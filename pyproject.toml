@@ -6,7 +6,7 @@
 [tool.robotpy]
 
 # Version of robotpy this project depends on
-robotpy_version = "2024.3.2.1"
+robotpy_version = "2025.2.1.0"
 
 # Which extra RobotPy components should be installed
 # -> equivalent to `pip install robotpy[extra1, ...]
@@ -25,4 +25,6 @@ robotpy_extras = [
     #"sim",
 ]
 
-raptacon3200
+"photonlibpy"="v2025.1.1-rc1"
+
+raptacon3200 = "0.0.1"
