@@ -25,4 +25,4 @@ robotpy_extras = [
     #"sim",
 ]
 
-raptacon3200
+raptacon3200 = "0.0.1"
