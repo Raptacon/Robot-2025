@@ -3,7 +3,7 @@
 import typing
 import commands2
 
-from robotswerve import RobotSwerve
+from robotswerve import Robotswerve
 
 
 class MyRobot(commands2.TimedCommandRobot):
@@ -30,7 +30,7 @@ class MyRobot(commands2.TimedCommandRobot):
         """
         # Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
-        self.container = RobotSwerve()
+        self.container = Robotswerve()
 
     def robotPeriodic(self) -> None:
         self.container.robotPeriodic()

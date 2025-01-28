@@ -73,8 +73,8 @@ class SwerveDrivetrain(Subsystem):
 
         # Path Planner setup
         #path_planner_config = self.gen_path_planner_config()
-        path_planner_config = RobotConfig.fromGUISettings()
-        self.configure_path_planner(path_planner_config)
+        #path_planner_config = RobotConfig.fromGUISettings()
+        #self.configure_path_planner(path_planner_config)
 
     def raw_current_heading(self) -> Rotation3d:
         """

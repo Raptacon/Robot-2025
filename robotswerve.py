@@ -10,7 +10,7 @@ from commands2.button import Trigger
 from pathplannerlib.path import PathPlannerPath
 from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
 
-class robotswerve:
+class Robotswerve:
     """
     Container to hold the main robot code
     """
@@ -22,14 +22,14 @@ class robotswerve:
         #self.auto_chooser = AutoBuilder.buildAutoChooser()
         #wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
 
-        Trigger(self.isDisabled).debounce(3).onTrue(
-            commands2.cmd.runOnce(
-                self.drivetrain.set_motor_stop_modes(
-                    to_drive=True, to_break=True, all_motor_override=True, burn_flash=True
-                ),
-                self.drivetrain
-            )
-        )
+        # Trigger(self.isDisabled).debounce(3).onTrue(
+        #     commands2.cmd.runOnce(
+        #         self.drivetrain.set_motor_stop_modes(
+        #             to_drive=True, to_break=True, all_motor_override=True, burn_flash=True
+        #         ),
+        #         self.drivetrain
+        #     )
+        # )
 
     def robotPeriodic(self):
         commands2.CommandScheduler.getInstance().run()
@@ -80,3 +80,5 @@ class robotswerve:
 
     def testPeriodic(self):
         pass
+
+    
