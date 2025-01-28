@@ -5,7 +5,7 @@ from pathlib import Path
 import wpimath.filter
 import wpimath
 import navx
-from auto import Autonomous
+#from auto import Autonomous
 import os
 
 import utils.configMapper
