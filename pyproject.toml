@@ -24,3 +24,8 @@ robotpy_extras = [
     #"romi",
     #"sim",
 ]
+# Other pip packages to install
+requires = [
+    "photonlibpy",
+]
+raptacon3200 = "0.0.1"
