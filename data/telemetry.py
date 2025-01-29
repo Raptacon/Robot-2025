@@ -65,7 +65,6 @@ class Telemetry:
         self.swerveModules = driveTrain.swerve_modules
         self.driverStation = driverStation
 
-        wpilib.DataLogManager.start()
         self.datalog = wpilib.DataLogManager.getLog()
         for entryname, entrytype, logname in telemetryButtonEntries:
             setattr(self, "driver" + entryname, entrytype(self.datalog, "driver/" + logname))
