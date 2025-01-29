@@ -38,6 +38,5 @@ class DefaultDrive(commands2.Command):
             self.velocity_vector_x() * SwerveDriveConsts.maxTranslationMPS,
             self.velocity_vector_y() * SwerveDriveConsts.maxTranslationMPS,
             self.angular_velocity() * math.radians(SwerveDriveConsts.maxAngularDPS),
-            # TODO: JD make button configured
             self.field
         )
