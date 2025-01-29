@@ -7,20 +7,21 @@ from constants import SwerveDriveConsts
 from .swerve_module import SwerveModuleMk4iSparkMaxFalconCanCoder
 
 # Third-party imports
-from wpilib import DriverStation, SmartDashboard
-from wpimath.system.plant import DCMotor
 import navx
 from commands2 import Subsystem
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import ModuleConfig, RobotConfig, PIDConstants
+from wpilib import DriverStation, SmartDashboard
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d, Rotation2d, Rotation3d, Translation2d
 from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Kinematics, SwerveModulePosition
+from wpimath.system.plant import DCMotor
 
 
 class SwerveDrivetrain(Subsystem):
     """
+    Virtual representation of, and interface for, a full swerve drive
     """
     def __init__(
         self,
@@ -29,6 +30,14 @@ class SwerveDrivetrain(Subsystem):
             Rotation2d.fromDegrees(OperatorRobotConfig.default_start_pose[2])
         )) -> None:
         """
+        Creates a new swerve drivetrain
+
+        Args:
+            starting_pose: the poosition and orientation of the robot on the field
+                at the moment the robot is first enabled
+
+        Returns:
+            None: class initialization executed upon construction
         """
         self.constants = SwerveDriveConsts()
         self.invert_gyro = False
@@ -78,26 +87,53 @@ class SwerveDrivetrain(Subsystem):
 
     def raw_current_heading(self) -> Rotation3d:
         """
+        Get the gyroscope heading without adjusting by the starting heading offset. If the gyro
+        needs to be inverted for CCW positive rotation, change the polarity of the heading
+
+        Returns:
+            The current 3D unadjusted heading from the gyroscope
         """
         return -self.gyroscope.getRotation3d() if self.invert_gyro else self.gyroscope.getRotation3d()
 
     def current_heading(self) -> Rotation3d:
         """
+        Get the gyroscope heading adjusted by the starting heading offset - this ensures that a heading of
+        zero corresponds to the front of the robot. CCW rotation will correspond to a positive increase in
+        the Z component heading.
+
+        Returns:
+            The current 3D front-relative heading from the gyroscope
         """
         return self.raw_current_heading() - self.heading_offset
 
     def current_yaw(self) -> Rotation2d:
         """
+        Get the current front-relative yaw of the robot, as determined by the offset-adjusted gyroscope reading.
+        CCW rotation corresponds to a positive increase in the yaw.
+
+        Returns:
+            The current front-relative yaw of the robot
         """
         return Rotation2d(self.current_heading().Z())
 
     def factory_default_gyro(self) -> None:
         """
+        Retrieve the starting reading from the gyroscope and save as the heading offset. This
+        ensures that the front of the robot will correspond to 0 in the heading and yaw.
+
+        Returns:
+            None: object's heading offset updated in-place
         """
         self.heading_offset = self.gyroscope.getRotation3d()
 
     def reset_heading(self) -> None:
         """
+        Reset the heading such that the robot's current gyroscope reading will correspond to 0 in any
+        heading and yaw readings after this method is called. Odometry must also be reset with a rotation
+        of 0 for it to continue to work properly.
+
+        Returns:
+            None: object's heading offset is updated in-place and pose estimator is reset
         """
         self.heading_offset = self.raw_current_heading()
         self.reset_pose_estimator(Pose2d(self.current_pose().translation(), Rotation2d()))
@@ -107,13 +143,31 @@ class SwerveDrivetrain(Subsystem):
         velocity_vector_x: float,
         velocity_vector_y: float,
         angular_velocity: float,
-        field_relative: bool = False
+        field_relative: bool = True
     ) -> None:
         """
+        Operate the swerve drive according to three given component velocities. These velocities
+        will almost always come from human driver controller input. This method can be used for both
+        robot-relative and field-relative drive.
+
+        Args:
+            velocity_vector_x: how fast, in meters per second, to translate in the X (+ front-to-back -) direction
+            velocity_vector_y: how fast, in meters per second, to translate in the Y (+ left-to-right -) direction
+            angular_velocity: how fast, in radians per second, to rotate the robot (CCW +)
+            field_relative: if True, drive relative to the field (forward always means away from the driver station,
+                left always means toward the left wall). If False, drive relative to the robot (forward means straight
+                from the front side of the robot, left means straight from the left side of the robot).
+
+        Returns:
+            None: individual swerve modules are given new goal states to transition to in-place
         """
         if field_relative:
+            field_invert = 1
+            if self.flip_to_red_alliance():
+                field_invert = -1
+
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                velocity_vector_x, velocity_vector_y, angular_velocity, self.current_yaw()
+                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_yaw()
             )
         else:
             chassis_speeds = ChassisSpeeds(velocity_vector_x, velocity_vector_y, angular_velocity)
@@ -122,16 +176,37 @@ class SwerveDrivetrain(Subsystem):
 
     def current_module_positions(self) -> Tuple[SwerveModulePosition]:
         """
+        Get the current positions of each swerve module on the drivetrain. Position is defined as how far
+        drive motors have driven so far, in meters, and the current absolute steer rotation of the wheel,
+        in degrees with domain [0, 360).
+
+        Returns:
+            The current module positions, given in front-left, front-right, back-left, back-right order
         """
         return tuple([swerve_module.current_position() for swerve_module in self.swerve_modules])
 
     def current_pose(self) -> Pose2d:
         """
+        Get the robot's current position on the field. We use the "always blue" field coordinate system,
+        in which moving away from the blue driver station corresponds to increasing X values and moving
+        toward the left field wall from the perspective of a blue driver corresponds to increasing Y values.
+        A robot with the front side perfectly facing the red driver station has a rotation of zero. Rotation
+        increases with CCW rotation of the robot.
+
+        Returns:
+            The robot's current position as a combination of field coordinate and field-relative rotation
         """
         return self.pose_estimator.getEstimatedPosition()
 
     def current_robot_relative_speed(self) -> ChassisSpeeds:
         """
+        Get the translational and rotational velocities of the whole robot, with axial definitions relative to the robot (
+        velocity in the robot's front and back directions correspond to + and - X velocity, velocity in
+        the robot's left and right directions correspond to + and - Y velocity, velocity in CCW rotation
+        when looking down on top of the robot corresponds to + angular velocity).
+
+        Returns:
+            The translational velocities, in meters per second, and rotational velocity, in radians per second
         """
         return self.drive_kinematics.toChassisSpeeds(tuple(
             swerve_module.current_state() for swerve_module in self.swerve_modules
@@ -139,6 +214,16 @@ class SwerveDrivetrain(Subsystem):
 
     def set_states_from_speeds(self, drivetrain_speeds: ChassisSpeeds) -> None:
         """
+        Directly set new goal states for each individual swerve module based on the given desired
+        translational and rotational velocities for the whole drivetrain. This method is privately used
+        as a link between driver inputs and the swerve modules. It is publicly used by specific motion
+        commands (like autonomous routines).
+
+        Args:
+            drivetrain_speeds: the velocities we want the drivetrain to achieve
+
+        Returns:
+            None: new goal states are set for each swerve module in-place
         """
         module_states = self.drive_kinematics.toSwerveModuleStates(drivetrain_speeds)
         module_states = self.drive_kinematics.desaturateWheelSpeeds(module_states, self.constants.maxTranslationMPS)
@@ -148,6 +233,12 @@ class SwerveDrivetrain(Subsystem):
 
     def update_pose_estimator(self) -> None:
         """
+        Update the pose estimator using the current module positions and the robot's current yaw.
+        Additional contributors of pose estimation, like AprilTag readings, can be incorporated here.
+        This method is expected to be called on each periodic clock tick.
+
+        Returns:
+            None: pose estimator is updated in-place
         """
         self.pose_estimator.update(self.current_yaw(), self.current_module_positions())
         for swerve_module in self.swerve_modules:
@@ -162,12 +253,27 @@ class SwerveDrivetrain(Subsystem):
 
     def reset_pose_estimator(self, current_pose: Pose2d) -> None:
         """
+        Reset the robot's current pose to the given input. Should be called, at a minimum, before
+        executing an autonomous routine.
+
+        Args:
+            current_pose: the robot's current field-relative position and rotation
+
+        Returns:
+            None: pose estimator is updated in-place
         """
         self.pose_estimator.resetPosition(self.current_yaw(), self.current_module_positions(), current_pose)
         self.stop_driving(apply_to_modules=False)
 
     def stop_driving(self, apply_to_modules: bool = True) -> None:
         """
+        Set all velocities to zero.
+
+        Args:
+            apply_to_modules: if True, change velocities on the modules to be zero. If False, do not.
+
+        Returns:
+            None: if desired, goal states are updated on the modules in-place
         """
         robot_relative_speeds = ChassisSpeeds.fromRobotRelativeSpeeds(ChassisSpeeds(0, 0, 0), self.current_yaw())
         module_states = self.drive_kinematics.toSwerveModuleStates(robot_relative_speeds)
@@ -176,8 +282,22 @@ class SwerveDrivetrain(Subsystem):
             for i, module_state in enumerate(module_states):
                 self.swerve_modules[i].set_state(module_state)
 
-    def set_motor_stop_modes(self, to_drive: bool, to_break: bool, all_motor_override: bool = False, burn_flash: bool = False) -> bool:
+    def set_motor_stop_modes(self, to_drive: bool, to_break: bool, all_motor_override: bool = False, burn_flash: bool = False) -> None:
         """
+        Update the idle mode (coast vs break) for each swerve module. Coast means friction naturally
+        determines when the motor comes to a stop, break means the motor comes to a stop as soon as possible.
+
+        Args:
+            to_drive: if True, change the idle mode of all drive motors. If False, cahnge the idle mode of all
+                steer motors
+            to_break: if True change the idle mode to break. If False, change the idle mode to coast
+            all_motor_override: if True change all motors (drive and steer) to the desired idle mode. If False,
+                only change the motors specified in to_drive.
+            burn_flash: if True, save the idle mode changes to memory that persists across power cycles. If False,
+                do not save in this manner (settings given here will disappear once the robot turns off)
+
+        Returns:
+            None: motor idle modes are updated in-place
         """
         for swerve_module in self.swerve_modules:
             swerve_module.set_motor_stop_mode(to_drive=to_drive, to_break=to_break)
@@ -188,6 +308,12 @@ class SwerveDrivetrain(Subsystem):
 
     def flip_to_red_alliance(self) -> bool:
         """
+        Determine whether to flip autonomous routines and field-relative drive for the red alliance.
+        Because alliance choice can change, this method should be called as part of code executed on
+        periodic clock ticks.
+
+        Returns:
+            True if we should make flips for the red alliance, False otherwise
         """
         alliance = DriverStation.getAlliance()
         if alliance:
@@ -196,6 +322,14 @@ class SwerveDrivetrain(Subsystem):
 
     def gen_path_planner_config(self) -> RobotConfig:
         """
+        Create a configuration object for PathPlanner based on the physical constants recorded
+        for the overall drivetrain and the individual swerve modules. This should follow the
+        same structure as the configuration generated using PathPlanner's GUI.
+
+        THIS IS CURRENTLY BROKEN AND NEEDS TO BE DEBUGGED. DO NOT USE.
+
+        Returns:
+            PathPlanner configuration object based on our robot's properties
         """
         path_planner_config = RobotConfig(
             massKG=self.constants.massKG,
@@ -217,6 +351,33 @@ class SwerveDrivetrain(Subsystem):
 
     def configure_path_planner(self, config: RobotConfig) -> None:
         """
+        Set up PathPlanner to execute autonomous routines using this drivetrain.
+
+        PathPlanner expects the following:
+
+        - A method to retrieve the robot's current field-relative position and rotation.
+            PathPlanner uses this to evaluate the difference between the expected progression
+            along the path to the robot's actual position. The optimizer minimizes this error.
+        - A method to reset the robot's current field-relative position and rotation.
+            PathPlanner uses this to align the robot's virtual pose to the starting pose
+            of the autonomous routine.
+        - A method to retrieve the robot's current robot-relative velocities, translational and rotational.
+            PathPlanner uses this to evaluate the difference between the expected velocities
+            as the robot traverses the path and the robot's actual velocities. The optimizer minimizes this error.
+        - A method to update each swerve module's goal state based on desired velocities for the overall drivetrain.
+            PathPlanner uses this to command the robot to drive in accordance with its path.
+        - A controller object that defines how actual robot velocities will be optimized against PathPlanner's
+            desired velocities for the path. The object is configured with separate PID constants for
+            translation and rotation.
+        - A PathPlanner configuration object defining properties of the drivetrain and individual modules.
+        - A method to determine whether autonomous routines should be flipped for the red alliance.
+        - A subsystem to require for PathPlanner's commands.
+
+        Args:
+            config: PathPlanner configuration object defining properties of the drivetrain and individual modules
+
+        Returns:
+            None: PathPlanner's AutoBuilder is configured in-place
         """
         AutoBuilder.configure(
             self.current_pose,
@@ -234,5 +395,7 @@ class SwerveDrivetrain(Subsystem):
 
     def periodic(self) -> None:
         """
+        Execute code on every periodic clock tick, regardless of the robot's game mode state
+        (disabled, autonomous, teleoperated, test).
         """
         self.update_pose_estimator()
