@@ -3,15 +3,14 @@ from typing import Callable
 
 # Internal imports
 from commands.default_swerve_drive import DefaultDrive
-from subsystem.drivetrain.drivetrain import SwerveDrivetrain
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 # Third-party imports
 import commands2
 import wpilib
 import wpimath
 from commands2.button import Trigger
-from pathplannerlib.path import PathPlannerPath
-from pathplannerlib.auto import AutoBuilder, PathPlannerAuto
+from pathplannerlib.auto import AutoBuilder
 
 class RobotSwerve:
     """

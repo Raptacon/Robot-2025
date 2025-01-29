@@ -4,7 +4,7 @@ from typing import Callable
 
 # Internal imports
 from constants import SwerveDriveConsts
-from subsystem.drivetrain.drivetrain import SwerveDrivetrain
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 # Third-party imports
 import commands2
