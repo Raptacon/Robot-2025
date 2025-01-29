@@ -42,7 +42,7 @@ class SwerveDrivetrain(Subsystem):
         self.constants = SwerveDriveConsts()
         self.invert_gyro = False
 
-        # must do in front-left, front-right, back-left, back-right order
+        # must give in front-left, front-right, back-left, back-right order
         self.swerve_modules = [
             SwerveModuleMk4iSparkMaxNeoCanCoder(
                 "frontLeft", (self.constants.moduleFrontLeftX, self.constants.moduleFrontLeftY),
@@ -81,9 +81,8 @@ class SwerveDrivetrain(Subsystem):
         self.reset_heading()
 
         # Path Planner setup
-        #path_planner_config = self.gen_path_planner_config()
-        #path_planner_config = RobotConfig.fromGUISettings()
-        #self.configure_path_planner(path_planner_config)
+        path_planner_config = RobotConfig.fromGUISettings()
+        self.configure_path_planner(path_planner_config)
 
     def raw_current_heading(self) -> Rotation3d:
         """
