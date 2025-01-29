@@ -4,14 +4,14 @@ from typing import Tuple
 # Internal imports
 from config import OperatorRobotConfig
 from constants import SwerveDriveConsts
-from .swerve_module import SwerveModuleMk4iSparkMaxFalconCanCoder
+from .swerve_module import SwerveModuleMk4iSparkMaxNeoCanCoder
 
 # Third-party imports
 import navx
 from commands2 import Subsystem
 from pathplannerlib.auto import AutoBuilder
-from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import ModuleConfig, RobotConfig, PIDConstants
+from pathplannerlib.controller import PPHolonomicDriveController
 from wpilib import DriverStation, SmartDashboard
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d, Rotation2d, Rotation3d, Translation2d
@@ -44,19 +44,19 @@ class SwerveDrivetrain(Subsystem):
 
         # must do in front-left, front-right, back-left, back-right order
         self.swerve_modules = [
-            SwerveModuleMk4iSparkMaxFalconCanCoder(
+            SwerveModuleMk4iSparkMaxNeoCanCoder(
                 "frontLeft", (self.constants.moduleFrontLeftX, self.constants.moduleFrontLeftY),
                 OperatorRobotConfig.swerve_module_channels[0], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[0]
             ),
-            SwerveModuleMk4iSparkMaxFalconCanCoder(
+            SwerveModuleMk4iSparkMaxNeoCanCoder(
                 "frontRight", (self.constants.moduleFrontRightX, self.constants.moduleFrontRightY),
                 OperatorRobotConfig.swerve_module_channels[1], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[1]
             ),
-            SwerveModuleMk4iSparkMaxFalconCanCoder(
+            SwerveModuleMk4iSparkMaxNeoCanCoder(
                 "backLeft", (self.constants.moduleBackLeftX, self.constants.moduleBackLeftY),
                 OperatorRobotConfig.swerve_module_channels[2], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[2]
             ),
-            SwerveModuleMk4iSparkMaxFalconCanCoder(
+            SwerveModuleMk4iSparkMaxNeoCanCoder(
                 "backRight", (self.constants.moduleBackRightX, self.constants.moduleBackRightY),
                 OperatorRobotConfig.swerve_module_channels[3], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[3]
             )

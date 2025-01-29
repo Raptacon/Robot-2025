@@ -17,15 +17,15 @@ from wpimath.geometry import Rotation2d, Translation2d
 """
 This is a basic swerve drive module for a robot running
 https://www.swervedrivespecialties.com/products/mk4-swerve-module
-with L1 standard and 2 falcon 500
-https://store.ctr-electronics.com/falcon-500-powered-by-talon-fx/
+with L2 standard and 2 NEO 1.1s
+https://www.revrobotics.com/rev-21-1650/
 and a
 https://store.ctr-electronics.com/cancoder/
 Other defaults may be added in future
 """
 
 
-class SwerveModuleMk4iSparkMaxFalconCanCoder:
+class SwerveModuleMk4iSparkMaxNeoCanCoder:
     """
     Module for Mk4i with 2 brushless Falcon 500s and a CANcoder swerve drive
     """
