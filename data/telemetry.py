@@ -4,7 +4,7 @@ from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 from wpiutil.log import (
-    DataLog, BooleanLogEntry, StringLogEntry, FloatLogEntry, IntegerLogEntry
+    BooleanLogEntry, StringLogEntry, FloatLogEntry, IntegerLogEntry
 )
 
 telemetryButtonEntries = [
@@ -65,7 +65,8 @@ class Telemetry:
         self.swerveModules = driveTrain.swerve_modules
         self.driverStation = driverStation
 
-        self.datalog = DataLog("data/log")
+        wpilib.DataLogManager.start()
+        self.datalog = wpilib.DataLogManager.getLog()
         for entryname, entrytype, logname in telemetryButtonEntries:
             setattr(self, "driver" + entryname, entrytype(self.datalog, "driver/" + logname))
             setattr(self, "mech" + entryname, entrytype(self.datalog, "mech/" + logname))
