@@ -74,9 +74,6 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
             "absolute_encoder": channel_base + 2
         }
 
-        # Telemetry setup
-        self.setup_smartdashboard(self.name)
-
         # Physical device instantiation
         self.drive_motor = rev.SparkMax(self.id_lookup["drive_motor"] , rev.SparkLowLevel.MotorType.kBrushless)
         self.steer_motor = rev.SparkMax(self.id_lookup["steer_motor"], rev.SparkLowLevel.MotorType.kBrushless)
@@ -226,71 +223,11 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
             write_mode
         )
 
-    def setup_smartdashboard(self, module_name: str) -> None:
-        """
-        Create SmartDashboard publishers for presenting the module's telemetry data.
-
-        Args:
-            module_name: the display name of this swerve module. Must be unique from other modules.
-
-        Returns:
-            None
-        """
-        self.raw_absolute_angle_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Raw Absolute Encoder").publish()
-        )
-        self.adj_absolute_angle_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Adjusted Absolute Encoder").publish()
-        )
-        self.abs_encoder_issue_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getBooleanTopic(f"swerve/modules/{module_name}/Absolute Encoder Read Issue").publish()
-        )
-        self.raw_angle_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Raw Angle Encoder").publish()
-        )
-        self.raw_drive_encoder_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Raw Drive Encoder").publish()
-        )
-        self.raw_drive_velocity_pubisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Raw Drive Velocity").publish()
-        )
-        self.raw_drive_setpoint_encoder_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Speed Setpoint").publish()
-        )
-        self.angle_setpoint_encoder_publisher = (
-            NetworkTableInstance
-            .getDefault()
-            .getTable("SmartDashboard")
-            .getDoubleTopic(f"swerve/modules/{module_name}/Angle Setpoint").publish()
-        )
-
     def update_telemetry(self) -> None:
         """
         Publish values representing the current state of the swerve module to SmartDashboard.
         """
         # TODO: JD move to telemetry
-        # TODO: JD worth looking at putting some of these in cache?
         abs_encoder_value = self.absolute_encoder.get_absolute_position(refresh=True)
 
         SmartDashboard.putNumber(f"{self.name} Drive Value", self.drive_motor_encoder.getPosition())
@@ -299,15 +236,6 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         SmartDashboard.putBoolean(f"{self.name} Absolute Encoder Issue Publisher", not abs_encoder_value.status.is_ok())
         SmartDashboard.putNumber(f"{self.name} Raw Absolute Encoder Publisher", abs_encoder_value.value_as_double)
         SmartDashboard.putNumber(f"{self.name} Raw Drive Velocity Publisher", self.drive_motor_encoder.getVelocity())
-
-        # abs_encoder_value = self.absolute_encoder.get_absolute_position(refresh=True)
-        # self.abs_encoder_issue_publisher.set(not abs_encoder_value.status.is_ok())
-        # if abs_encoder_value.status.is_ok():
-        #     self.raw_absolute_angle_publisher.set(abs_encoder_value.value_as_double - self.constants.encoder_calibration)
-        #     self.adj_absolute_angle_publisher.set(abs_encoder_value.value_as_double)
-        # self.raw_angle_publisher.set(self.steer_motor_encoder.getPosition())
-        # self.raw_drive_encoder_publisher.set(self.drive_motor_encoder.getPosition())
-        # self.raw_drive_velocity_pubisher.set(self.drive_motor_encoder.getVelocity())
 
     def baseline_relative_encoders(self) -> None:
         """
@@ -379,7 +307,7 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         current_angle = Rotation2d.fromDegrees(self.current_raw_absolute_steer_position())
         return SwerveModuleState(current_velocity, current_angle)
 
-    def set_state(self, state: SwerveModuleState) -> None:
+    def set_state(self, state: SwerveModuleState, apply_cosine_scaling: bool = False) -> None:
         """
         Change the state of the swerve module to the given new state, using closed-loop PID control to
         transition from the current state to the new state. This is effectively how we tell our
@@ -387,6 +315,8 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
 
         Args:
             state: the new state the swerve module should immediately transition to
+            apply_cosine_scaling: if True, scale the drive speed down according to how perpendicular
+                the wheel is to the new state angle. If False, do not scale.
 
         Returns:
             None - PID controllers are updated in-place with new setpoints
@@ -396,11 +326,11 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         state_degrees = state.angle.degrees()
         state_speed = state.speed
 
-        # TODO: JD try cosine scaling
-        # cosine_scaler = (state.angle - encoder_rotation).cos()
-        # if cosine_scaler < 0.0:
-        #     cosine_scaler = 1
-        # state_speed *= cosine_scaler
+        if apply_cosine_scaling:
+            cosine_scaler = (Rotation2d.fromDegrees(state_degrees) - encoder_rotation).cos()
+            if cosine_scaler < 0.0:
+                cosine_scaler = 1
+            state_speed *= cosine_scaler
 
         self.steer_motor_pid.setReference(state_degrees, rev.SparkLowLevel.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0)
         self.drive_motor_pid.setReference(state_speed, rev.SparkLowLevel.ControlType.kVelocity, rev.ClosedLoopSlot.kSlot0)

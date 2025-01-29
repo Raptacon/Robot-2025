@@ -40,25 +40,41 @@ class SwerveDrivetrain(Subsystem):
             None: class initialization executed upon construction
         """
         self.constants = SwerveDriveConsts()
-        self.invert_gyro = False
+        self.invert_gyro = self.constants.invertGyro
 
         # must give in front-left, front-right, back-left, back-right order
         self.swerve_modules = [
             SwerveModuleMk4iSparkMaxNeoCanCoder(
-                "frontLeft", (self.constants.moduleFrontLeftX, self.constants.moduleFrontLeftY),
-                OperatorRobotConfig.swerve_module_channels[0], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[0]
+                "frontLeft",
+                (self.constants.moduleFrontLeftX, self.constants.moduleFrontLeftY),
+                OperatorRobotConfig.swerve_module_channels[0],
+                invert_drive=self.constants.moduleFrontLeftInvertDrive,
+                invert_steer=self.constants.moduleFrontLeftInvertSteer,
+                encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[0]
             ),
             SwerveModuleMk4iSparkMaxNeoCanCoder(
-                "frontRight", (self.constants.moduleFrontRightX, self.constants.moduleFrontRightY),
-                OperatorRobotConfig.swerve_module_channels[1], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[1]
+                "frontRight",
+                (self.constants.moduleFrontRightX, self.constants.moduleFrontRightY),
+                OperatorRobotConfig.swerve_module_channels[1],
+                invert_drive=self.constants.moduleFrontRightInvertDrive,
+                invert_steer=self.constants.moduleFrontRightInvertSteer,
+                encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[1]
             ),
             SwerveModuleMk4iSparkMaxNeoCanCoder(
-                "backLeft", (self.constants.moduleBackLeftX, self.constants.moduleBackLeftY),
-                OperatorRobotConfig.swerve_module_channels[2], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[2]
+                "backLeft",
+                (self.constants.moduleBackLeftX, self.constants.moduleBackLeftY),
+                OperatorRobotConfig.swerve_module_channels[2],
+                invert_drive=self.constants.moduleBackLeftInvertDrive,
+                invert_steer=self.constants.moduleBackLeftInvertSteer,
+                encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[2]
             ),
             SwerveModuleMk4iSparkMaxNeoCanCoder(
-                "backRight", (self.constants.moduleBackRightX, self.constants.moduleBackRightY),
-                OperatorRobotConfig.swerve_module_channels[3], invert_steer=True, invert_drive=True, encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[3]
+                "backRight",
+                (self.constants.moduleBackRightX, self.constants.moduleBackRightY),
+                OperatorRobotConfig.swerve_module_channels[3],
+                invert_drive=self.constants.moduleBackRightInvertDrive,
+                invert_steer=self.constants.moduleBackRightInvertSteer,
+                encoder_calibration=OperatorRobotConfig.swerve_abs_encoder_calibrations[3]
             )
         ]
 
