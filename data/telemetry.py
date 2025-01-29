@@ -1,7 +1,7 @@
 import wpilib
-import math
 
-from subsystem.swerveDriveTrain import Drivetrain
+from config import OperatorRobotConfig
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 from wpiutil.log import (
     DataLog, BooleanLogEntry, StringLogEntry, FloatLogEntry, IntegerLogEntry
@@ -34,12 +34,11 @@ telemetryOdometryEntries = [
 ]
 
 telemetrySwerveDriveTrainEntries = []
-for i in range(len(Drivetrain.kModuleProps)):
+for i in range(len(OperatorRobotConfig.swerve_module_channels)):
     telemetrySwerveDriveTrainEntries.extend([
         [f"steerDegree{i + 1}", FloatLogEntry, f"module{i + 1}/steerdegree"],
         [f"drivePercent{i + 1}", FloatLogEntry, f"module{i + 1}/drivepercent"],
         [f"moduleVelocity{i + 1}", FloatLogEntry, f"module{i + 1}/velocity"],
-        [f"currSteerDegree{i + 1}", FloatLogEntry, f"module{i + 1}/currsteerdegree"]
     ])
 
 driverStationEntries = [
@@ -57,13 +56,13 @@ class Telemetry:
         self,
         driverController: wpilib.XboxController = None,
         mechController: wpilib.XboxController = None,
-        driveTrain: Drivetrain = None,
+        driveTrain: SwerveDrivetrain = None,
         driverStation: wpilib.DriverStation = None,
     ):
         self.driverController = driverController
         self.mechController = mechController
-        self.odometryPosition = driveTrain.odometry
-        self.swerveModules = driveTrain.swerveModules
+        self.odometryPosition = driveTrain.pose_estimator
+        self.swerveModules = driveTrain.swerve_modules
         self.driverStation = driverStation
 
         self.datalog = DataLog("data/log")
@@ -126,7 +125,7 @@ class Telemetry:
         Records the data for the positions of the bot in a field,
         Gives the x position, y position and rotation
         """
-        pose = self.odometryPosition.getPose()
+        pose = self.odometryPosition.getEstimatedPosition()
         self.xPositions.append(pose.X())
         self.yPositions.append(pose.Y())
         self.angles.append(pose.rotation().degrees())
@@ -137,10 +136,9 @@ class Telemetry:
         it get the steer angle, the drive percent and the velocity
         """
         for i, swerveModule in enumerate(self.swerveModules):
-            getattr(self, f"steerDegree{i + 1}").append(swerveModule.steerAngle)
-            getattr(self, f"drivePercent{i + 1}").append(swerveModule.drivePercent)
-            getattr(self, f"moduleVelocity{i + 1}").append(swerveModule.getDriveVelocity())
-            getattr(self, f"currSteerDegree{i + 1}").append(math.degrees(swerveModule.getSteerAngle()))
+            getattr(self, f"steerDegree{i + 1}").append(swerveModule.current_raw_absolute_steer_position())
+            getattr(self, f"drivePercent{i + 1}").append(swerveModule.drive_motor.getAppliedOutput())
+            getattr(self, f"moduleVelocity{i + 1}").append(swerveModule.current_state().speed)
 
     def getDriverStationInputs(self):
         """

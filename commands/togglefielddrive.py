@@ -1,10 +1,10 @@
 import commands2
 import typing
-from subsystem.swerveDriveTrain import Drivetrain
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 class ToggleFieldDrive(commands2.InstantCommand):
     def __init__(self,
-                 driveTrain: Drivetrain,
+                 driveTrain: SwerveDrivetrain,
                  robotRelative: typing.Callable[[],bool]) -> None:
         super().__init__()
         self.driveTrain = driveTrain

@@ -29,6 +29,8 @@ class RobotSwerve:
         self.auto_chooser = AutoBuilder.buildAutoChooser()
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
 
+        # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
+        # to_break should be False at competitions where the robot is turned off between matches
         Trigger(is_disabled()).debounce(3).onTrue(
             commands2.cmd.runOnce(
                 self.drivetrain.set_motor_stop_modes(
