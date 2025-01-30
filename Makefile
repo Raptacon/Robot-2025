@@ -58,5 +58,10 @@ docker: docker_build
 docker_build:
 	docker build . --tag raptacon2022_build
 
-deploy:
+# Installs the 3rd party dependencies such as photonvision and rapatcon3200 (whatever is in the toml esp in the requires section)
+# https://docs.wpilib.org/en/stable/docs/software/python/pyproject_toml.html
+sync:
+	${PYTHON} -m robotpy sync
+
+deploy: sync
 	${PYTHON} -m robotpy deploy 
