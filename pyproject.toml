@@ -25,7 +25,8 @@ robotpy_extras = [
     #"sim",
 ]
 # Other pip packages to install
+# Must use python -m robotpy sync to install to cache
 requires = [
     "photonlibpy",
+    "raptacon3200"
 ]
-raptacon3200 = "0.0.1"
