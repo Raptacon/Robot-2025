@@ -6,6 +6,7 @@ modulegraph
 flake8
 coverage
 wheel
+numpy
 robotpy[all]
 pyntcore==2025.*
 
