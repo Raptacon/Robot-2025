@@ -36,26 +36,68 @@ class SparkMaxConstants:
 #############################
 
 
+#* Coordinates
+#* Wheel dimensions
+#? Swerve level & gear ratios
+#* Absolute encoder offsets
+#* Gyro CCW pos - invert
+#* Steer and drive - CCW pos - invert
+# Printout to true direction verification
+# Teleop control
+# Verify Odometer
+# PID control config
+# Auto control
+# Velocity verification
+
+
+# Y: 22 inches wide, end-to-end
+# Y: +/- 0.26035
+# X: 26 inches long, end-to-end
+# X: +/- 0.31115
+# Wheel width: 1.5 inches
+# Wheel diameter: 4 inches
+# Wheel COF (Colson): 1
+
+# Swerve Level: L2?
+# Swerve Drive Gear Ratio: 
+# Swerve Steer Gear Ratio: 
+
+# frontLeft raw abs: 0.329590
+# frontRight raw abs: 0.988525 ...281
+# backLeft raw abs: 0.996826
+# backRight raw abs: 0.834961
+
+# Gryo - do not invert
+
+# Front Left, Drive: invert
+# Front Left, Steer: invert
+# Front Right, Drive: invert
+# Front Right, Steer: invert
+# Back Left, Drive: invert
+# Back Left, Steer: invert
+# Back Right, Drive: invert
+# Back Left, Steer: invert
+
 class SwerveDriveConsts(RobotConstants):
-    moduleFrontLeftX: float = 0.3302
-    moduleFrontLeftY: float = 0.3556
-    moduleFrontRightX: float = 0.3302
-    moduleFrontRightY: float = -0.3556
-    moduleBackLeftX: float = -0.3302
-    moduleBackLeftY: float = 0.3556
-    moduleBackRightX: float = -0.3302
-    moduleBackRightY: float = -0.3556
+    moduleFrontLeftX: float = 0.31115
+    moduleFrontLeftY: float = 0.26035
+    moduleFrontRightX: float = 0.31115
+    moduleFrontRightY: float = -0.26035
+    moduleBackLeftX: float = -0.31115
+    moduleBackLeftY: float = 0.26035
+    moduleBackRightX: float = -0.31115
+    moduleBackRightY: float = -0.26035
 
     invertGyro: bool = False
-    moduleFrontLeftInvertDrive: bool = False
-    moduleFrontRightInvertDrive: bool = False
-    moduleBackLeftInvertDrive: bool = False
-    moduleBackRightInvertDrive: bool = False
+    moduleFrontLeftInvertDrive: bool = True
+    moduleFrontRightInvertDrive: bool = True
+    moduleBackLeftInvertDrive: bool = True
+    moduleBackRightInvertDrive: bool = True
 
-    moduleFrontLeftInvertSteer: bool = False
-    moduleFrontRightInvertSteer: bool = False
-    moduleBackLeftInvertSteer: bool = False
-    moduleBackRightInvertSteer: bool = False
+    moduleFrontLeftInvertSteer: bool = True
+    moduleFrontRightInvertSteer: bool = True
+    moduleBackLeftInvertSteer: bool = True
+    moduleBackRightInvertSteer: bool = True
 
     maxTranslationMPS: float = 4.14528
     maxAngularDPS: float = math.degrees(maxTranslationMPS / math.hypot(moduleFrontLeftY, moduleFrontLeftX))
@@ -66,7 +108,7 @@ class SwerveModuleMk4iConsts(SwerveDriveConsts):
     https://github.com/SwerveDriveSpecialties/swerve-lib/blob/develop/src/main/java/com/swervedrivespecialties/swervelib/ctre/Falcon500DriveControllerFactoryBuilder.java
     """
     kNominalVoltage: float = 12.0
-    kDriveCurrentLimit: int = 50
+    kDriveCurrentLimit: int = 40
     kSteerCurrentLimit: int = 20
     kRampRate: float = 0.25
     kTicksPerRotation: int = 1

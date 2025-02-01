@@ -7,7 +7,7 @@ class OperatorRobotConfig:
     # Give in front-left, front-right, back-left, back-right order
     swerve_module_channels: Tuple[int] = (50, 53, 56, 59)
     swerve_abs_encoder_calibrations: Tuple[float] = (
-        0 / 360.0, 0 / 360.0, 0 / 360.0, 0 / 360.0
+        241.3476 / 360.0, 4.131 / 360.0, 1.14264 / 360.0, 59.41404 / 360.0
     )
     swerve_steer_pid: Tuple[float] = (0.01, 0, 0)
     swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 1 / 473)
