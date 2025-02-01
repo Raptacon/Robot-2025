@@ -42,7 +42,7 @@ class SparkMaxConstants:
 #* Absolute encoder offsets
 #* Gyro CCW pos - invert
 #* Steer and drive - CCW pos - invert
-# Printout to true direction verification
+#* Printout to true direction verification
 # Teleop control
 # Verify Odometer
 # PID control config
