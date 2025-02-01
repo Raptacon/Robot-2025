@@ -7,10 +7,8 @@ from constants import SwerveModuleMk4iConsts, SwerveModuleMk4iL2Consts
 from sensors.utils import configureSparkMaxCanRates
 
 # Third-party imports
-from ntcore import NetworkTableInstance
 import phoenix6
 import rev
-from wpilib import SmartDashboard
 from wpimath.kinematics import SwerveModulePosition, SwerveModuleState
 from wpimath.geometry import Rotation2d, Translation2d
 
@@ -222,22 +220,6 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
             config_use, rev.SparkBase.ResetMode.kNoResetSafeParameters,
             write_mode
         )
-
-    def update_telemetry(self) -> None:
-        """
-        Publish values representing the current state of the swerve module to SmartDashboard.
-        """
-        # TODO: JD move to telemetry
-        abs_encoder_value = self.absolute_encoder.get_absolute_position(refresh=True)
-
-        SmartDashboard.putNumber(f"{self.name} Drive Value", self.drive_motor_encoder.getPosition())
-        SmartDashboard.putNumber(f"{self.name} Adjusted Absolute Encoder Value", abs_encoder_value.value_as_double - self.constants.encoder_calibration)
-        SmartDashboard.putNumber(f"{self.name} Raw Angle Value", self.steer_motor_encoder.getPosition())
-        SmartDashboard.putBoolean(f"{self.name} Absolute Encoder Issue Publisher", not abs_encoder_value.status.is_ok())
-        SmartDashboard.putNumber(f"{self.name} Raw Absolute Encoder Publisher", abs_encoder_value.value_as_double)
-        SmartDashboard.putNumber(f"{self.name} Raw Drive Velocity Publisher", self.drive_motor_encoder.getVelocity())
-        SmartDashboard.putNumber(f"{self.name} Abs Steer Position", self.current_raw_absolute_steer_position())
-        
 
     def baseline_relative_encoders(self) -> None:
         """
