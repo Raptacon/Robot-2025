@@ -36,48 +36,6 @@ class SparkMaxConstants:
 #############################
 
 
-#* Coordinates
-#* Wheel dimensions
-#? Swerve level & gear ratios
-#* Absolute encoder offsets
-#* Gyro CCW pos - invert
-#* Steer and drive - CCW pos - invert
-#* Printout to true direction verification
-# Teleop control
-# Verify Odometer
-# PID control config
-# Auto control
-# Velocity verification
-
-
-# Y: 22 inches wide, end-to-end
-# Y: +/- 0.26035
-# X: 26 inches long, end-to-end
-# X: +/- 0.31115
-# Wheel width: 1.5 inches
-# Wheel diameter: 4 inches
-# Wheel COF (Colson): 1
-
-# Swerve Level: L2?
-# Swerve Drive Gear Ratio: 
-# Swerve Steer Gear Ratio: 
-
-# frontLeft raw abs: 0.329590
-# frontRight raw abs: 0.988525 ...281
-# backLeft raw abs: 0.996826
-# backRight raw abs: 0.834961
-
-# Gryo - do not invert
-
-# Front Left, Drive: invert
-# Front Left, Steer: invert
-# Front Right, Drive: invert
-# Front Right, Steer: invert
-# Back Left, Drive: invert
-# Back Left, Steer: invert
-# Back Right, Drive: invert
-# Back Left, Steer: invert
-
 class SwerveDriveConsts(RobotConstants):
     moduleFrontLeftX: float = 0.31115
     moduleFrontLeftY: float = 0.26035
