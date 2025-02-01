@@ -236,6 +236,8 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         SmartDashboard.putBoolean(f"{self.name} Absolute Encoder Issue Publisher", not abs_encoder_value.status.is_ok())
         SmartDashboard.putNumber(f"{self.name} Raw Absolute Encoder Publisher", abs_encoder_value.value_as_double)
         SmartDashboard.putNumber(f"{self.name} Raw Drive Velocity Publisher", self.drive_motor_encoder.getVelocity())
+        SmartDashboard.putNumber(f"{self.name} Abs Steer Position", self.current_raw_absolute_steer_position())
+        
 
     def baseline_relative_encoders(self) -> None:
         """
@@ -273,13 +275,11 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         Returns:
             The steer motor's current absolute rotation position, in degrees with domain [0, 360).
         """
-        # TODO: JD see if want to use absolute encoder at all here
-        # steer_position = self.current_raw_absolute_encoder_value()
-        # if steer_position:
-        #     steer_position = steer_position * 360 # TODO: JD is this already what we want? Or need to reverse offset? #(steer_position - self.constants.encoder_calibration) * 360.0
-        # else:
-        #     steer_position = self.steer_motor_encoder.getPosition()
-        steer_position = self.steer_motor_encoder.getPosition()
+        steer_position = self.current_raw_absolute_encoder_value()
+        if steer_position:
+            steer_position = steer_position * 360
+        else:
+            steer_position = self.steer_motor_encoder.getPosition()
         steer_position = steer_position % 360
         return steer_position
 
