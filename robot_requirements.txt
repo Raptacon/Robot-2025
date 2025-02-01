@@ -1,4 +1,4 @@
-#robotpy[commands2,ctre,navx,rev,sim,pathplannerlib,photonvision,playingwithfusion,cscore] ==2024.*
+#robotpy[commands2,ctre,navx,rev,sim,pathplannerlib,photonvision,playingwithfusion,cscore]
 robotpy[all]
 
 raptacon3200

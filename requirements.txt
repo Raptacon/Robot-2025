@@ -7,12 +7,10 @@ flake8
 coverage
 wheel
 robotpy[all]
-pyntcore==2024.*
+pyntcore
 
-#robotpy[ctre,navx,rev,sim,pathplannerlib,photonvision,playingwithfusion] == 2024.*
+#robotpy[ctre,navx,rev,sim,pathplannerlib,photonvision,playingwithfusion] ==
 
 # If installed on OSX (joystick support) it seems to fail?
-pyfrc == 2024.*
-robotpy-halsim-gui
 
 raptacon3200
