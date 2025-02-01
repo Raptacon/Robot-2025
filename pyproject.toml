@@ -25,6 +25,4 @@ robotpy_extras = [
     #"sim",
 ]
 
-"photonlibpy"="v2025.1.1-rc1"
-
-raptacon3200 = "0.0.1"
+raptacon3200

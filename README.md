@@ -92,6 +92,19 @@ TODO more documentation here around motors, controllers and how to update them.
 
 Once you have run the command "python -m robotpy sync" and have connected to the bot, run the command "python -m robotpy deploy" and it will run tests to check for any obvious errors. Then it will check for variations in packages and install any missing ones. Then it deploys the code to the bot.
 
+alternatively if you're using GitBash (or not on Windows) you can just run:
+
+```bash
+make sync
+```
+
+or 
+
+```bash
+make deploy
+```
+which calls sync as a dependency.
+
 If you don't have the driver station installed on your device, you need to do that. You can install it from [NI FRC tools](https://www.ni.com/en.html?cid=PSEA-7013q000001rC7dAAE-CONS-GOGSE_103579176918&utm_keyword=ni&gad_source=1&gclid=Cj0KCQiA-62tBhDSARIsAO7twbYEez351i8rN76k43uCC2MIVkMJ89hxuDBCPp60X1JldrEnka57xE8aApVcEALw_wcB) 
 
 # Configuration
