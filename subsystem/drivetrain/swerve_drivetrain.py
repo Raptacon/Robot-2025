@@ -227,7 +227,7 @@ class SwerveDrivetrain(Subsystem):
             swerve_module.current_state() for swerve_module in self.swerve_modules
         ))
 
-    def set_states_from_speeds(self, drivetrain_speeds: ChassisSpeeds) -> None:
+    def set_states_from_speeds(self, drivetrain_speeds: ChassisSpeeds, apply_cosine_scaling: bool = True) -> None:
         """
         Directly set new goal states for each individual swerve module based on the given desired
         translational and rotational velocities for the whole drivetrain. This method is privately used
@@ -236,6 +236,8 @@ class SwerveDrivetrain(Subsystem):
 
         Args:
             drivetrain_speeds: the velocities we want the drivetrain to achieve
+            apply_cosine_scaling: if True, scale the drive speed down according to how perpendicular
+                the wheel is to the new state angle. If False, do not scale.
 
         Returns:
             None: new goal states are set for each swerve module in-place
@@ -244,7 +246,7 @@ class SwerveDrivetrain(Subsystem):
         module_states = self.drive_kinematics.desaturateWheelSpeeds(module_states, self.constants.maxTranslationMPS)
 
         for i, module_state in enumerate(module_states):
-            self.swerve_modules[i].set_state(module_state)
+            self.swerve_modules[i].set_state(module_state, apply_cosine_scaling=apply_cosine_scaling)
 
     def update_pose_estimator(self) -> None:
         """
@@ -398,7 +400,7 @@ class SwerveDrivetrain(Subsystem):
             self.current_pose,
             self.reset_pose_estimator,
             self.current_robot_relative_speed,
-            lambda speeds, feedforwards: self.set_states_from_speeds(speeds),
+            lambda speeds, feedforwards: self.set_states_from_speeds(speeds, apply_cosine_scaling=False),
             PPHolonomicDriveController(
                 PIDConstants(*OperatorRobotConfig.pathplanner_translation_pid),
                 PIDConstants(*OperatorRobotConfig.pathplanner_rotation_pid)

@@ -307,7 +307,7 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         current_angle = Rotation2d.fromDegrees(self.current_raw_absolute_steer_position())
         return SwerveModuleState(current_velocity, current_angle)
 
-    def set_state(self, state: SwerveModuleState, apply_cosine_scaling: bool = False) -> None:
+    def set_state(self, state: SwerveModuleState, apply_cosine_scaling: bool = True) -> None:
         """
         Change the state of the swerve module to the given new state, using closed-loop PID control to
         transition from the current state to the new state. This is effectively how we tell our
