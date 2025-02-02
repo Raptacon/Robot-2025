@@ -14,4 +14,4 @@ pyntcore==2025.*
 pyfrc==2025.*
 robotpy-halsim-gui
 
-raptacon3200
+raptacon3200>=2025.0.1

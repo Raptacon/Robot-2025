@@ -4,7 +4,7 @@ from typing import Tuple
 # Internal imports
 from config import OperatorRobotConfig
 from constants import SwerveModuleMk4iConsts, SwerveModuleMk4iL2Consts
-from sensors.utils import configureSparkMaxCanRates
+from raptacon3200.utils import sparkMaxUtils
 
 # Third-party imports
 import phoenix6
@@ -131,7 +131,7 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         Returns:
             None - internal steer configuration is updated in-place
         """
-        configureSparkMaxCanRates(self.steer_motor_config, drive_motor_flag=False)
+        sparkMaxUtils.configureSparkMaxCanRates(self.steer_motor_config, drive_motor_flag=False)
         (
             self.steer_motor_config
             .inverted(invert)
@@ -169,7 +169,7 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
         Returns:
             None - internal drive configuration is updated in-place
         """
-        configureSparkMaxCanRates(self.drive_motor_config, drive_motor_flag=True)
+        sparkMaxUtils.configureSparkMaxCanRates(self.drive_motor_config, drive_motor_flag=True)
         (
             self.drive_motor_config
             .inverted(invert)

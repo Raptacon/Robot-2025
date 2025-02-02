@@ -28,6 +28,6 @@ robotpy_extras = [
 # Must use python -m robotpy sync to install to cache
 requires = [
     "photonlibpy",
-    "raptacon3200",
+    "raptacon3200>=2025.0.1",
     "numpy"
 ]
