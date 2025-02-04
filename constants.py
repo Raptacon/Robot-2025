@@ -12,23 +12,8 @@ import math
 
 class RobotConstants:
     massKG: float = 74.088
+    #MOI: Moment of inertia, kg*m^2
     MOI: float = 6.883
-
-
-#############################
-# SENSORS ###################
-#############################
-
-
-class SparkMaxConstants:
-    faultRateMs: int = 50
-    motorPosRateMs: int = 20
-    appliedOutputRateMs: int = 10
-    motorTelmRateMs: int = 50
-    analogRateMs: int = 1833
-    altEncoderRateMs: int = 1050
-    dutyCycleEncRateMs: int = 2150
-    dutyCycleEncVelRateMs: int = 3150
 
 
 #############################
@@ -37,6 +22,7 @@ class SparkMaxConstants:
 
 
 class SwerveDriveConsts(RobotConstants):
+    # where the wheel is compared to the center of the robot in meters
     moduleFrontLeftX: float = 0.31115
     moduleFrontLeftY: float = 0.26035
     moduleFrontRightX: float = 0.31115
@@ -46,6 +32,7 @@ class SwerveDriveConsts(RobotConstants):
     moduleBackRightX: float = -0.31115
     moduleBackRightY: float = -0.26035
 
+    # inverts if the module or gyro does not rotate counterclockwise positive
     invertGyro: bool = False
     moduleFrontLeftInvertDrive: bool = True
     moduleFrontRightInvertDrive: bool = True
@@ -66,8 +53,10 @@ class SwerveModuleMk4iConsts(SwerveDriveConsts):
     https://github.com/SwerveDriveSpecialties/swerve-lib/blob/develop/src/main/java/com/swervedrivespecialties/swervelib/ctre/Falcon500DriveControllerFactoryBuilder.java
     """
     kNominalVoltage: float = 12.0
+    # cuurrent limits use amps
     kDriveCurrentLimit: int = 40
     kSteerCurrentLimit: int = 20
+    # ramp rate: how fast the bot can go from 0% to 100%, mesured in seconds
     kRampRate: float = 0.25
     kTicksPerRotation: int = 1
     kCanStatusFrameHz: int = 10
@@ -81,10 +70,12 @@ class SwerveModuleMk4iL1Consts(SwerveModuleMk4iConsts):
     """
     https://docs.yagsl.com/configuring-yagsl/standard-conversion-factors
     """
-    wheelDiameter: float = 0.10033
+    wheelDiameter: float = 0.10033 # in meters
     driveGearRatio: float = 8.14
     steerGearRatio: float = 150 / 7
     
+    # position: meters per rotation
+    # velocity: meters per second
     drivePositionConversionFactor : float = (math.pi * wheelDiameter) / (driveGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation)
     driveVelocityConversionFactor: float = drivePositionConversionFactor / 60.0
     steerPositionConversionFactor: float = 360 / (steerGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation)
@@ -97,11 +88,14 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
     """
     https://docs.yagsl.com/configuring-yagsl/standard-conversion-factors
     """
-    wheelDiameter: float = 0.10033
+    wheelDiameter: float = 0.10033 # in meters
+    # COf: coefficient, force/force (no units)
     wheelCOF: float = 1.0
     driveGearRatio: float = 6.75
     steerGearRatio: float = 150 / 7
 
+    # position: meters per rotation
+    # velocity: meters per second
     drivePositionConversionFactor : float = (math.pi * wheelDiameter) / (driveGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation)
     driveVelocityConversionFactor: float = drivePositionConversionFactor / 60.0
     steerPositionConversionFactor: float = 360 / (steerGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation)
