@@ -85,15 +85,18 @@ class SwerveDrivetrain(Subsystem):
         self.gyroscope = navx.AHRS.create_spi()
         self.heading_offset = Rotation3d()
         self.factory_default_gyro()
+        if self.flip_to_red_alliance():
+            self.starting_pose = 180
+        else:
+            self.starting_pose = 0
 
         self.pose_estimator = SwerveDrive4PoseEstimator(
             self.drive_kinematics,
             self.current_yaw(),
             self.current_module_positions(),
-            starting_pose
+            self.starting_pose
         )
 
-        self.starting_pose = starting_pose
         self.reset_heading()
 
         # Path Planner setup
@@ -182,7 +185,7 @@ class SwerveDrivetrain(Subsystem):
                 field_invert = -1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_yaw()
+                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_pose().rotation()
             )
         else:
             chassis_speeds = ChassisSpeeds(velocity_vector_x, velocity_vector_y, angular_velocity)

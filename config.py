@@ -3,7 +3,10 @@ from typing import Tuple
 
 
 class OperatorRobotConfig:
-    default_start_pose: Tuple[float] = (2.0, 7.0, 0.0)
+    # Default start position for red alliance
+    red_default_start_pose: Tuple[float] = (10.0, 1.5, 0.0)
+    # Default start position for blue alliance
+    blue_default_start_pose: Tuple[float] = (7.7, 6.0, 180.0)
     # Give in front-left, front-right, back-left, back-right order
     # ids for the drive controllers
     swerve_module_channels: Tuple[int] = (50, 53, 56, 59)
