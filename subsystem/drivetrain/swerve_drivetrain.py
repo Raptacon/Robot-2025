@@ -24,11 +24,8 @@ class SwerveDrivetrain(Subsystem):
     Virtual representation of, and interface for, a full swerve drive
     """
     def __init__(
-        self,
-        starting_pose: Pose2d = Pose2d(
-            Translation2d(*OperatorRobotConfig.default_start_pose[0:2]),
-            Rotation2d.fromDegrees(OperatorRobotConfig.default_start_pose[2])
-        )) -> None:
+        self
+        ):
         """
         Creates a new swerve drivetrain
 
@@ -86,9 +83,11 @@ class SwerveDrivetrain(Subsystem):
         self.heading_offset = Rotation3d()
         self.factory_default_gyro()
         if self.flip_to_red_alliance():
-            self.starting_pose = 180
+            self.starting_pose = Pose2d(Translation2d(*OperatorRobotConfig.red_default_start_pose[0:2]),
+            Rotation2d.fromDegrees(OperatorRobotConfig.red_default_start_pose[2]))
         else:
-            self.starting_pose = 0
+            self.starting_pose = Pose2d(Translation2d(*OperatorRobotConfig.blue_default_start_pose[0:2]),
+            Rotation2d.fromDegrees(OperatorRobotConfig.blue_default_start_pose[2]))
 
         self.pose_estimator = SwerveDrive4PoseEstimator(
             self.drive_kinematics,
@@ -180,9 +179,9 @@ class SwerveDrivetrain(Subsystem):
             None: individual swerve modules are given new goal states to transition to in-place
         """
         if field_relative:
-            field_invert = 1
+            field_invert = -1
             if self.flip_to_red_alliance():
-                field_invert = -1
+                field_invert = 1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_pose().rotation()
