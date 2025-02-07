@@ -179,9 +179,9 @@ class SwerveDrivetrain(Subsystem):
             None: individual swerve modules are given new goal states to transition to in-place
         """
         if field_relative:
-            field_invert = -1
+            field_invert = 1
             if self.flip_to_red_alliance():
-                field_invert = 1
+                field_invert = -1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
                 field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_pose().rotation()
