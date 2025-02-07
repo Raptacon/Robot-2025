@@ -26,9 +26,9 @@ jobs:
         pip install -r requirements.txt
     - name: Robotpy tests
       timeout-minutes: 1
-      continue-on-error: True
+      continue-on-error: False
       run: |
-        python robot.py coverage test
+        python -m robotpy coverage test
   DocStringStatic:
     name: Doc String Verification
     runs-on: windows-latest
