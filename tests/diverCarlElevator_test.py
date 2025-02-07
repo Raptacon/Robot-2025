@@ -116,6 +116,8 @@ def test_elevatorSubsystem() -> None:
     elevator.stopElevator()
     assert elevator.getSetHeight() == 0.55
 
+
+    assert False
     print("Elevator test passed")
 
 
