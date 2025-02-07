@@ -13,3 +13,4 @@ class GrabHatch(commands2.Command):
 
     def isFinished(self) -> bool:
         return self.elevator.atGoal()
+    

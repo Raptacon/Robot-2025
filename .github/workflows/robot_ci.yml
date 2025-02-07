@@ -28,7 +28,7 @@ jobs:
       timeout-minutes: 1
       continue-on-error: True
       run: |
-        python robot.py test
+        python robot.py coverage test
   DocStringStatic:
     name: Doc String Verification
     runs-on: windows-latest
