@@ -11,7 +11,7 @@ import wpimath.units
 # 2 motors one will run opposite direction
 
 
-class DiverCarlElevator(commands2.SubsystemBase):
+class DiverCarlElevator(commands2.Subsystem):
     kMotorPrimaryCanId = 10
     kMotorFollowerCanId = 11
     kEncoderPinA = 9
