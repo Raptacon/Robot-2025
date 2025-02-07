@@ -115,7 +115,7 @@ def test_elevatorSubsystem() -> None:
     encSim.setDistance(0.55)
     elevator.stopElevator()
     assert elevator.getSetHeight() == 0.55
-
+    assert False
     print("Elevator test passed")
 
 
