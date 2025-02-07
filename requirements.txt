@@ -6,11 +6,9 @@ modulegraph
 flake8
 coverage
 wheel
-robotpy[all]
-pyntcore
+numpy
+robotpy[all]==2025.*
+pyntcore==2025.*
 
-#robotpy[ctre,navx,rev,sim,pathplannerlib,photonvision,playingwithfusion] ==
 
-# If installed on OSX (joystick support) it seems to fail?
-
-raptacon3200
+raptacon3200>=2025.0.1
