@@ -107,7 +107,7 @@ def test_elevatorSubsystem() -> None:
     assert elevator._motors.get() < 0
     assert elevator._limitAlert.get() == False
 
-    #test incremental move and stop move
+    # test incremental move and stop move
     elevator.setHeight(0.5)
     assert elevator.getSetHeight() == 0.5
     elevator.setIncrementalMove(0.1)

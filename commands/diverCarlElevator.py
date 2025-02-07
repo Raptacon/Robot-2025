@@ -1,5 +1,5 @@
 import commands2
-from subsystems.diverCarlElevator import DiverCarlElevator
+from subsystem.diverCarlElevator import DiverCarlElevator
 
 
 class GrabHatch(commands2.Command):
@@ -13,4 +13,3 @@ class GrabHatch(commands2.Command):
 
     def isFinished(self) -> bool:
         return self.elevator.atGoal()
-    

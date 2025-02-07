@@ -142,3 +142,6 @@ imgui.ini
 .deploy_cfg
 .installer_config
 setup_.venv_windows
+logs/
+tests/logs
+**/ctre_sim/
