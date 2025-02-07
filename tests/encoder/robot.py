@@ -1,9 +1,4 @@
 #!/usr/bin/env python3
-#
-# Copyright (c) FIRST and other WPILib contributors.
-# Open Source Software; you can modify and/or share it under the terms of
-# the WPILib BSD license file in the root directory of this project.
-#
 
 import wpilib
 import wpilib.interfaces
@@ -11,8 +6,7 @@ import wpilib.interfaces
 
 class MyRobot(wpilib.TimedRobot):
     """
-    This is a demo program showing the use of the DifferentialDrive class.
-    Runs the motors with tank steering.
+    Example robot to test The pull encoder on GPIO 9/8 (A/B) inputs
     """
 
     def robotInit(self):
