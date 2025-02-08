@@ -1,13 +1,13 @@
 import commands2
 import commands2.cmd
 import wpilib
-from subsystem.swerveDriveTrain import Drivetrain
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from wpimath.geometry import Pose2d, Transform2d
 
 class AutoDrive(commands2.CommandBase):
     targetPos = Pose2d()
     tolerance = Transform2d(0.5, 0.5, 0)
-    def __init__(self, timeS: float, speedX: float, speedY: float, dir: float, fieldRel: bool, drive: Drivetrain) -> None:
+    def __init__(self, timeS: float, speedX: float, speedY: float, dir: float, fieldRel: bool, drive: SwerveDrivetrain) -> None:
         """Creates a new DriveDistance. This command will drive your your robot to a designated cordinate.
         targetPos: The X and Y pos that the bot will drive to(in meters)
         drive:  The drivetrain subsystem on which this command will run
@@ -23,13 +23,13 @@ class AutoDrive(commands2.CommandBase):
 
     def initialize(self) -> None:
         """Called when the command is initially scheduled."""
-        self.drive.resetHeading()
+        self.drive.reset_heading()
         self.timer = wpilib.Timer()
         self.timer.start()
     def execute(self) -> None:
         """Called every time the scheduler runs while the command is scheduled."""
         self.drive.drive(self.speedX, self.speedY, self.dir, self.fieldRel)
-        self.drive.updateOdometry()
+        self.drive.update_pose_estimator()
 
     def end(self, interrupted: bool) -> None:
         """Called once the command ends or is interrupted."""

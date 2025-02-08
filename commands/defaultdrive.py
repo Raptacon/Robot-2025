@@ -1,12 +1,12 @@
 import typing
 import commands2
-from subsystem.swerveDriveTrain import Drivetrain
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 
 class DefaultDrive(commands2.CommandBase):
     def __init__ (
         self,
-        driveTrain: Drivetrain,
+        driveTrain: SwerveDrivetrain,
         forward: typing.Callable[[], float],
         translation: typing.Callable[[], float],
         rotation: typing.Callable[[], float],
