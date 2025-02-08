@@ -5,7 +5,7 @@ from subsystem.diverCarlElevator import DiverCarlElevator
 class GrabHatch(commands2.Command):
     def __init__(self, elevator: DiverCarlElevator) -> None:
         super().__init__()
-        self.elevator = DiverCarlElevator
+        self.elevator = elevator
         self.addRequirements(self.elevator)
 
     def initialize(self, heightMeters: float) -> None:
