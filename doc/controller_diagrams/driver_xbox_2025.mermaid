@@ -1,0 +1,47 @@
+graph TB
+    LT[/Unused\]
+    NullTrigger:::hidden
+    RT[/Chute\]
+
+    LB("Turbo\nMode")
+    NullBumper:::hidden
+    RB(Robot\nRelative)
+
+    LJs((Translate))
+    Start["N/A"]:::na
+    Select["N/A"]:::na
+    subgraph buttons[ ]
+        x((Not\nAssigned)):::na
+        y((Not\nAssigned)):::na
+        a((Not\nAssigned)):::na
+        b((Reset\nOrientation))
+
+        x~~~y~~~b
+        x~~~a~~~b
+    end
+
+    LNoteLayer:::hidden
+    MNoteLayer:::hidden
+    RNoteLayer:::hidden
+
+    subgraph dpad[ ]
+        dL["N/A"]:::na
+        dU[Climb]
+        dD[N/A]:::na
+        dR[N/A]:::na
+
+        dL~~~dU~~~dR
+        dL~~~dD~~~dR
+    end
+    NullBottom:::hidden
+    RJs((Rotate))
+
+    LT---LB~~~LJs~~~LNoteLayer~~~dpad
+    NullTrigger~~~NullBumper
+        NullBumper~~~Start~~~MNoteLayer
+        NullBumper~~~Select~~~MNoteLayer
+        MNoteLayer~~~NullBottom
+    RT---RB~~~buttons~~~RNoteLayer~~~RJs
+    
+classDef hidden display: none;
+classDef na color: #a88

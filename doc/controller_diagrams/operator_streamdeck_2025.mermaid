@@ -1,0 +1,25 @@
+---
+title: Operator (StreamDeck)
+---
+graph TB
+    subgraph c5["Ejection"]
+        Net["Net\nAlgae"]
+        EjectAlg["Eject\nAlgae"]
+        EjectCoral["Eject\nCoral"]
+    end
+    subgraph c4["Intake"]
+        r1c4["Not\nAssigned"]
+            style r1c4 color:#caa
+        IntakeAlg["Algae\nIntake"]
+        IntakeGrd["Coral\nGround Intake"]
+    end
+    subgraph c3["Reef (Other)"]
+        RmAlgU["Algae\n(Upper)"]
+        RmAlgL["Algae\n(Lower)"]
+        Trough["Align\nTrough"]
+    end
+    subgraph c1c2["Reef (Pegs)"]
+        LL4["L4\n(Left)"]---RL4["L4\n(Right)"]
+        LL3["L3\n(Left)"]---RL3["L3\n(Right)"]
+        LL2["L2\n(Left)"]---RL2["L2\n(Right)"]
+    end
