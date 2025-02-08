@@ -1,7 +1,7 @@
 import commands2
 import commands2.cmd
 from commands.autoDrive import AutoDrive
-from subsystem.swerveDriveTrain import Drivetrain
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from commands.sparkyAuto import HandOff
 from subsystem.sparkyShooter import Shooter
 from subsystem.sparkyIntake import SparkyIntake
@@ -10,7 +10,7 @@ import logging
 log = logging.getLogger("Auto")
 
 class SparkyShoot(commands2.SequentialCommandGroup):
-    def __init__(self, shooter : Shooter, intake : SparkyIntake, drive: Drivetrain) -> None:
+    def __init__(self, shooter : Shooter, intake : SparkyIntake, drive: SwerveDrivetrain) -> None:
         super().__init__()
         self.addCommands(
             commands2.PrintCommand("Running Shooter"),
