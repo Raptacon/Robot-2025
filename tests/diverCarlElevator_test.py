@@ -98,7 +98,7 @@ def test_elevatorSubsystem() -> None:
     assert elevator._disabled == False
 
     simPrimaryMotor.getReverseLimitSwitchSim().setPressed(True)
-    elevator._motors.set(1.0)
+    elevator._motors.set(-1.0)
     elevator.periodic()
     assert elevator._motors.get() == 0
     assert elevator._limitAlert.get() == True

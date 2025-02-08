@@ -72,7 +72,7 @@ class DiverCarlElevator(commands2.Subsystem):
             self._limitAlert.set(True)
             return
 
-        if self._primaryMotor.getReverseLimitSwitch().get() and self._motors.get() > 0:
+        if self._primaryMotor.getReverseLimitSwitch().get() and self._motors.get() < 0:
             self._motors.set(0)
             self._limitAlert.setText(f"Elevator BOTTOM HIT at {self._encoder.getDistance()}m")
             self._limitAlert.set(True)
@@ -85,7 +85,14 @@ class DiverCarlElevator(commands2.Subsystem):
             self._motors.set(0)
             return
 
-        self._motors.set(self._controller.calculate(self._encoder.getDistance()))
+        output = self._controller.calculate(self._encoder.getDistance());
+        if output > 0.1:
+            output = 0.1
+        if output < -0.1:
+            output = -0.1
+
+
+        self._motors.set(output)
 
 
 
