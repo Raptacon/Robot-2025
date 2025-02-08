@@ -1,34 +1,47 @@
+---
+title: Driver (Xbox)
+---
 graph TB
     LT[/Unused\]
     NullTrigger:::hidden
     RT[/Chute\]
 
-    LB("Turbo\nMode")
+    LB("Turbo
+        Mode")
     NullBumper:::hidden
-    RB(Robot\nRelative)
+    RB("Robot
+        Relative")
 
     LJs((Translate))
-    Start["N/A"]:::na
-    Select["N/A"]:::na
+    Start("N/A"):::na
+    Select("N/A"):::na
     subgraph buttons[ ]
-        x((Not\nAssigned)):::na
-        y((Not\nAssigned)):::na
-        a((Not\nAssigned)):::na
-        b((Reset\nOrientation))
+        x("Not 
+            Assigned"):::na
+        y("Not 
+            Assigned"):::na
+        a("Not 
+            Assigned"):::na
+        b("Not 
+            Assigned")
 
         x~~~y~~~b
         x~~~a~~~b
     end
+    
 
-    LNoteLayer:::hidden
+    LNoteLayer[/"Translate maps the
+                      angle of the joystick
+                      to the angle of Robot
+                      Translation"/]:::note
     MNoteLayer:::hidden
-    RNoteLayer:::hidden
+    RNoteLayer:::note
 
     subgraph dpad[ ]
-        dL["N/A"]:::na
-        dU[Climb]
-        dD[N/A]:::na
-        dR[N/A]:::na
+        dL{{"N/A"}}:::na
+        dU{{Climb}}
+        dD{{N/A}}:::na
+        dR{{N/A}}:::na
 
         dL~~~dU~~~dR
         dL~~~dD~~~dR
@@ -36,12 +49,12 @@ graph TB
     NullBottom:::hidden
     RJs((Rotate))
 
-    LT---LB~~~LJs~~~LNoteLayer~~~dpad
+    LT---LB~~~LJs---LNoteLayer~~~dpad
     NullTrigger~~~NullBumper
         NullBumper~~~Start~~~MNoteLayer
         NullBumper~~~Select~~~MNoteLayer
         MNoteLayer~~~NullBottom
     RT---RB~~~buttons~~~RNoteLayer~~~RJs
-    
+
 classDef hidden display: none;
 classDef na color: #a88
