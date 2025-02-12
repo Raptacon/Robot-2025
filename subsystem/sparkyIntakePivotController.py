@@ -2,9 +2,10 @@ import commands2
 
 from typing import Callable
 from subsystem.sparkyIntakePivot import IntakePivot
-class pivotController(commands2.SubsystemBase):
 
-    def __init__(self,):
+
+class pivotController(commands2.SubsystemBase):
+    def __init__(self):
         super().__init__()
         self.calibrated = False
         #save for later use
@@ -14,7 +15,7 @@ class pivotController(commands2.SubsystemBase):
             self.getIntakeRotation().pivotMotor.set(-0.2)
             if(self.getIntakeRotation().getLimit()):
                 self.calibrated = True
-                self.getIntakeRotation().encoderOffset = self.getIntakeRotation().encoder.getAbsolutePosition()
+                self.getIntakeRotation().encoderOffset = self.getIntakeRotation().encoder.get()
 
     def setIntakeRotationSubsystem(self, RotationSubsystem):
         self.intakeRotationSS = RotationSubsystem
@@ -39,10 +40,9 @@ class pivotController(commands2.SubsystemBase):
             return self.getIntakeRotation().closeToSetpoint(tolerance)
         else:
             return self.getIntakeRotation().atSetpoint()
-    isPivotPositioned
 
-    def getReqSubsystems(self) -> list[commands2.Subsystem]:
-        return [self, self.getIntakeRotation()]
+    def getReqSubsystems(self) -> tuple[commands2.Subsystem]:
+        return tuple[self, self.getIntakeRotation()]
 
     def setManipulator(self, angleDegrees):
         """Sets the angle and length of the manipulator

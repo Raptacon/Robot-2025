@@ -7,7 +7,11 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from commands.default_swerve_drive import DefaultDrive
+from commands.shortyIntake import Intake
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from subsystem.sparkyIntake import SparkyIntake
+from subsystem.sparkyIntakePivot import IntakePivot
+from subsystem.sparkyIntakePivotController import pivotController
 
 # Third-party imports
 import commands2
@@ -58,6 +62,11 @@ class RobotSwerve:
                 self.drivetrain
             )
         )
+
+        self.intake = SparkyIntake()
+        self.pivot = IntakePivot()
+        self.intakePivotController = pivotController()
+        self.intakePivotController.setIntakeRotationSubsystem(self.pivot)
 
     def robotPeriodic(self):
         if self.enableTelemetry and self.telemetry:

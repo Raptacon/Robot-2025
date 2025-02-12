@@ -10,9 +10,15 @@ class IntakePivot(commands2.PIDSubsystem):
     kMaxPostion = 1.0 * 2 * math.pi
     kRolloverDeadZoneDeg = 340
     def __init__(self) -> None:
-        self.pivotMotor = rev.CANSparkMax(22, rev.CANSparkLowLevel.MotorType.kBrushless)
-        self.pivotMotor.setIdleMode(rev.CANSparkMax.IdleMode.kCoast)
-        self.pivotMotor.setInverted(False)
+        self.pivotMotor = rev.SparkMax(22, rev.SparkLowLevel.MotorType.kBrushless)
+        self.arm_motor_config = rev.SparkMaxConfig()
+        self.arm_motor_config.inverted(False).setIdleMode(rev.SparkBaseConfig.IdleMode.kCoast)
+
+
+        self.pivotMotor.configure(
+            self.arm_motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters,
+            rev.SparkBase.PersistMode.kPersistParameters
+        )
 
         self.pivotRelEncoder = self.pivotMotor.getEncoder()
 
@@ -25,7 +31,7 @@ class IntakePivot(commands2.PIDSubsystem):
 
         self.motorFeedforward = wpimath.controller.SimpleMotorFeedforwardMeters(0, 0, 0)
 
-        self.handOffSwitch = self.pivotMotor.getReverseLimitSwitch(rev.SparkLimitSwitch.Type.kNormallyOpen)
+        self.handOffSwitch = self.pivotMotor.getReverseLimitSwitch()
 
         self.setSetpoint(self.getPostion())
 
@@ -51,7 +57,7 @@ class IntakePivot(commands2.PIDSubsystem):
 
     def getAbsolutePosition(self):
         #print(f"absPos:{self.encoder.getAbsolutePosition()}")
-        return self.encoder.getAbsolutePosition()
+        return self.encoder.get()#getAbsolutePosition()
 
     def setSetpoint(self, goal: float) -> None:
         if goal < self.kMinPostion:

@@ -3,7 +3,7 @@ import typing
 from subsystem.sparkyIntake import SparkyIntake
 from subsystem.sparkyIntakePivotController import pivotController
 
-class Intake(commands2.CommandBase):
+class Intake(commands2.Command):
     def __init__(self, intake: SparkyIntake, pivot : pivotController, intakePercent: typing.Callable[[], float], spitOut: typing.Callable[[], bool], changePivot : typing.Callable[[], bool]) -> None:
         super().__init__()
         self.intake = intake
