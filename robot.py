@@ -1,70 +1,60 @@
 #!/usr/bin/env python3
 
-import typing
-import commands2
-
-from robotswerve import RobotSwerve
+import wpilib
 
 
-class MyRobot(commands2.TimedCommandRobot):
+class MyRobot(wpilib.TimedRobot):
     """
     Our default robot class, pass it to wpilib.run
     Command v2 robots are encouraged to inherit from TimedCommandRobot, which
     has an implementation of (self) -> None:
     which runs the scheduler for you
     """
-    # 50 ms default period
-    kDefaultPeriod: typing.ClassVar[float] = 50.0
-    autonomousCommand: typing.Optional[commands2.Command] = None
-
-    def __init__(self) -> None:
-        # setup our scheduling period. Defaulting to 20 Hz (50 ms)
-        super().__init__(period=MyRobot.kDefaultPeriod / 1000)
-        # Instantiate our RobotContainer. This will perform all our button bindings, and put our
-        # autonomous chooser on the dashboard.
-        if not hasattr(self, "container"):
-            # to work around sim creating motors during tests, assing to class and if already created keep using created robot class for tests.
-            # during robot running, this is only every called once
-            MyRobot.container = RobotSwerve(lambda: self.isDisabled)
+    #def __init__(self) -> None:
+     #   pass
 
     def robotInit(self) -> None:
         """
         This function is run when the robot is first started up and should be used for any
         initialization code.
         """
+        self.analog_input = wpilib.AnalogInput(3)
 
     def robotPeriodic(self) -> None:
-        self.container.robotPeriodic()
+        averaged_voltage = self.analog_input.getAverageVoltage()
+
+        wpilib.SmartDashboard.putNumber("Air Sensor Voltage", averaged_voltage)
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
-        self.container.disabledInit()
+        #self.container.disabledInit()
 
     def disabledPeriodic(self) -> None:
         """This function is called periodically when disabled"""
-        self.container.disabledPeriodic()
+        #self.container.disabledPeriodic()
 
     def autonomousInit(self) -> None:
         """This autonomous runs the autonomous command selected by your RobotContainer class."""
-        self.container.autonomousInit()
+        #self.container.autonomousInit()
 
     def autonomousPeriodic(self) -> None:
         """This function is called periodically during autonomous"""
-        self.container.autonomousPeriodic()
+        #self.container.autonomousPeriodic()
+        pass
 
     def teleopInit(self) -> None:
-        self.container.teleopInit()
-
+        #self.container.teleopInit()
+        pass
     def teleopPeriodic(self) -> None:
         """This function is called periodically during operator control"""
-        self.container.teleopPeriodic()
-
+        #self.container.teleopPeriodic()
+        pass
     def testInit(self) -> None:
-        self.container.testInit()
-
+        #self.container.testInit()
+        pass
     def testPeriodic(self) -> None:
-        self.container.testPeriodic()
-
+        #self.container.testPeriodic()
+        pass
 
 if __name__ == "__main__":
     print("Please run python -m robotpy <args>")
