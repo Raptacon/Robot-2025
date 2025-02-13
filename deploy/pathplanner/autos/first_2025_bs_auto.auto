@@ -15,6 +15,12 @@
                 }
               },
               {
+                "type": "named",
+                "data": {
+                  "name": "intake_piece"
+                }
+              },
+              {
                 "type": "path",
                 "data": {
                   "pathName": "2r_to_1f"
@@ -24,9 +30,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 2.0
+            "name": "spit_piece"
           }
         },
         {
@@ -40,6 +46,12 @@
                 }
               },
               {
+                "type": "named",
+                "data": {
+                  "name": "intake_piece"
+                }
+              },
+              {
                 "type": "path",
                 "data": {
                   "pathName": "1r_to_1f"
@@ -49,9 +61,9 @@
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 2.0
+            "name": "spit_piece"
           }
         },
         {
@@ -71,6 +83,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "first_2025_auto",
+  "folder": null,
   "choreoAuto": false
 }

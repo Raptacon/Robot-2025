@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 from typing import Callable
 
+import wpimath.kinematics
+
 # Internal imports
 from data.telemetry import Telemetry
 from commands.default_swerve_drive import DefaultDrive
@@ -18,7 +20,7 @@ import commands2
 import wpilib
 import wpimath
 from commands2.button import Trigger
-from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -26,14 +28,27 @@ class RobotSwerve:
     Container to hold the main robot code
     """
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
+        wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+
+        self.intake = SparkyIntake()
+        self.pivot = IntakePivot()
+        self.intakePivotController = pivotController()
+        self.intakePivotController.setIntakeRotationSubsystem(self.pivot)
 
         # HID setup
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
 
         # Autonomous setup
+        NamedCommands.registerCommand("intake_piece", Intake(
+            self.intake, self.intakePivotController, lambda: 0, lambda: True
+        ).withTimeout(2))
+        NamedCommands.registerCommand("spit_piece", Intake(
+            self.intake, self.intakePivotController, lambda: 0, lambda: False
+        ).withTimeout(2))
+
         self.auto_command = None
         self.auto_chooser = AutoBuilder.buildAutoChooser()
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
@@ -63,12 +78,9 @@ class RobotSwerve:
             )
         )
 
-        self.intake = SparkyIntake()
-        self.pivot = IntakePivot()
-        self.intakePivotController = pivotController()
-        self.intakePivotController.setIntakeRotationSubsystem(self.pivot)
-
     def robotPeriodic(self):
+        #print(self.drivetrain.getCurrentCommand())
+        #print("---")
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDataCollections()
 

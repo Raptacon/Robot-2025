@@ -59,14 +59,21 @@ class pivotController(commands2.SubsystemBase):
         """
         sets the manipulator to the ground position
         """
-        self.setManipulator(270)
+        self.setManipulator(225)
 
     def setHandOffPickup(self):
         """
         sets the manipulator to the handoff position
         """
         #Using 2.0 instead of 0 as this limits the landing and less rebound
-        self.setManipulator(2)
+        self.setManipulator(30)
+
+    def setSpitShot(self):
+        """
+        sets the manipulator to the spit shot
+        """
+        self.setManipulator(130)
+
 
 def getPivotFunctionalCommand(pivotController: pivotController, func: Callable, tolerance = 0.2):
     """

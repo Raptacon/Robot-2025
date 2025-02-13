@@ -35,7 +35,7 @@
   "globalConstraints": {
     "maxVelocity": 0.65,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
+    "maxAngularVelocity": 100.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "first_2025_auto",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
