@@ -96,7 +96,7 @@ class SwerveDrivetrain(Subsystem):
             self.starting_pose
         )
 
-        self.reset_heading()
+        self.reset_heading(reset_pose_estimator=False)
 
         # Path Planner setup
         path_planner_config = RobotConfig.fromGUISettings()
@@ -143,7 +143,7 @@ class SwerveDrivetrain(Subsystem):
         """
         self.heading_offset = self.gyroscope.getRotation3d()
 
-    def reset_heading(self) -> None:
+    def reset_heading(self, reset_pose_estimator: bool = True) -> None:
         """
         Reset the heading such that the robot's current gyroscope reading will correspond to 0 in any
         heading and yaw readings after this method is called. Odometry must also be reset with a rotation
@@ -153,7 +153,8 @@ class SwerveDrivetrain(Subsystem):
             None: object's heading offset is updated in-place and pose estimator is reset
         """
         self.heading_offset = self.raw_current_heading()
-        self.reset_pose_estimator(Pose2d(self.current_pose().translation(), Rotation2d()))
+        if reset_pose_estimator:
+            self.reset_pose_estimator(Pose2d(self.current_pose().translation(), Rotation2d()))
 
     def drive(
         self,
