@@ -25,12 +25,13 @@ class RobotSwerve:
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
         # networktables setup
         self.inst = ntcore.NetworkTableInstance.getDefault()
-        self.table = self.inst.getTable("datatable")
+        self.table = self.inst.getTable("Stream_Deck")
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
 
         # HID setup
+        wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
 
