@@ -55,3 +55,8 @@ Relative to each group
 ## Add PCM
 
 ## Add SparkMax
+
+## 2025 Mechs
+* 10 - Main Elevator Motor
+* 11 - Follower Elevator Motor
+
