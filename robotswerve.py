@@ -15,6 +15,7 @@ import wpilib
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import NamedCommands
 
 class RobotSwerve:
     """
@@ -27,6 +28,10 @@ class RobotSwerve:
         # HID setup
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
+
+        # Register Named Commands
+        NamedCommands.registerCommand('Raise_Place', )
+        NamedCommands.registerCommand('Coral_Intake', )
 
         # Autonomous setup
         self.auto_command = None
