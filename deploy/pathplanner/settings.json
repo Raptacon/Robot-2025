@@ -4,11 +4,10 @@
   "holonomicMode": true,
   "pathFolders": [
     "Paths2025_Blue",
-    "first_2025_auto"
+    "Paths2025_Red"
   ],
   "autoFolders": [
-    "Autos2025_Blue",
-    "first_2025_auto"
+    "Autos2025_Blue"
   ],
   "defaultMaxVel": 0.65,
   "defaultMaxAccel": 3.0,

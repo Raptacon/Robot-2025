@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "ms_4r"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise_Place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "4r_2f"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Coral_Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2f_7r"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise_Place"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Autos2025_Blue",
+  "choreoAuto": false
+}
