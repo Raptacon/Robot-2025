@@ -15,6 +15,7 @@ import wpilib
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder
+import ntcore
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -22,6 +23,10 @@ class RobotSwerve:
     Container to hold the main robot code
     """
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
+        # networktables setup
+        self.inst = ntcore.NetworkTableInstance.getDefault()
+        self.table = self.inst.getTable("datatable")
+
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
 
@@ -79,6 +84,8 @@ class RobotSwerve:
         pass
 
     def teleopInit(self):
+        self.table.putNumber("pressedKey", -1)
+
         if self.auto_command:
             self.auto_command.cancel()
 
@@ -93,7 +100,24 @@ class RobotSwerve:
         )
 
     def teleopPeriodic(self):
-        pass
+        self.keyPressed = self.table.getNumber("pressedKey", -1)
+
+        self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
+                     1: commands2.cmd.print_("Key 1 pressed"),
+                     2: commands2.cmd.print_("Key 2 pressed"),
+                     3: commands2.cmd.print_("Key 3 pressed"),
+                     4: commands2.cmd.print_("Key 4 pressed"),
+                     5: commands2.cmd.print_("Key 5 pressed"),
+                     6: commands2.cmd.print_("Key 6 pressed"),
+                     7: commands2.cmd.print_("Key 7 pressed"),
+                     8: commands2.cmd.print_("Key 8 pressed"),
+                     9: commands2.cmd.print_("Key 9 pressed"),
+                     10: commands2.cmd.print_("Key 10 pressed"),
+                     11: commands2.cmd.print_("Key 11 pressed"),
+                     12: commands2.cmd.print_("Key 12 pressed"),
+                     13: commands2.cmd.print_("Key 13 pressed"),
+                     14: commands2.cmd.print_("Key 14 pressed"),
+                     -1: commands2.cmd.print_("No key pressed"),}
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
