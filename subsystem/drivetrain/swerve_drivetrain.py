@@ -259,7 +259,7 @@ class SwerveDrivetrain(Subsystem):
         """
         self.pose_estimator.update(self.current_yaw(), self.current_module_positions())
 
-    def add_vision_pose_estimate(self, pose: Pose2d, timestamp: float) -> None:
+    def add_vision_pose_estimate(self, pose: Pose2d, timestamp: float, stdDevs: Tuple[float]) -> None:
         """
         Adds a vision-based pose estimate to the pose estimator. This method is expected to be called from the Vision class.
 
@@ -269,8 +269,7 @@ class SwerveDrivetrain(Subsystem):
         Returns:
             None: pose estimator is updated in-place
         """
-        #TODO add standard deviation
-        self.pose_estimator.addVisionMeasurement(pose, timestamp)
+        self.pose_estimator.addVisionMeasurement(pose, timestamp, stdDevs)
 
     def reset_pose_estimator(self, current_pose: Pose2d) -> None:
         """
