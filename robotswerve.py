@@ -120,7 +120,9 @@ class RobotSwerve:
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
         
-        self.keys[self.keyPressed]
+        # print(self.keys[self.keyPressed])
+
+        #print(self.keyPressed)
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
