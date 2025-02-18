@@ -31,8 +31,8 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
-        NamedCommands.registerCommand('Raise_Place', )
-        NamedCommands.registerCommand('Coral_Intake', )
+        NamedCommands.registerCommand('Raise_Place', commands2.cmd.print_("Raise_place"))
+        NamedCommands.registerCommand('Coral_Intake', commands2.cmd.print_("Coral_Intake"))
 
         # Autonomous setup
         self.auto_command = None

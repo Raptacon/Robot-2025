@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.5,
-        "y": 6.16
+        "x": 7.15,
+        "y": 7.5
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.833994733350389,
-        "y": 5.381245884190657
+        "x": 6.821911088265632,
+        "y": 6.616124550227224
       },
       "isLocked": false,
       "linkedName": "Blue_Start"
@@ -20,8 +20,8 @@
         "y": 4.2
       },
       "prevControl": {
-        "x": 6.287020743024666,
-        "y": 4.704138839213155
+        "x": 6.036029480004467,
+        "y": 4.6141715102561776
       },
       "nextControl": null,
       "isLocked": false,
