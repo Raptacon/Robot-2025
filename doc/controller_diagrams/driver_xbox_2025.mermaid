@@ -4,20 +4,20 @@ title: Driver (Xbox)
 graph TB
     LT[/Unused\]
     NullTrigger:::hidden
-    RT[/Chute\]
+    RT[/Chute\]:::clsPress
 
     LB("Turbo
-        Mode")
+        Mode"):::clsHold
     NullBumper:::hidden
     RB("Robot
-        Relative")
+        Relative"):::clsHold
 
     LJs(((Translate)))
     subgraph controls[ ]
         Start("N/A"):::na~~~Select("N/A"):::na
     end
     controls:::hidden
-    subgraph buttons[ ]
+    subgraph buttons
         x("Not 
             Assigned"):::na
         y("Not 
@@ -25,11 +25,12 @@ graph TB
         a("Not 
             Assigned"):::na
         b("Reset 
-            Orientation")
+            Orientation"):::clsPress
 
         x~~~y~~~b
         x~~~a~~~b
     end
+    buttons:::nobg
     
 
     LNoteLayer[/"Translate maps the
@@ -45,7 +46,7 @@ graph TB
         dL{{"Not 
             Assigned"}}:::na
         dU{{"Climb
-            Cage"}}
+            Cage"}}:::clsPress
         dD{{"Not 
             Assigned"}}:::na
         dR{{"Not 
@@ -56,6 +57,7 @@ graph TB
     
         dL~~~dD~~~dR
     end
+    dpad:::nobg
     NullBottom:::hidden
     RJs(((Rotate)))
 
@@ -65,6 +67,15 @@ graph TB
         MNoteLayer~~~NullBottom
     RT---RB~~~buttons~~~RNoteLayer-.-RJs
 
+    subgraph legend
+        press["Press to trigger event"]:::clsPress
+        toggle["Press to toggle state"]:::clsToggle
+        hold["Hold for secondary state"]:::clsHold
+    end
 classDef hidden display: none;
 classDef na color: #a88
 classDef note fill: #0000, stroke-dasharray: 5 5
+classDef clsHold fill: #ea0
+classDef clsToggle fill: #a0e, color: white
+classDef clsPress fill: #0ea
+classDef nobg fill: transparent
