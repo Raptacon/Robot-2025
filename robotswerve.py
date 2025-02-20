@@ -7,6 +7,8 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from commands.default_swerve_drive import DefaultDrive
+from lookups.utils import getCurrentReefZone
+from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 # Third-party imports
@@ -24,6 +26,7 @@ class RobotSwerve:
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
         # HID setup
         self.driver_controller = wpilib.XboxController(0)
@@ -50,7 +53,7 @@ class RobotSwerve:
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
-        Trigger(is_disabled()).debounce(3).onTrue(
+        disabled_coast_trigger = Trigger(is_disabled).debounce(3).onTrue(
             commands2.cmd.runOnce(
                 self.drivetrain.set_motor_stop_modes(
                     to_drive=True, to_break=True, all_motor_override=True, burn_flash=True
@@ -82,6 +85,11 @@ class RobotSwerve:
         if self.auto_command:
             self.auto_command.cancel()
 
+        self.alliance = "blue"
+        if self.drivetrain.flip_to_red_alliance():
+            self.alliance = "red"
+        self.teleop_auto_command = None
+
         self.drivetrain.setDefaultCommand(
             DefaultDrive(
                 self.drivetrain,
@@ -92,8 +100,56 @@ class RobotSwerve:
             )
         )
 
+        self.teleop_auto_triggers = {
+            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).toggleOnTrue(
+                auto_drive_commands.pid_to_pose.PIDToPose(
+                    self.drivetrain, lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                        None
+                    )
+                )
+            ),
+            "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).toggleOnTrue(
+                PIDToPose(
+                    self.drivetrain, lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                        None
+                    )
+                )
+            )
+        }
+
+
+        self.teleop_auto_triggers = {
+            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+                PIDToPose(
+                    self.drivetrain, lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                        None
+                    )
+                )
+            ),
+            "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+                PIDToPose(
+                    self.drivetrain, lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                        None
+                    )
+                )
+            ),
+            # "left_reef_align": Trigger(self.driver_controller.getXButtonPressed),
+            # "right_reef_align": Trigger(self.driver_controller.getBButtonPressed),
+            # "left_reef_align": Trigger(self.driver_controller.getXButtonPressed),
+            # "right_reef_align": Trigger(self.driver_controller.getBButtonPressed),
+        }
+
     def teleopPeriodic(self):
-        pass
+        if self.driver_controller.getLeftBumperButtonPressed():
+            commands2.CommandScheduler.getInstance().cancelAll()
+
+        self.teleop_auto_triggers["left_reef_align"].onTrue(
+            pathpl
+        )
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()

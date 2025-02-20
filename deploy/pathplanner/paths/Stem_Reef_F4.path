@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 5.354744318181819,
+        "y": 2.255042613636364
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.229744318181819,
+        "y": 2.4715489645824746
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.1054545454545455,
+        "y": 2.663877840909091
+      },
+      "prevControl": {
+        "x": 5.297043154424843,
+        "y": 2.33203663602109
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 1.5,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 360.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 119.99999999999999
+  },
+  "reversed": false,
+  "folder": "reef_stem_paths",
+  "idealStartingState": {
+    "velocity": 1.0,
+    "rotation": 119.99999999999999
+  },
+  "useDefaultConstraints": false
+}
