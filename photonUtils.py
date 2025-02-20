@@ -1,4 +1,5 @@
 import math
+from typing import overload
 
 from wpimath.geometry import (
     Pose2d,
@@ -47,6 +48,7 @@ class PhotonUtils:
         return fieldToTarget.transformBy(targetToCamera)
 
     @staticmethod
+    @overload
     def estimateFieldToRobot(
         cameraToTarget: Transform2d, fieldToTarget: Pose2d, cameraToRobot: Transform2d
     ):
@@ -72,6 +74,7 @@ class PhotonUtils:
         return robotPose.translation().distance(targetPose.translation())
 
     @staticmethod
+    @overload
     def estimateFieldToRobot(
         cameraHeightMeters: float,
         targetHeightMeters: float,
