@@ -1,3 +1,4 @@
 robotpy[all]
+photonlibpy
 
 raptacon3200
