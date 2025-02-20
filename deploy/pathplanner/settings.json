@@ -8,7 +8,10 @@
   ],
   "autoFolders": [
     "swerve_path",
-    "swerve_motion"
+    "swerve_motion",
+    "Paths2025_Blue",
+    "Paths2025_Red",
+    "Autos2025_Blue"
   ],
   "defaultMaxVel": 0.65,
   "defaultMaxAccel": 3.0,

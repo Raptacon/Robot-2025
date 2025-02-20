@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.5,
-        "y": 6.16
+        "x": 7.15,
+        "y": 7.5
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.428290025146688,
-        "y": 5.952116512992458
+        "x": 5.204321808510639,
+        "y": 6.848869680851063
       },
       "isLocked": false,
       "linkedName": "Blue_Start"
@@ -20,8 +20,8 @@
         "y": 5.115
       },
       "prevControl": {
-        "x": 4.457376362112322,
-        "y": 5.780586756077119
+        "x": 4.014095744680851,
+        "y": 5.787001329787233
       },
       "nextControl": null,
       "isLocked": false,
@@ -35,7 +35,7 @@
   "globalConstraints": {
     "maxVelocity": 0.65,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 100.0,
+    "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
@@ -45,7 +45,7 @@
     "rotation": -59.99999999999999
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Paths2025_Blue",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
