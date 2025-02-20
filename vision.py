@@ -40,13 +40,13 @@ class Vision:
             robot_pose = camEstPose.estimatedPose.toPose2d()
 
             tag_distances = [
-                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialID()).toPose2d())
+                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                 for targ in bestPipeline.getTargets()
                 if targ is not None
             ]
 
             distance_to_closest_tag = None
-            if len(distance_to_closest_tag) > 0:
+            if len(tag_distances) > 0:
                 distance_to_closest_tag = min(tag_distances)
 
             std_dev = self.distanceToStdDev(distance_to_closest_tag)
