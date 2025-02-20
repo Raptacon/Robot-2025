@@ -16,7 +16,7 @@ from wpimath.trajectory import TrapezoidProfile
 
 
 class PIDToPose(Command):
-    def __int__(
+    def __init__(
         self,
         drivetrain: SwerveDrivetrain,
         target_pose: Callable[[], Pose2d] | None,

@@ -6,6 +6,7 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
+from commands.auto.pid_to_pose import PIDToPose
 from commands.default_swerve_drive import DefaultDrive
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
@@ -53,7 +54,7 @@ class RobotSwerve:
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
-        disabled_coast_trigger = Trigger(is_disabled).debounce(3).onTrue(
+        disabled_coast_trigger = Trigger(is_disabled()).debounce(3).onTrue(
             commands2.cmd.runOnce(
                 self.drivetrain.set_motor_stop_modes(
                     to_drive=True, to_break=True, all_motor_override=True, burn_flash=True
@@ -102,7 +103,7 @@ class RobotSwerve:
 
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).toggleOnTrue(
-                auto_drive_commands.pid_to_pose.PIDToPose(
+                PIDToPose(
                     self.drivetrain, lambda: reef_position_lookup.get(
                         (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
                         None
@@ -118,7 +119,6 @@ class RobotSwerve:
                 )
             )
         }
-
 
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
@@ -146,10 +146,6 @@ class RobotSwerve:
     def teleopPeriodic(self):
         if self.driver_controller.getLeftBumperButtonPressed():
             commands2.CommandScheduler.getInstance().cancelAll()
-
-        self.teleop_auto_triggers["left_reef_align"].onTrue(
-            pathpl
-        )
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
