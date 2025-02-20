@@ -14,7 +14,7 @@ class Vision:
     def __init__(self, driveTrain: SwerveDrivetrain, cam_name : str = "Sparky_Arducam_1"):
         self.cam = PhotonCamera(cam_name)
         self.drive = driveTrain
-        self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025Reefscape)
+        self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeWelded)
         self.camPoseEst = PhotonPoseEstimator(
             self.field_layout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
