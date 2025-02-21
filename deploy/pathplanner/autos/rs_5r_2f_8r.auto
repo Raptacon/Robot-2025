@@ -13,7 +13,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Raise_Place"
+            "name": "spit_piece"
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Coral_Intake"
+            "name": "intake_piece"
           }
         },
         {
@@ -37,7 +37,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Raise_Place"
+            "name": "spit_piece"
           }
         }
       ]
