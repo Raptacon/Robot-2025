@@ -23,14 +23,12 @@ class SwerveDrivetrain(Subsystem):
     """
     Virtual representation of, and interface for, a full swerve drive
     """
-    def __init__(
-        self
-        ):
+    def __init__(self):
         """
         Creates a new swerve drivetrain
 
         Args:
-            starting_pose: the poosition and orientation of the robot on the field
+            starting_pose: the position and orientation of the robot on the field
                 at the moment the robot is first enabled
 
         Returns:
@@ -82,21 +80,15 @@ class SwerveDrivetrain(Subsystem):
         self.gyroscope = navx.AHRS.create_spi()
         self.heading_offset = Rotation3d()
         self.factory_default_gyro()
-        if self.flip_to_red_alliance():
-            self.starting_pose = Pose2d(Translation2d(*OperatorRobotConfig.red_default_start_pose[0:2]),
-            Rotation2d.fromDegrees(OperatorRobotConfig.red_default_start_pose[2]))
-        else:
-            self.starting_pose = Pose2d(Translation2d(*OperatorRobotConfig.blue_default_start_pose[0:2]),
-            Rotation2d.fromDegrees(OperatorRobotConfig.blue_default_start_pose[2]))
 
         self.pose_estimator = SwerveDrive4PoseEstimator(
             self.drive_kinematics,
             self.current_yaw(),
             self.current_module_positions(),
-            self.starting_pose
+            self.get_default_starting_pose()
         )
 
-        self.reset_heading(reset_pose_estimator=False)
+        self.reset_heading()
 
         # Path Planner setup
         path_planner_config = RobotConfig.fromGUISettings()
@@ -143,7 +135,7 @@ class SwerveDrivetrain(Subsystem):
         """
         self.heading_offset = self.gyroscope.getRotation3d()
 
-    def reset_heading(self, reset_pose_estimator: bool = True) -> None:
+    def reset_heading(self) -> None:
         """
         Reset the heading such that the robot's current gyroscope reading will correspond to 0 in any
         heading and yaw readings after this method is called. Odometry must also be reset with a rotation
@@ -153,8 +145,7 @@ class SwerveDrivetrain(Subsystem):
             None: object's heading offset is updated in-place and pose estimator is reset
         """
         self.heading_offset = self.raw_current_heading()
-        if reset_pose_estimator:
-            self.reset_pose_estimator(Pose2d(self.current_pose().translation(), Rotation2d()))
+        self.reset_pose_estimator(Pose2d(self.current_pose().translation(), Rotation2d()))
 
     def drive(
         self,
@@ -287,6 +278,25 @@ class SwerveDrivetrain(Subsystem):
         """
         self.pose_estimator.resetPosition(self.current_yaw(), self.current_module_positions(), current_pose)
         self.stop_driving(apply_to_modules=False)
+
+    def get_default_starting_pose(self) -> Pose2d:
+        """
+        Get the alliance-specific default starting pose for the drivetrain. This should be called
+        in autonomous init if not using a routine that updates the starting odometry pose.
+        If relying on this, the driver should quickly read an AprilTag using the camera once the match starts.
+
+        Returns:
+            default_starting_pose: the assumed starting pose given no other information
+        """
+        default_starting_pose = OperatorRobotConfig.blue_default_start_pose
+        if self.flip_to_red_alliance():
+            default_starting_pose = OperatorRobotConfig.red_default_start_pose
+
+        default_starting_pose = Pose2d(
+            Translation2d(*default_starting_pose[0:2]), Rotation2d.fromDegrees(default_starting_pose[2])
+        )
+
+        return default_starting_pose
 
     def stop_driving(self, apply_to_modules: bool = True) -> None:
         """
