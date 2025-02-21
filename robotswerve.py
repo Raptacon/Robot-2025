@@ -102,25 +102,6 @@ class RobotSwerve:
         )
 
         self.teleop_auto_triggers = {
-            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).toggleOnTrue(
-                PIDToPose(
-                    self.drivetrain, lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                        None
-                    )
-                )
-            ),
-            "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).toggleOnTrue(
-                PIDToPose(
-                    self.drivetrain, lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                        None
-                    )
-                )
-            )
-        }
-
-        self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
                 PIDToPose(
                     self.drivetrain, lambda: reef_position_lookup.get(
@@ -132,15 +113,11 @@ class RobotSwerve:
             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
                 PIDToPose(
                     self.drivetrain, lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
                         None
                     )
                 )
             ),
-            # "left_reef_align": Trigger(self.driver_controller.getXButtonPressed),
-            # "right_reef_align": Trigger(self.driver_controller.getBButtonPressed),
-            # "left_reef_align": Trigger(self.driver_controller.getXButtonPressed),
-            # "right_reef_align": Trigger(self.driver_controller.getBButtonPressed),
         }
 
     def teleopPeriodic(self):

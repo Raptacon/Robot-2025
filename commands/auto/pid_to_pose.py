@@ -53,13 +53,14 @@ class PIDToPose(Command):
         """
         if self.target_pose:
             current_pose = self.drivetrain.current_pose()
+            
             x_pose_error = self.target_pose().X() - current_pose.X()
             y_pose_error = self.target_pose().Y() - current_pose.Y()
-            rotation_error = (self.target_pose().rotation() - self.current_pose.rotation()).degrees()
+            rotation_error = (self.target_pose().rotation() - current_pose.rotation()).degrees()
 
-            x_output = applyDeadband(self.x_translation_pid.calculate(x_pose_error, 0), 0.04, inf)
-            y_output = applyDeadband(self.y_translation_pid.calculate(y_pose_error, 0), 0.04, inf)
-            rotation_output = applyDeadband(self.rotation_pid.calculate(rotation_error, 0), 0.04, inf)
+            x_output = -applyDeadband(self.x_translation_pid.calculate(x_pose_error, 0), 0.04, inf)
+            y_output = -applyDeadband(self.y_translation_pid.calculate(y_pose_error, 0), 0.04, inf)
+            rotation_output = -applyDeadband(self.rotation_pid.calculate(rotation_error, 0), 0.04, inf)
 
             drive_speed = ChassisSpeeds.fromFieldRelativeSpeeds(x_output, y_output, rotation_output, current_pose.rotation())
             self.drivetrain.drive(drive_speed.vx, drive_speed.vy, drive_speed.omega, False)
