@@ -18,7 +18,7 @@ class OperatorRobotConfig:
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
     # First three elements are PID, last two elements are trapezoidal profile
-    # Translation trapezoidal profile units are mps and mps^2, rotation are dps and dps^2 
+    # Translation trapezoidal profile units are mps and mps^2, rotation are dps and dps^2
     pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 3, 1.5)
     pid_to_pose_rotation_pid_profile: Tuple[float] = (1.0, 0.0, 0.0, 360, 360)
     # Tolerance of x, y, and omega position errors within which robot is at target pose

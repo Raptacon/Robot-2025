@@ -54,7 +54,7 @@ class RobotSwerve:
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
-        disabled_coast_trigger = Trigger(is_disabled()).debounce(3).onTrue(
+        Trigger(is_disabled()).debounce(3).onTrue(
             commands2.cmd.runOnce(
                 self.drivetrain.set_motor_stop_modes(
                     to_drive=True, to_break=True, all_motor_override=True, burn_flash=True
