@@ -25,6 +25,26 @@ class PIDToPose(Command):
         setpoint_tolerances: tuple = OperatorRobotConfig.pid_to_pose_setpoint_tolerances
     ) -> None:
         """
+        Align to a target pose using PID. In this control system, the objective function is the
+        absolute error between the current and goal x, y, and omega coordinates, separately. This
+        objective function is minimized until all errors are within a given tolerance. The decision
+        variables of the control system are the translational and rotational velocities of the
+        drivetrain. The contraints are a trapezoidal motion profiles for translational and rotational
+        motion, where slopes represent max acceleration and the plateaus represent max velocity.
+
+        Note that the robot will move in a straight line from its current position to the target
+        pose and will rotate to the target orientation as quickly as possible.
+
+        Args:
+            drivetrain: the drivetrain subsystem that effects movement from current pose to target pose
+            target_pose: the desired always-blue position and orientation of the robot
+            translation_pid_config: the PID and trapezoidal profile constants for translational motion
+            rotation_pid_config: the PID and trapezoidal profile constants for rotational motion
+            setpoint_tolerances: the thresholds for x, y, and omega, respectively, below which absolute
+                positional error is low enough for the robot to be considered arrived at the target pose
+
+        Returns:
+            None: class initialization executed upon construction
         """
         super().__init__()
 
@@ -50,6 +70,12 @@ class PIDToPose(Command):
 
     def execute(self) -> None:
         """
+        If a target pose is available, run the profiled PID control system to move from the
+        current pose to the target pose.
+
+        Returns:
+            None: translational and rotational velocities are passed into the drivetrain's drive
+                method, which runs the motors accordingly
         """
         if self.target_pose:
             current_pose = self.drivetrain.current_pose()
@@ -67,11 +93,23 @@ class PIDToPose(Command):
 
     def end(self, interrupted: bool) -> None:
         """
+        When this command is over, have the robot stop driving (set all velocities to zero).
+
+        Args:
+            interrupted: whether the command was terminated by way of interruption
+
+        Returns:
+            None: drivetrain subsystem will apply zeroed velocities to motors
         """
         self.drivetrain.stop_driving(apply_to_modules=True)
 
-    def isFinished(self) -> None:
+    def isFinished(self) -> bool:
         """
+        The command is considered complete when the absolute error of each coodinate is within tolerance.
+        If there is no target pose for the robot to navigate to, this command instantly ends.
+
+        Returns:
+            True if the command is complete according to the definition above, False otherwise.
         """
         at_setpoints = self.x_translation_pid.atSetpoint() and self.y_translation_pid.atSetpoint() and self.rotation_pid.atSetpoint()
         no_target_pose = True if not self.target_pose else False
