@@ -51,9 +51,9 @@ class Vision:
 
             std_dev = self.distanceToStdDev(distance_to_closest_tag)
 
-            self.drive.add_vision_pose_estimate(
-                camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, std_dev
-            )
+            # self.drive.add_vision_pose_estimate(
+            #     camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, std_dev
+            # )
 
     def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
         targetID = target.getFiducialId()

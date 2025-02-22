@@ -77,7 +77,7 @@ class RobotSwerve:
         )
 
         # Vision setup
-        self.vision = Vision(self.drivetrain)
+        #self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -96,8 +96,8 @@ class RobotSwerve:
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDataCollections()
 
-        self.vision.getCamEstimate()
-        self.vision.showTargetData()
+        #self.vision.getCamEstimate()
+        #self.vision.showTargetData()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
