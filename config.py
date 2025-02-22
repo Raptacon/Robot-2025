@@ -27,10 +27,10 @@ class OperatorRobotConfig:
     # First three elements are PID, last two elements are trapezoidal profile
     # Translation trapezoidal profile units are mps and mps^2, rotation are dps and dps^2
     pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 3, 1.5)
-    pid_to_pose_rotation_pid_profile: Tuple[float] = (1.0, 0.0, 0.0, 360, 360)
+    pid_to_pose_rotation_pid_profile: Tuple[float] = (0.5, 0.0, 0.0, 360, 360)
     # Tolerance of x, y, and omega position errors within which robot is at target pose
     # x error is in meters, y error is in meters, omega error is in degrees
-    pid_to_pose_setpoint_tolerances: Tuple[float] = (0.05, 0.05, 0.5)
+    pid_to_pose_setpoint_tolerances: Tuple[float] = (0.25, 0.25, 15)
 
     # Robot motion constraints when running PathPlanner during teleop.
     # Values to give are: max translation velocity (mps), max translation acceleration (mps^2),
