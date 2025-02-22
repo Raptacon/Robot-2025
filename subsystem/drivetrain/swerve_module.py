@@ -11,6 +11,7 @@ import phoenix6
 import rev
 from wpimath.kinematics import SwerveModulePosition, SwerveModuleState
 from wpimath.geometry import Rotation2d, Translation2d
+from wpilib import SmartDashboard
 
 """
 This is a basic swerve drive module for a robot running

@@ -13,11 +13,13 @@ class OperatorRobotConfig:
     blue_default_start_pose: Tuple[float] = (7.7, 6.0, 180.0)
     # Give in front-left, front-right, back-left, back-right order
     # ids for the drive controllers
-    swerve_module_channels: Tuple[int] = (50, 53, 56, 59)
+    swerve_module_channels: Tuple[int] = (59, 56, 53, 50)
     # Give in front-left, front-right, back-left, back-right order
     # starting rotational position for the absolute encoders
     swerve_abs_encoder_calibrations: Tuple[float] = (
-        262.96884 / 360.0, 185.0976 / 360.0, 216.91404 / 360.0, 252.24624 / 360.0
+        #0, 0, 0, 0
+        72.24624 / 360.0, 36.91404 / 360.0, 5.0976 / 360.0, 82.96884 / 360.0
+        #252.24624 / 360.0, 216.91404 / 360.0, 185.0976 / 360.0,  262.96884 / 360.0
     )
     swerve_steer_pid: Tuple[float] = (0.01, 0, 0)
     swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.23)
