@@ -2,13 +2,10 @@
 from math import pi
 from typing import Tuple
 
-<<<<<<< HEAD
-=======
 # Third-party imports
 from wpimath.geometry import Rotation2d
 
 
->>>>>>> feat/92_jd_auto_align
 class OperatorRobotConfig:
     # Default start position for red alliance
     red_default_start_pose: Tuple[float] = (10.0, 1.5, 0.0)
