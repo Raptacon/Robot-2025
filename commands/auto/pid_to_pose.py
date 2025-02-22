@@ -82,7 +82,7 @@ class PIDToPose(Command):
             
             x_pose_error = self.target_pose().X() - current_pose.X()
             y_pose_error = self.target_pose().Y() - current_pose.Y()
-            rotation_error = (self.target_pose().rotation() - current_pose.rotation()).degrees()
+            rotation_error = (self.target_pose().rotation() - current_pose.rotation()).radians()
 
             x_output = -applyDeadband(self.x_translation_pid.calculate(x_pose_error, 0), 0.04, inf)
             y_output = -applyDeadband(self.y_translation_pid.calculate(y_pose_error, 0), 0.04, inf)
