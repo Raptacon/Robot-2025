@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.274833776595746,
-        "y": 6.613164893617021
+        "x": 6.1325284090909085,
+        "y": 7.380440340909091
       },
       "isLocked": false,
       "linkedName": "Blue_Start"
@@ -20,8 +20,8 @@
         "y": 5.376
       },
       "prevControl": {
-        "x": 5.971123670212767,
-        "y": 6.2513989361702125
+        "x": 5.514289772727272,
+        "y": 6.243678977272728
       },
       "nextControl": null,
       "isLocked": false,
@@ -35,7 +35,7 @@
   "globalConstraints": {
     "maxVelocity": 0.65,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
+    "maxAngularVelocity": 100.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
@@ -45,7 +45,7 @@
     "rotation": -119.99999999999999
   },
   "reversed": false,
-  "folder": "Paths2025_Blue",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

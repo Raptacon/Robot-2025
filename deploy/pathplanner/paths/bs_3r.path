@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Paths2025_Blue",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

@@ -8,8 +8,8 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.428247471853718,
-        "y": 1.2248095545151032
+        "x": 6.0328125,
+        "y": 0.6695596590909088
       },
       "isLocked": false,
       "linkedName": "rs"
@@ -20,8 +20,8 @@
         "y": 2.664
       },
       "prevControl": {
-        "x": 5.641582399806655,
-        "y": 2.125252459574446
+        "x": 5.3048863636363635,
+        "y": 2.045639204545454
       },
       "nextControl": null,
       "isLocked": false,
@@ -35,7 +35,7 @@
   "globalConstraints": {
     "maxVelocity": 0.65,
     "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
+    "maxAngularVelocity": 100.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
     "unlimited": false
@@ -45,7 +45,7 @@
     "rotation": 119.99999999999999
   },
   "reversed": false,
-  "folder": "Paths2025_Blue",
+  "folder": null,
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
