@@ -12,7 +12,7 @@ from commands2 import Subsystem
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.config import ModuleConfig, RobotConfig, PIDConstants
 from pathplannerlib.controller import PPHolonomicDriveController
-from wpilib import DriverStation
+from wpilib import DriverStation, SmartDashboard
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Pose2d, Rotation2d, Rotation3d, Translation2d
 from wpimath.kinematics import ChassisSpeeds, SwerveDrive4Kinematics, SwerveModulePosition
@@ -252,6 +252,10 @@ class SwerveDrivetrain(Subsystem):
             None: pose estimator is updated in-place
         """
         self.pose_estimator.update(self.current_yaw(), self.current_module_positions())
+        SmartDashboard.putNumber("Drivetrain Raw IMU Yaw", Rotation2d(self.current_heading().Z()).degrees())
+        SmartDashboard.putNumber("Odometry: X Pose", self.current_pose().X())
+        SmartDashboard.putNumber("Odometry: Y Pose", self.current_pose().Y())
+        SmartDashboard.putNumber("Odometry: Angle Pose", self.current_pose().rotation().degrees())
 
     def add_vision_pose_estimate(self, pose: Pose2d, timestamp: float, stdDevs: Tuple[float]) -> None:
         """
