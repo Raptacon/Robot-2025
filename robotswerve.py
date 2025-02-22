@@ -8,8 +8,11 @@ import wpimath.kinematics
 
 # Internal imports
 from data.telemetry import Telemetry
+from commands.auto.pid_to_pose import PIDToPose
 from vision import Vision
 from commands.default_swerve_drive import DefaultDrive
+from lookups.utils import getCurrentReefZone
+from lookups.reef_positions import reef_position_lookup
 from commands.shortyIntake import Intake
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.sparkyIntake import SparkyIntake
@@ -32,6 +35,7 @@ class RobotSwerve:
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
         self.intake = SparkyIntake()
         self.pivot = IntakePivot()
@@ -116,6 +120,11 @@ class RobotSwerve:
         if self.auto_command:
             self.auto_command.cancel()
 
+        self.alliance = "blue"
+        if self.drivetrain.flip_to_red_alliance():
+            self.alliance = "red"
+        self.teleop_auto_command = None
+
         self.drivetrain.setDefaultCommand(
             DefaultDrive(
                 self.drivetrain,
@@ -126,8 +135,28 @@ class RobotSwerve:
             )
         )
 
+        self.teleop_auto_triggers = {
+            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+                PIDToPose(
+                    self.drivetrain, lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                        None
+                    )
+                )
+            ),
+            "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+                PIDToPose(
+                    self.drivetrain, lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                        None
+                    )
+                )
+            ),
+        }
+
     def teleopPeriodic(self):
-        pass
+        if self.driver_controller.getLeftBumperButtonPressed():
+            commands2.CommandScheduler.getInstance().cancelAll()
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()

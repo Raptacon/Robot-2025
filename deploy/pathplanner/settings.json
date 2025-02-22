@@ -11,7 +11,8 @@
     "swerve_motion",
     "Paths2025_Blue",
     "Paths2025_Red",
-    "Autos2025_Blue"
+    "Autos2025_Blue",
+    "reef_stem_paths"
   ],
   "defaultMaxVel": 0.65,
   "defaultMaxAccel": 3.0,
