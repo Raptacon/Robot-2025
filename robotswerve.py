@@ -102,6 +102,7 @@ class RobotSwerve:
 
     def teleopPeriodic(self):
         self.keyPressed = self.table.getNumber("pressedKey", -1)
+        self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
 
         self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
                      1: commands2.cmd.print_("Key 1 pressed"),
@@ -119,10 +120,8 @@ class RobotSwerve:
                      13: commands2.cmd.print_("Key 13 pressed"),
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
-        
-        # print(self.keys[self.keyPressed])
 
-        # print(self.keyPressed)
+        wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
