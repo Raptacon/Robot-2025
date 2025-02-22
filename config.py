@@ -22,8 +22,8 @@ class OperatorRobotConfig:
         #252.24624 / 360.0, 216.91404 / 360.0, 185.0976 / 360.0,  262.96884 / 360.0
     )
     swerve_steer_pid: Tuple[float] = (0.01, 0, 0)
-    swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.23)
-    pathplanner_translation_pid: Tuple[float] = (10.0, 0.0, 0.0)
+    swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.10)
+    pathplanner_translation_pid: Tuple[float] = (5.0, 0.0, 0.0)
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
     #TODO Get the actual values from our robot
@@ -33,7 +33,7 @@ class OperatorRobotConfig:
     vision_std_dev_scale_factor: float = 1
     # First three elements are PID, last two elements are trapezoidal profile
     # Translation trapezoidal profile units are mps and mps^2, rotation are rps and rps^2
-    pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 3, 1.5)
+    pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 2, 1.5)
     pid_to_pose_rotation_pid_profile: Tuple[float] = (
         0.5, 0.0, 0.0, Rotation2d.fromDegrees(360).radians(), Rotation2d.fromDegrees(360).radians()
     )
