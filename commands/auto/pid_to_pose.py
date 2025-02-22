@@ -1,5 +1,5 @@
 # Native imports
-from math import inf
+from math import inf, pi
 from typing import Callable
 
 # Internal imports
@@ -60,7 +60,7 @@ class PIDToPose(Command):
             *rotation_pid_config[0:3], TrapezoidProfile.Constraints(*rotation_pid_config[3:5])
         )
 
-        self.rotation_pid.enableContinuousInput(-180, 180)
+        self.rotation_pid.enableContinuousInput(-pi, pi)
 
         self.x_translation_pid.setTolerance(setpoint_tolerances[0])
         self.y_translation_pid.setTolerance(setpoint_tolerances[1])

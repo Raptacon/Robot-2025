@@ -1,5 +1,9 @@
 # Native imports
+from math import pi
 from typing import Tuple
+
+# Third-party imports
+from wpimath.geometry import Rotation2d
 
 
 class OperatorRobotConfig:
@@ -18,12 +22,14 @@ class OperatorRobotConfig:
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
     # First three elements are PID, last two elements are trapezoidal profile
-    # Translation trapezoidal profile units are mps and mps^2, rotation are dps and dps^2
+    # Translation trapezoidal profile units are mps and mps^2, rotation are rps and rps^2
     pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 3, 1.5)
-    pid_to_pose_rotation_pid_profile: Tuple[float] = (1.0, 0.0, 0.0, 360, 360)
+    pid_to_pose_rotation_pid_profile: Tuple[float] = (
+        1.0, 0.0, 0.0, Rotation2d.fromDegrees(360).radians(), Rotation2d.fromDegrees(360).radians()
+    )
     # Tolerance of x, y, and omega position errors within which robot is at target pose
-    # x error is in meters, y error is in meters, omega error is in degrees
-    pid_to_pose_setpoint_tolerances: Tuple[float] = (0.05, 0.05, 0.5)
+    # x error is in meters, y error is in meters, omega error is in radians
+    pid_to_pose_setpoint_tolerances: Tuple[float] = (0.25, 0.25, Rotation2d.fromDegrees(10).radians())
 
     # Robot motion constraints when running PathPlanner during teleop.
     # Values to give are: max translation velocity (mps), max translation acceleration (mps^2),
