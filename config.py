@@ -18,6 +18,6 @@ class OperatorRobotConfig:
 
     #TODO Get the actual values from our robot
     robot_Cam_Translation: Tuple[float] = (0.5, 0.0, 0.5)
-    robot_Cam_Rotation_Degress: Tuple[float] = (0.0, -30.0, 0.0)
+    robot_Cam_Rotation_Degress: Tuple[float] = (0.0, 30.0, 0.0)
     vision_std_dev_basis: float = 1.1
     vision_std_dev_scale_factor: float = 1
