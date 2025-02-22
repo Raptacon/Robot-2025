@@ -13,7 +13,7 @@ from wpimath.controller import ProfiledPIDController
 from wpimath.geometry import Pose2d
 from wpimath.kinematics import ChassisSpeeds
 from wpimath.trajectory import TrapezoidProfile
-
+from wpilib import SmartDashboard
 
 class PIDToPose(Command):
     def __init__(
@@ -78,6 +78,9 @@ class PIDToPose(Command):
                 method, which runs the motors accordingly
         """
         if self.target_pose:
+            SmartDashboard.putNumber("Target X:", self.target_pose().X())
+            SmartDashboard.putNumber("Target Y:", self.target_pose().Y())
+            SmartDashboard.putNumber("Target H:", self.target_pose().rotation().degrees())
             current_pose = self.drivetrain.current_pose()
             
             x_pose_error = self.target_pose().X() - current_pose.X()
