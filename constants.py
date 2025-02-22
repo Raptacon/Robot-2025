@@ -73,7 +73,7 @@ class SwerveModuleMk4iL1Consts(SwerveModuleMk4iConsts):
     wheelDiameter: float = 0.10033 # in meters
     driveGearRatio: float = 8.14
     steerGearRatio: float = 150 / 7
-    
+
     # position: meters per rotation
     # velocity: meters per second
     drivePositionConversionFactor : float = (math.pi * wheelDiameter) / (driveGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation)
@@ -102,3 +102,16 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
     steerVelocityConversionFactor: float = steerPositionConversionFactor / 60.0
 
     moduleType: str = "Mk4i_L2"
+
+
+class DiverCarlElevatorConsts():
+    kMotorPrimaryCanId = 10
+    kMotorFollowerCanId = 11
+    kEncoderPins = (9, 8)
+    kMinHeightM = 0
+    kMaxHeightM = 1.5
+    kMaxVelMPS = 0.75
+    kMaxAccelMPSS = 0.2
+    kMechDeltaHeightM = 0.3048 # 12 inches to meters - approx height
+    kMotorPrimaryInverted = False
+    kPid = (1.3, 0, 0.7)
