@@ -8,6 +8,7 @@ coverage
 wheel
 numpy
 robotpy[all]==2025.*
+photonlibpy
 pyntcore==2025.*
 
 
