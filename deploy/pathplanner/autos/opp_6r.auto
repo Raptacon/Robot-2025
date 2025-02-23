@@ -15,6 +15,12 @@
           "data": {
             "name": "spit_piece"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "6r_2f"
+          }
         }
       ]
     }
