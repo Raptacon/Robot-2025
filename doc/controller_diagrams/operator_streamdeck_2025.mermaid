@@ -1,0 +1,45 @@
+---
+title: Operator (StreamDeck)
+---
+graph TB
+    subgraph c5["Ejection"]
+        Net["Net
+             Algae"]:::clsPress
+        EjectAlg["Eject
+                  Algae"]:::clsPress
+        EjectCoral["Eject
+                    Coral"]:::clsPress
+    end
+    subgraph c4["Intake"]
+        r1c4["Not
+              Assigned"]:::na
+        IntakeAlg["Algae
+                   Intake"]:::clsPress
+        IntakeGrd["Coral
+                   Ground Intake"]:::clsPress
+    end
+    subgraph c3["Reef (Other)"]
+        RmAlgU["Algae
+                (Upper)"]:::clsPress
+        RmAlgL["Algae
+                (Lower)"]:::clsPress
+        Trough["Align
+                Trough"]:::clsPress
+    end
+    subgraph c1c2["Reef (Pegs)"]
+        LL4["L4\n(Left)"]:::clsPress~~~RL4["L4\n(Right)"]:::clsPress
+        LL3["L3\n(Left)"]:::clsPress~~~RL3["L3\n(Right)"]:::clsPress
+        LL2["L2\n(Left)"]:::clsPress~~~RL2["L2\n(Right)"]:::clsPress
+    end
+    subgraph legend
+        press["Press to trigger event"]:::clsPress
+        toggle["Press to toggle state"]:::clsToggle
+        hold["Hold for secondary state"]:::clsHold
+    end
+classDef hidden display: none;
+classDef na color: #a88
+classDef note fill: #0000, stroke-dasharray: 5 5
+classDef clsHold fill: #ea0
+classDef clsToggle fill: #a0e, color: white
+classDef clsPress fill: #0ea
+classDef nobg fill: transparent

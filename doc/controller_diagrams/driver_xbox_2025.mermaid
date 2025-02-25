@@ -1,0 +1,81 @@
+---
+title: Driver (Xbox)
+---
+graph TB
+    LT[/Unused\]
+    NullTrigger:::hidden
+    RT[/Chute\]:::clsPress
+
+    LB("Turbo
+        Mode"):::clsHold
+    NullBumper:::hidden
+    RB("Robot
+        Relative"):::clsHold
+
+    LJs(((Translate)))
+    subgraph controls[ ]
+        Start("N/A"):::na~~~Select("N/A"):::na
+    end
+    controls:::hidden
+    subgraph buttons
+        x("Not 
+            Assigned"):::na
+        y("Not 
+            Assigned"):::na
+        a("Not 
+            Assigned"):::na
+        b("Reset 
+            Orientation"):::clsPress
+
+        x~~~y~~~b
+        x~~~a~~~b
+    end
+    buttons:::nobg
+    
+
+    LNoteLayer[/"Translate maps the
+                angle of the joystick
+                to the angle of Robot
+                Translation"/]:::note
+    MNoteLayer:::hidden
+    RNoteLayer[/"Rotate
+                -x: counter-clockwise
+                +x: clockwise"/]:::note
+
+    subgraph dpad[ ]
+        dL{{"Not 
+            Assigned"}}:::na
+        dU{{"Climb
+            Cage"}}:::clsPress
+        dD{{"Not 
+            Assigned"}}:::na
+        dR{{"Not 
+            Assigned"}}:::na
+
+        dL~~~dU~~~dR
+        %% dL---dR
+    
+        dL~~~dD~~~dR
+    end
+    dpad:::nobg
+    NullBottom:::hidden
+    RJs(((Rotate)))
+
+    LT---LB~~~LJs-.-LNoteLayer~~~dpad
+    NullTrigger~~~NullBumper
+        NullBumper~~~controls~~~MNoteLayer
+        MNoteLayer~~~NullBottom
+    RT---RB~~~buttons~~~RNoteLayer-.-RJs
+
+    subgraph legend
+        press["Press to trigger event"]:::clsPress
+        toggle["Press to toggle state"]:::clsToggle
+        hold["Hold for secondary state"]:::clsHold
+    end
+classDef hidden display: none;
+classDef na color: #a88
+classDef note fill: #0000, stroke-dasharray: 5 5
+classDef clsHold fill: #ea0
+classDef clsToggle fill: #a0e, color: white
+classDef clsPress fill: #0ea
+classDef nobg fill: transparent
