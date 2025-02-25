@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "starter_path"
+            "pathName": "rs_forward"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": null,
+  "folder": "Autos2025_Blue",
   "choreoAuto": false
 }
