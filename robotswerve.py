@@ -80,6 +80,8 @@ class RobotSwerve:
         self.auto_command = self.auto_chooser.getSelected()
         if self.auto_command:
             self.auto_command.schedule()
+        else:
+            self.drivetrain.reset_pose_estimator(self.drivetrain.get_default_starting_pose())
 
     def autonomousPeriodic(self):
         pass
