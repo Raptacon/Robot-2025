@@ -7,19 +7,19 @@ assignees: ''
 
 ---
 
-### Description
-
-[Description of the feature REMOVE THIS WHEN DONE]
-
-**Is your feature request related to a problem? Please describe.**
-[A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] REMOVE THIS WHEN DONE]
-
-**Describe the solution you'd like**
-[A clear and concise description of what you want to happen. REMOVE THIS WHEN DONE]
-
-**Describe alternatives you've considered**
-[A clear and concise description of any alternative solutions or features you've considered.REMOVE THIS WHEN DONE]
+### Description  
+<!-- Description of the feature -->  
 
 
-**Additional context**
-[Add any other context or screenshots about the feature request here. REMOVE THIS WHEN DONE]
+#### Is your feature request related to a problem? Please describe.
+<!-- A clear and concise description of what the problem is. Ex. I'm always frustrated when [...] -->
+
+#### Describe the solution you'd like
+<!-- A clear and concise description of what you want to happen. -->
+
+#### Describe alternatives you've considered
+<!-- A clear and concise description of any alternative solutions or features you've considered. -->
+
+
+#### Additional context
+<!-- Add any other context or screenshots about the feature request here. -->
