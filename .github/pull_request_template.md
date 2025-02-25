@@ -11,25 +11,29 @@
 - [ ] All new and existing tests passed.
 
 ## Associated Issue(s)
-Issue: <#X or issue-XX > [REMOVE THIS WHEN DONE Describe the issue you're working on here so it ties to the issue and Kanban (IMPORTANT FOR TRACKING). Make sure to create an issue if one doesn't already exist! ]
+<!-- Describe the issue you're working on here so it ties to the issue and Kanban (IMPORTANT FOR TRACKING). -->
+<!-- Make sure to create an issue if one doesn't already exist! -->
+<!-- If this pull request resolves the issue entirely, use the format "Issue: closes #__" -->
+<!-- If this pull request resolves only part of the issue, or is only related, use the format "Issue: #__" -->
+Issue: <#X or issue-XX > 
 
 ## Steps to Test
-[ Describe how to run your AUTOMATED TESTS and any manual tests that may be need to prove your fix/feature REMOVE THIS WHEN DONE]
+<!-- Describe how to run your AUTOMATED TESTS and any manual tests that may be need to prove your fix/feature -->
 1. [First Step]
 2. [Second Step]
 3. [and so on...]
 
 ## Changelog
 
-[ A brief description of the problem statement. REMOVE THIS WHEN DONE ]
+<!-- A brief description of the problem statement. -->
 
 ## What?
 
-[ Explain the technical implementation of what you're doing. REMOVE THIS WHEN DONE ]
+<!-- Explain the technical implementation of what you're doing. -->
 
 ## Why?
 
-[ Explain why you're making this change and what benefits from it. REMOVE THIS WHEN DONE ]
+<!-- Explain why you're making this change and what benefits from it. -->
 
 
 
