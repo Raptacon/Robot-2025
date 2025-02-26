@@ -21,6 +21,7 @@ from subsystem.sparkyIntakePivotController import pivotController
 
 # Third-party imports
 import commands2
+import ntcore
 import wpilib
 import wpimath
 from commands2.button import Trigger
@@ -33,6 +34,10 @@ class RobotSwerve:
     """
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
+        # networktables setup
+        self.inst = ntcore.NetworkTableInstance.getDefault()
+        self.table = self.inst.getTable("Stream_Deck")
+
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
@@ -43,6 +48,7 @@ class RobotSwerve:
         self.intakePivotController.setIntakeRotationSubsystem(self.pivot)
 
         # HID setup
+        wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
 
@@ -94,7 +100,7 @@ class RobotSwerve:
         #print(self.drivetrain.getCurrentCommand())
         #print("---")
         if self.enableTelemetry and self.telemetry:
-            self.telemetry.runDataCollections()
+            self.telemetry.runDefaultDataCollections()
 
         #self.vision.getCamEstimate()
         #self.vision.showTargetData()
@@ -117,6 +123,24 @@ class RobotSwerve:
         pass
 
     def teleopInit(self):
+        self.table.putNumber("pressedKey", -1)
+        self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
+                     1: commands2.cmd.print_("Key 1 pressed"),
+                     2: commands2.cmd.print_("Key 2 pressed"),
+                     3: commands2.cmd.print_("Key 3 pressed"),
+                     4: commands2.cmd.print_("Key 4 pressed"),
+                     5: commands2.cmd.print_("Key 5 pressed"),
+                     6: commands2.cmd.print_("Key 6 pressed"),
+                     7: commands2.cmd.print_("Key 7 pressed"),
+                     8: commands2.cmd.print_("Key 8 pressed"),
+                     9: commands2.cmd.print_("Key 9 pressed"),
+                     10: commands2.cmd.print_("Key 10 pressed"),
+                     11: commands2.cmd.print_("Key 11 pressed"),
+                     12: commands2.cmd.print_("Key 12 pressed"),
+                     13: commands2.cmd.print_("Key 13 pressed"),
+                     14: commands2.cmd.print_("Key 14 pressed"),
+                     -1: commands2.cmd.print_("No key pressed"),}
+
         if self.auto_command:
             self.auto_command.cancel()
 
@@ -157,6 +181,10 @@ class RobotSwerve:
     def teleopPeriodic(self):
         if self.driver_controller.getLeftBumperButtonPressed():
             commands2.CommandScheduler.getInstance().cancelAll()
+        self.keyPressed = self.table.getNumber("pressedKey", -1)
+        self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
+
+        wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()

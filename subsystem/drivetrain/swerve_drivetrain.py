@@ -25,11 +25,7 @@ class SwerveDrivetrain(Subsystem):
     """
     def __init__(self):
         """
-        Creates a new swerve drivetrain
-
-        Args:
-            starting_pose: the position and orientation of the robot on the field
-                at the moment the robot is first enabled
+        Creates a new swerve drivetrain.
 
         Returns:
             None: class initialization executed upon construction

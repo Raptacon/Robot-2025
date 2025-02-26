@@ -7,9 +7,11 @@ from wpimath.geometry import Rotation2d
 
 
 class OperatorRobotConfig:
-    # Default start position for red alliance
+    # Default start position for red alliance using always-blue-alliance coordinates
+    # Coordinates are x (meters), y (meters), and rotation (degrees)
     red_default_start_pose: Tuple[float] = (10.0, 1.5, 0.0)
-    # Default start position for blue alliance
+    # Default start position for blue alliance using always-blue-alliance coordinates
+    # Coordinates are x (meters), y (meters), and rotation (degrees)
     blue_default_start_pose: Tuple[float] = (7.7, 6.0, 180.0)
     # Give in front-left, front-right, back-left, back-right order
     # ids for the drive controllers
