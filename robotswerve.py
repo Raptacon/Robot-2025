@@ -7,6 +7,7 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from commands.auto.pid_to_pose import PIDToPose
+from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
@@ -101,22 +102,37 @@ class RobotSwerve:
             )
         )
 
+        # self.teleop_auto_triggers = {
+        #     "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+        #         PIDToPose(
+        #             self.drivetrain, lambda: reef_position_lookup.get(
+        #                 (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+        #                 None
+        #             )
+        #         )
+        #     ),
+        #     "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+        #         PIDToPose(
+        #             self.drivetrain, lambda: reef_position_lookup.get(
+        #                 (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+        #                 None
+        #             )
+        #         )
+        #     ),
+        # }
+
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
-                PIDToPose(
-                    self.drivetrain, lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                        None
-                    )
-                )
+                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                    None
+                )))
             ),
             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
-                PIDToPose(
-                    self.drivetrain, lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                        None
-                    )
-                )
+                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                    None
+                )))
             ),
         }
 

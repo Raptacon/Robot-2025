@@ -1,5 +1,5 @@
 # Native imports
-from typing import Tuple
+from typing import Callable, Tuple
 
 # Internal imports
 from config import OperatorRobotConfig
@@ -14,7 +14,7 @@ from wpimath.units import degreesToRadians
 
 
 def pathplanToPose(
-    target_pose: Pose2d | None,
+    target_pose: Callable[[], Pose2d | None],
     path_constraints: Tuple[float] = OperatorRobotConfig.teleop_pathplan_constraints,
 ) -> Command:
     """
@@ -39,6 +39,7 @@ def pathplanToPose(
         If a target pose is available, the command to follow a path to that pose is returned.
             Otherwise an empty command is returned.
     """
+    target_pose = target_pose()
     if target_pose:
         path_constraints = PathConstraints(
             *path_constraints[0:2], degreesToRadians(path_constraints[2]), degreesToRadians(path_constraints[3])
