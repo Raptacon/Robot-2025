@@ -118,6 +118,7 @@ class DiverCarlElevatorConsts():
 
 class DiverCarlChisteraConsts():
     kMotorCanId = 12
+    kMotorInverted = False
     kEncoderTicksToDegrees = 360
     kEncoderZeroOffsetDegres = 0
     kMinDeg = 0
@@ -128,6 +129,7 @@ class DiverCarlChisteraConsts():
 
 class CaptainPlanetConsts():
     kMotorCanId = 14
+    kMotorInverted = False
     kReverseSensor = 0
     kForwardSensor = 1
     kDefaultpeed = 0.2
