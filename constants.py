@@ -115,3 +115,19 @@ class DiverCarlElevatorConsts():
     kMechDeltaHeightM = 0.3048 # 12 inches to meters - approx height
     kMotorPrimaryInverted = False
     kPid = (1.3, 0, 0.7)
+
+class DiverCarlChisteraConsts():
+    kMotorCanId = 12
+    kEncoderTicksToDegrees = 360
+    kEncoderZeroOffsetDegres = 0
+    kMinDeg = 0
+    kMaxDeg = 250
+    kMaxVelRPS = 6
+    kMaxAccelRPSS = 0.5
+    kPid = (1.3, 0, 0.7)
+
+class CaptainPlanetConsts():
+    kMotorCanId = 14
+    kReverseSensor = 0
+    kForwardSensor = 1
+    kDefaultpeed = 0.2
