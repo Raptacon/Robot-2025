@@ -72,8 +72,8 @@ class RobotSwerve:
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
 
         self.telop_stem_paths = {
-            start_location: PathPlannerPath.fromPathFile(f"Stem_Reef_{start_location}")
-            for start_location in [f"F{n}" for n in range(1, 7)] + [f"N{n}" for n in range(1, 7)]
+            start_location: PathPlannerPath.fromPathFile(start_location)
+            for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)] + [f"Stem_Reef_N{n}" for n in range(1, 7)]
         }
 
         # Telemetry setup
@@ -208,8 +208,8 @@ class RobotSwerve:
                         reef_position_lookup.get(
                             (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
                             {}
-                        ).get("path", None)
-                    ), None)
+                        ).get("path", {}), None)
+                    )
                 )
             ),
             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
@@ -218,8 +218,8 @@ class RobotSwerve:
                         reef_position_lookup.get(
                             (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
                             {}
-                        ).get("path", None)
-                    ), None)
+                        ).get("path", {}), None)
+                    )
                 )
             ),
         }
