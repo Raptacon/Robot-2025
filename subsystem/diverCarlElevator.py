@@ -31,7 +31,7 @@ class DiverCarlElevator(commands2.Subsystem):
 
         self._encoder = wpilib.Encoder(*c.kEncoderPins)
         # 0.1mm to meters
-        self._encoder.setDistancePerPulse(0.1 / 1000)
+        self._encoder.setDistancePerPulse(0.1 / 1000 / 3)
 
         self._constraints = wpimath.trajectory.TrapezoidProfile.Constraints(c.kMaxVelMPS, c.kMaxAccelMPSS)
         self._controller = wpimath.controller.ProfiledPIDController(*c.kPid, self._constraints, self._dt)

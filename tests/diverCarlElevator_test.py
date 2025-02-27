@@ -9,7 +9,7 @@ def test_elevatorSubsystem() -> None:
     simTime = 0.06
     elevator = DiverCarlElevator(dt=simTime)
     simPrimaryMotor = rev.SparkSim(elevator._primaryMotor, DCMotor(12, 10, 10, 10, 5000, 1))
-    simFollowerMotor = rev.SparkSim(elevator._followerMotor, DCMotor(12, 10, 10, 10, 5000, 1))
+    #simFollowerMotor = rev.SparkSim(elevator._followerMotor, DCMotor(12, 10, 10, 10, 5000, 1))
 
 
     # test some contsturction time variables
