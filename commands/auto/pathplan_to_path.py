@@ -1,23 +1,22 @@
 # Native imports
-from typing import Tuple
+from typing import Callable, Tuple
 
 # Internal imports
 from config import OperatorRobotConfig
 
 # Third-party imports
 from commands2 import Command
+from commands2.cmd import none
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath, PathConstraints
 from wpimath.units import degreesToRadians
 
 
 def pathplanToPath(
-    target_path: PathPlannerPath,
+    target_path: Callable[[], PathPlannerPath | None],
     path_constraints: Tuple[float] = OperatorRobotConfig.teleop_pathplan_constraints
 ) -> Command:
     """
-    THIS CODE IS UNTESTED, PROCEED WITH CAUTION
-
     Use PathPlanner to navigate from the robot's current position to a given predefined spath.
     PathPlanner uses the navgrid.json file in the deploy folder to determine field obstacles -
     paths generated here will avoid those obstacles. PathPlanner recommends using this approach
@@ -38,10 +37,14 @@ def pathplanToPath(
     Returns:
         pathplan_to_path: the command to follow a path that blends into the pre-defined path
     """
-    path_constraints = PathConstraints(
-        *path_constraints[0:2], degreesToRadians(path_constraints[2]), degreesToRadians(path_constraints[3])
-    )
+    target_path = target_path()
+    if target_path:
+        path_constraints = PathConstraints(
+            *path_constraints[0:2], degreesToRadians(path_constraints[2]), degreesToRadians(path_constraints[3])
+        )
 
-    pathplan_to_path = AutoBuilder.pathfindThenFollowPath(target_path, path_constraints)
+        pathplan_to_path = AutoBuilder.pathfindThenFollowPath(target_path, path_constraints)
 
-    return pathplan_to_path
+        return pathplan_to_path
+
+    return none()

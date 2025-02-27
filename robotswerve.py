@@ -11,6 +11,7 @@ from data.telemetry import Telemetry
 from commands.auto.pid_to_pose import PIDToPose
 from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
+from commands.auto.pathplan_to_path import pathplanToPath
 from commands.default_swerve_drive import DefaultDrive
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
@@ -27,6 +28,7 @@ import wpilib
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
+from pathplannerlib.path import PathPlannerPath
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -68,6 +70,11 @@ class RobotSwerve:
         self.auto_command = None
         self.auto_chooser = AutoBuilder.buildAutoChooser()
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
+
+        self.telop_stem_paths = {
+            start_location: PathPlannerPath.fromPathFile(f"Stem_Reef_{start_location}")
+            for start_location in [f"F{n}" for n in range(1, 7)] + [f"N{n}" for n in range(1, 7)]
+        }
 
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
@@ -165,32 +172,55 @@ class RobotSwerve:
         #         PIDToPose(
         #             self.drivetrain, lambda: reef_position_lookup.get(
         #                 (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-        #                 None
-        #             )
+        #                 {}
+        #             ).get("pose", None)
         #         )
         #     ),
         #     "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
         #         PIDToPose(
         #             self.drivetrain, lambda: reef_position_lookup.get(
         #                 (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-        #                 None
-        #             )
+        #                 {}
+        #             ).get("pose", None)
         #         )
+        #     ),
+        # }
+
+        # self.teleop_auto_triggers = {
+        #     "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+        #         commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+        #             (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+        #             {}
+        #         ).get("pose", None)))
+        #     ),
+        #     "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+        #         commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+        #             (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+        #             {}
+        #         ).get("pose", None)))
         #     ),
         # }
 
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                    None
-                )))
+                commands2.DeferredCommand(lambda: pathplanToPath(
+                    lambda: self.telop_stem_paths.get(
+                        reef_position_lookup.get(
+                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                            {}
+                        ).get("path", None)
+                    ), None)
+                )
             ),
             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                    None
-                )))
+                commands2.DeferredCommand(lambda: pathplanToPath(
+                    lambda: self.telop_stem_paths.get(
+                        reef_position_lookup.get(
+                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                            {}
+                        ).get("path", None)
+                    ), None)
+                )
             ),
         }
 

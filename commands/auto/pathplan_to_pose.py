@@ -18,8 +18,6 @@ def pathplanToPose(
     path_constraints: Tuple[float] = OperatorRobotConfig.teleop_pathplan_constraints,
 ) -> Command:
     """
-    THIS CODE IS UNTESTED, PROCEED WITH CAUTION
-
     Use PathPlanner to navigate from the robot's current position to a given target position
     on the field. PathPlanner uses the navgrid.json file in the deploy folder to determine
     field obstacles - paths generated here will avoid those obstacles.
