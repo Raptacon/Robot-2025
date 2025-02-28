@@ -71,7 +71,7 @@ class RobotSwerve:
 
     def robotPeriodic(self):
         if self.enableTelemetry and self.telemetry:
-            self.telemetry.runDataCollections()
+            self.telemetry.runDefaultDataCollections()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)

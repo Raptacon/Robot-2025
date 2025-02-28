@@ -1,8 +1,14 @@
-import wpilib
 
+
+# Internal imports
 from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
+# Third-party imports
+import wpilib
+from ntcore import NetworkTableInstance
+from wpimath.geometry import Pose2d, Rotation2d
+from wpimath.kinematics import ChassisSpeeds, SwerveModuleState
 from wpiutil.log import (
     BooleanLogEntry, StringLogEntry, FloatLogEntry, IntegerLogEntry
 )
@@ -28,14 +34,19 @@ telemetryButtonEntries = [
 ]
 
 telemetryOdometryEntries = [
-    ["xPositions", FloatLogEntry, "xpos"],
-    ["yPositions", FloatLogEntry, "ypos"],
-    ["angles", FloatLogEntry, "angle"]
+    ["robotPose", "robotpose"],
+    ["targetPose", "targetpose"],
 ]
 
-telemetrySwerveDriveTrainEntries = []
+telemetryFullSwerveDriveTrainEntries = [
+    ["moduleStates", SwerveModuleState, True, "swervemodeulestates"],
+    ["drivetrainVelocity", ChassisSpeeds, False, "swervevelocity"],
+    ["drivetrainRotation", Rotation2d, False, "swerverotation"]
+]
+
+telemetryRawSwerveDriveTrainEntries = []
 for i in range(len(OperatorRobotConfig.swerve_module_channels)):
-    telemetrySwerveDriveTrainEntries.extend([
+    telemetryRawSwerveDriveTrainEntries.extend([
         [f"steerDegree{i + 1}", FloatLogEntry, f"module{i + 1}/steerdegree"],
         [f"drivePercent{i + 1}", FloatLogEntry, f"module{i + 1}/drivepercent"],
         [f"moduleVelocity{i + 1}", FloatLogEntry, f"module{i + 1}/velocity"],
@@ -49,7 +60,6 @@ driverStationEntries = [
     ["enabled", BooleanLogEntry, "enabled"]
 ]
 
-
 class Telemetry:
 
     def __init__(
@@ -62,19 +72,30 @@ class Telemetry:
         self.driverController = driverController
         self.mechController = mechController
         self.odometryPosition = driveTrain.pose_estimator
+        self.driveTrain = driveTrain
         self.swerveModules = driveTrain.swerve_modules
         self.driverStation = driverStation
+
+        self.networkTable = NetworkTableInstance.getDefault()
+        for entryname, logname in telemetryOdometryEntries:
+            setattr(self, entryname, self.networkTable.getStructTopic("odometry/" + logname, Pose2d).publish())
+        for entryname, entrytype, isarraytype, logname in telemetryFullSwerveDriveTrainEntries:
+            if isarraytype:
+                setattr(self, entryname, self.networkTable.getStructArrayTopic("swervedrivetrain/" + logname, entrytype).publish())
+            else:
+                setattr(self, entryname, self.networkTable.getStructTopic("swervedrivetrain/" + logname, entrytype).publish())
 
         self.datalog = wpilib.DataLogManager.getLog()
         for entryname, entrytype, logname in telemetryButtonEntries:
             setattr(self, "driver" + entryname, entrytype(self.datalog, "driver/" + logname))
             setattr(self, "mech" + entryname, entrytype(self.datalog, "mech/" + logname))
-        for entryname, entrytype, logname in telemetryOdometryEntries:
-            setattr(self, entryname, entrytype(self.datalog, "odometry/" + logname))
-        for entryname, entrytype, logname in telemetrySwerveDriveTrainEntries:
-            setattr(self, entryname, entrytype(self.datalog, "swervedrivetrain/" + logname))
+        for entryname, entrytype, logname in telemetryRawSwerveDriveTrainEntries:
+            setattr(self, entryname, entrytype(self.datalog, "rawswervedrivetrain/" + logname))
         for entryname, entrytype, logname in driverStationEntries:
             setattr(self, entryname, entrytype(self.datalog, "driverstation/" + logname))
+
+        if self.driverStation:
+            self.driverStation.startDataLog(self.datalog)
 
     def getDriverControllerInputs(self):
         """
@@ -126,11 +147,17 @@ class Telemetry:
         Gives the x position, y position and rotation
         """
         pose = self.odometryPosition.getEstimatedPosition()
-        self.xPositions.append(pose.X())
-        self.yPositions.append(pose.Y())
-        self.angles.append(pose.rotation().degrees())
+        self.robotPose.set(pose)
 
-    def getSwerveInputs(self):
+    def getFullSwerveState(self):
+        """
+        Retrieves values reflecting the current state of the swerve drive
+        """
+        self.moduleStates.set([swerveModule.current_state() for swerveModule in self.swerveModules])
+        self.drivetrainVelocity.set(self.driveTrain.current_robot_relative_speed())
+        self.drivetrainRotation.set(self.driveTrain.current_yaw())
+
+    def getRawSwerveInputs(self):
         """
         Gets the inputs for some swerve drive train inputs
         it get the steer angle, the drive percent and the velocity
@@ -157,14 +184,19 @@ class Telemetry:
         self.test.append(self.driverStation.isTest())
         self.enabled.append(self.driverStation.isEnabled())
 
-    def runDataCollections(self):
+    def runDefaultDataCollections(self):
         if self.driverController is not None:
             self.getDriverControllerInputs()
         if self.mechController is not None:
             self.getMechControllerInputs()
         if self.odometryPosition is not None:
             self.getOdometryInputs()
+        if self.driveTrain and self.swerveModules:
+            self.getFullSwerveState()
         if self.swerveModules is not None:
-            self.getSwerveInputs()
+            self.getRawSwerveInputs()
         if self.driverStation is not None:
             self.getDriverStationInputs()
+
+    def logAdditionalOdometry(self, odometer_value: Pose2d, log_entry_name: str) -> None:
+        getattr(self, log_entry_name).set(odometer_value)
