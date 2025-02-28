@@ -135,12 +135,12 @@ class RobotSwerve:
         #             {}
         #         ).get("pose", None)))
         #     ),
-        #     "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+        #      "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
         #         commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
         #             (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
         #             {}
         #         ).get("pose", None)))
-        #     ),
+        #      ),
         # }
 
         self.teleop_auto_triggers = {
