@@ -11,11 +11,11 @@ from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 # Third-party imports
 import commands2
+import ntcore
 import wpilib
 import wpimath
 from commands2.button import Trigger
-from pathplannerlib.auto import AutoBuilder
-import ntcore
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -34,6 +34,10 @@ class RobotSwerve:
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
+
+        # Register Named Commands
+        NamedCommands.registerCommand('Raise_Place', commands2.cmd.print_("Raise_place"))
+        NamedCommands.registerCommand('Coral_Intake', commands2.cmd.print_("Coral_Intake"))
 
         # Autonomous setup
         self.auto_command = None
