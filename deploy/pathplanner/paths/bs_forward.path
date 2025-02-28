@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 6.282102272727273,
-        "y": 7.470184659090909
+        "y": 7.470184659090909,
       },
       "nextControl": null,
       "isLocked": false,
@@ -45,7 +45,7 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "Paths2025_Blue",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0
