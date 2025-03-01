@@ -8,6 +8,7 @@ from typing import Callable
 from data.telemetry import Telemetry
 from commands.default_swerve_drive import DefaultDrive
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from subsystem.captainIntake import CaptainIntake
 
 # Third-party imports
 import commands2
@@ -29,6 +30,11 @@ class RobotSwerve:
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.intake_state_machines = CaptainIntake()
+
+        # Initialize timer
+        self.timer = wpilib.Timer()
+        self.timer.start()
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
@@ -77,6 +83,8 @@ class RobotSwerve:
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
         self.drivetrain.stop_driving()
 
+        self.intake_state_machines.on_disable()
+
     def disabledPeriodic(self):
         pass
 
@@ -108,6 +116,8 @@ class RobotSwerve:
                      13: commands2.cmd.print_("Key 13 pressed"),
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
+        
+        self.intake_state_machines.on_enable()
 
         if self.auto_command:
             self.auto_command.cancel()
@@ -125,8 +135,11 @@ class RobotSwerve:
     def teleopPeriodic(self):
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
-
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
+
+        wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
+        self.intake_state_machines.on_iteration(self.timer.get())
+
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
