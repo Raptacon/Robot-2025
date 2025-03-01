@@ -80,7 +80,7 @@ class DiverCarlElevator(commands2.Subsystem):
             self._motors.set(0)
             return
 
-        output = self._controller.calculate(self._encoder.getDistance());
+        output = self._controller.calculate(self._encoder.getDistance())
         if output > 0.1:
             output = 0.1
         if output < -0.1:
