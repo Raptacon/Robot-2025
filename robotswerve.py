@@ -6,7 +6,10 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
+from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
+from lookups.utils import getCurrentReefZone
+from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 # Third-party imports
@@ -16,6 +19,7 @@ import wpilib
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
+from pathplannerlib.path import PathPlannerPath
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -29,6 +33,7 @@ class RobotSwerve:
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
@@ -43,6 +48,11 @@ class RobotSwerve:
         self.auto_command = None
         self.auto_chooser = AutoBuilder.buildAutoChooser()
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
+
+        self.telop_stem_paths = {
+            start_location: PathPlannerPath.fromPathFile(start_location)
+            for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)] + [f"Stem_Reef_N{n}" for n in range(1, 7)]
+        }
 
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
@@ -112,6 +122,11 @@ class RobotSwerve:
         if self.auto_command:
             self.auto_command.cancel()
 
+        self.alliance = "blue"
+        if self.drivetrain.flip_to_red_alliance():
+            self.alliance = "red"
+        self.teleop_auto_command = None
+
         self.drivetrain.setDefaultCommand(
             DefaultDrive(
                 self.drivetrain,
@@ -122,7 +137,24 @@ class RobotSwerve:
             )
         )
 
+        self.teleop_auto_triggers = {
+            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                    {}
+                ).get("pose", None)))
+            ),
+             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                    {}
+                ).get("pose", None)))
+             ),
+        }
+
     def teleopPeriodic(self):
+        if self.driver_controller.getLeftBumperButtonPressed():
+            commands2.CommandScheduler.getInstance().cancelAll()
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
 
