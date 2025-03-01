@@ -4,6 +4,8 @@ import os
 from pathlib import Path
 from typing import Callable
 
+import wpimath.geometry
+
 # Internal imports
 from data.telemetry import Telemetry
 from commands.auto.pathplan_to_pose import pathplanToPose
@@ -20,6 +22,7 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
+from wpimath.kinematics import SwerveModuleState
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -162,10 +165,21 @@ class RobotSwerve:
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
-        pass
+        wpilib.SmartDashboard.putNumber("PID turn configurator", 0)
+        wpilib.SmartDashboard.putNumber("PID speed configurator", 0)
+        wpilib.SmartDashboard.putNumber("PID runtime", 2)
 
     def testPeriodic(self):
-        pass
+        pid_turn_runner = wpilib.SmartDashboard.getNumber("PID turn configurator")
+        pid_speed_runner = wpilib.SmartDashboard.getNumber("PID speed configurator")
+        pid_runtime = wpilib.SmartDashboard.getNumber("PID runtime")
+        commands2.cmd.runOnce(
+            lambda: self.config_pid(pid_turn_runner, pid_speed_runner), self.drivetrain
+        ).withTimeout(pid_runtime)
+
+    def config_pid(self, turn_value, speed_value):
+        for swerve_module in self.drivetrain.swerve_modules:
+            swerve_module.set_state(SwerveModuleState(speed_value, wpimath.geometry.Rotation2d.fromDegrees(turn_value)))
 
     def getDeployInfo(self, key: str) -> str:
         """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"
