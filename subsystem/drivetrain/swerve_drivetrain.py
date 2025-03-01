@@ -23,18 +23,9 @@ class SwerveDrivetrain(Subsystem):
     """
     Virtual representation of, and interface for, a full swerve drive
     """
-    def __init__(
-        self,
-        starting_pose: Pose2d = Pose2d(
-            Translation2d(*OperatorRobotConfig.default_start_pose[0:2]),
-            Rotation2d.fromDegrees(OperatorRobotConfig.default_start_pose[2])
-        )) -> None:
+    def __init__(self):
         """
-        Creates a new swerve drivetrain
-
-        Args:
-            starting_pose: the poosition and orientation of the robot on the field
-                at the moment the robot is first enabled
+        Creates a new swerve drivetrain.
 
         Returns:
             None: class initialization executed upon construction
@@ -90,10 +81,9 @@ class SwerveDrivetrain(Subsystem):
             self.drive_kinematics,
             self.current_yaw(),
             self.current_module_positions(),
-            starting_pose
+            self.get_default_starting_pose()
         )
 
-        self.starting_pose = starting_pose
         self.reset_heading()
 
         # Path Planner setup
@@ -182,7 +172,7 @@ class SwerveDrivetrain(Subsystem):
                 field_invert = -1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_yaw()
+                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_pose().rotation()
             )
         else:
             chassis_speeds = ChassisSpeeds(velocity_vector_x, velocity_vector_y, angular_velocity)
@@ -272,6 +262,25 @@ class SwerveDrivetrain(Subsystem):
         """
         self.pose_estimator.resetPosition(self.current_yaw(), self.current_module_positions(), current_pose)
         self.stop_driving(apply_to_modules=False)
+
+    def get_default_starting_pose(self) -> Pose2d:
+        """
+        Get the alliance-specific default starting pose for the drivetrain. This should be called
+        in autonomous init if not using a routine that updates the starting odometry pose.
+        If relying on this, the driver should quickly read an AprilTag using the camera once the match starts.
+
+        Returns:
+            default_starting_pose: the assumed starting pose given no other information
+        """
+        default_starting_pose = OperatorRobotConfig.blue_default_start_pose
+        if self.flip_to_red_alliance():
+            default_starting_pose = OperatorRobotConfig.red_default_start_pose
+
+        default_starting_pose = Pose2d(
+            Translation2d(*default_starting_pose[0:2]), Rotation2d.fromDegrees(default_starting_pose[2])
+        )
+
+        return default_starting_pose
 
     def stop_driving(self, apply_to_modules: bool = True) -> None:
         """
