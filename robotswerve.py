@@ -6,6 +6,7 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
+from vision import Vision
 from commands.default_swerve_drive import DefaultDrive
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
@@ -58,6 +59,9 @@ class RobotSwerve:
             "Deploy User", self.getDeployInfo("deploy-user")
         )
 
+        # Vision setup
+        self.vision = Vision(self.drivetrain)
+
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
         Trigger(is_disabled()).debounce(3).onTrue(
@@ -72,6 +76,9 @@ class RobotSwerve:
     def robotPeriodic(self):
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDefaultDataCollections()
+
+        self.vision.getCamEstimate()
+        self.vision.showTargetData()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
