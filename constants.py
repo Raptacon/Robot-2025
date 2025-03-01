@@ -4,6 +4,7 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
+import rev
 
 #############################
 # ROBOT ###################
@@ -119,11 +120,17 @@ class DiverCarlElevatorConsts():
 class DiverCarlChisteraConsts():
     kMotorCanId = 12
     kMotorInverted = False
-    kEncoderTicksToDegrees = 360
-    kEncoderZeroOffsetDegres = 0
+    kGearRatio = 5.0
+    kEncoderZeroOffsetRads = 0
     kMinDeg = 0
     kMaxDeg = 250
     kMaxVelRPS = 6
+    kSoftLimits = {"forward": True, "forwardLimit": 3.14, "reverse": True, "reverseLimit": 0}
+    kLimits = {"forward": False,
+                   "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
+                   "reverse": True,
+                   "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen}
+
     kMaxAccelRPSS = 0.5
     kPid = (1.3, 0, 0.7)
 
