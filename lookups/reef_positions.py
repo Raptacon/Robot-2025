@@ -25,7 +25,7 @@ reef_position_lookup = {
     ("red", 4, "l"): {"pose":  Pose2d(12.188, 2.853, Rotation2d.fromDegrees(60)), "path": "Stem_Reef_N5"},
     ("red", 4, "r"): {"pose": Pose2d(12.477, 2.654, Rotation2d.fromDegrees(60)), "path": "Stem_Reef_N4"},
     ("red", 5, "l"): {"pose": Pose2d(13.683, 2.664, Rotation2d.fromDegrees(120)), "path": "Stem_Reef_N3"},
-    ("red", 5, "r"): {"pose": Pose2d(12.963, 2.823, Rotation2d.fromDegrees(120)), "path": "Stem_Reef_N2"},
+    ("red", 5, "r"): {"pose": Pose2d(13.980, 2.813, Rotation2d.fromDegrees(120)), "path": "Stem_Reef_N2"},
     ("blue", 0, "l"): {"pose": Pose2d(5.973, 3.86, Rotation2d.fromDegrees(180)), "path": "Stem_Reef_F6"},
     ("blue", 0, "r"): {"pose": Pose2d(6.023, 4.19, Rotation2d.fromDegrees(180)), "path": "Stem_Reef_N6"},
     ("blue", 1, "l"): {"pose": Pose2d(5.365, 5.217, Rotation2d.fromDegrees(-120)), "path": "Stem_Reef_N5"},
