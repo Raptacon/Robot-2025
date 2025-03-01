@@ -11,10 +11,11 @@ from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 
 # Third-party imports
 import commands2
+import ntcore
 import wpilib
 import wpimath
 from commands2.button import Trigger
-from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.auto import AutoBuilder, NamedCommands
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -22,12 +23,21 @@ class RobotSwerve:
     Container to hold the main robot code
     """
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
+        # networktables setup
+        self.inst = ntcore.NetworkTableInstance.getDefault()
+        self.table = self.inst.getTable("Stream_Deck")
+
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
 
         # HID setup
+        wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
+
+        # Register Named Commands
+        NamedCommands.registerCommand('Raise_Place', commands2.cmd.print_("Raise_place"))
+        NamedCommands.registerCommand('Coral_Intake', commands2.cmd.print_("Coral_Intake"))
 
         # Autonomous setup
         self.auto_command = None
@@ -61,7 +71,7 @@ class RobotSwerve:
 
     def robotPeriodic(self):
         if self.enableTelemetry and self.telemetry:
-            self.telemetry.runDataCollections()
+            self.telemetry.runDefaultDataCollections()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
@@ -74,11 +84,31 @@ class RobotSwerve:
         self.auto_command = self.auto_chooser.getSelected()
         if self.auto_command:
             self.auto_command.schedule()
+        else:
+            self.drivetrain.reset_pose_estimator(self.drivetrain.get_default_starting_pose())
 
     def autonomousPeriodic(self):
         pass
 
     def teleopInit(self):
+        self.table.putNumber("pressedKey", -1)
+        self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
+                     1: commands2.cmd.print_("Key 1 pressed"),
+                     2: commands2.cmd.print_("Key 2 pressed"),
+                     3: commands2.cmd.print_("Key 3 pressed"),
+                     4: commands2.cmd.print_("Key 4 pressed"),
+                     5: commands2.cmd.print_("Key 5 pressed"),
+                     6: commands2.cmd.print_("Key 6 pressed"),
+                     7: commands2.cmd.print_("Key 7 pressed"),
+                     8: commands2.cmd.print_("Key 8 pressed"),
+                     9: commands2.cmd.print_("Key 9 pressed"),
+                     10: commands2.cmd.print_("Key 10 pressed"),
+                     11: commands2.cmd.print_("Key 11 pressed"),
+                     12: commands2.cmd.print_("Key 12 pressed"),
+                     13: commands2.cmd.print_("Key 13 pressed"),
+                     14: commands2.cmd.print_("Key 14 pressed"),
+                     -1: commands2.cmd.print_("No key pressed"),}
+
         if self.auto_command:
             self.auto_command.cancel()
 
@@ -93,7 +123,10 @@ class RobotSwerve:
         )
 
     def teleopPeriodic(self):
-        pass
+        self.keyPressed = self.table.getNumber("pressedKey", -1)
+        self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
+
+        wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()

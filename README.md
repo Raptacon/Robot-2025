@@ -161,6 +161,10 @@ Extra things:
 * There are multiple tabs you can open in AdvantageScope, the ones you will use the most are going to be: Line Graph, Table, and Joysticks(if you are in live time).
 
 * Delete the logs after you use them.
+
+# Stream Deck
+To use our Stream Deck, you need to run the Raptacon streamdeck repo along with the robot code. We do this because we do not want too many 3rd party libraries in the robot code.
+
 # Information
 
 ## Deployed Robot Version
