@@ -6,9 +6,7 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from commands.auto.pid_to_pose import PIDToPose
 from commands.auto.pathplan_to_pose import pathplanToPose
-from commands.auto.pathplan_to_path import pathplanToPath
 from commands.default_swerve_drive import DefaultDrive
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup

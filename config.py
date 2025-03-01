@@ -1,5 +1,4 @@
 # Native imports
-from math import pi
 from typing import Tuple
 
 # Third-party imports
