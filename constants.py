@@ -128,8 +128,8 @@ class DiverCarlChisteraConsts():
     kPid = (1.3, 0, 0.7)
 
 class CaptainPlanetConsts():
-    kMotorCanId = 35
+    kMotorCanId = 13
     kMotorInverted = False
     kFrontBreakBeam = 2
     kBackBreakBeam = 3
-    kDefaultSpeed = 0.5
+    kDefaultSpeed = -0.25

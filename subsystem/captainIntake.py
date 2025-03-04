@@ -10,28 +10,72 @@ class CaptainIntake(StatefulAutonomous):
 
     def __init__(self):
         self.intakeMotor = rev.SparkMax(consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless)
-        self.breakbeam_1 = wpilib.DigitalInput(consts.kFrontBreakBeam)
-        self.breakbeam_2 = wpilib.DigitalInput(consts.kBackBreakBeam)
+        self.front_breakbeam = wpilib.DigitalInput(consts.kFrontBreakBeam)
+        self.back_breakbeam = wpilib.DigitalInput(consts.kBackBreakBeam)
         self.smartdashboard = wpilib.SmartDashboard
         super().__init__()
 
     @state(first=True)
     def idle(self):
-        self.smartdashboard.putBoolean("Breakbeam 1", not self.breakbeam_1.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", not self.breakbeam_2.get())
+        self.intakeMotor.set(0)
+        
+        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
+        self.smartdashboard.putString("Intake State", "idle")
 
         if self.smartdashboard.getBoolean("A Button Pressed", False):
-            self.next_state("intaking")
+            self.next_state("first_intaking")
+
+        if not self.smartdashboard.getBoolean("A Button Pressed", False):
+            self.next_state("idle")
 
     @state()
-    def intaking(self):        
+    def first_intaking(self):        
         self.intakeMotor.set(consts.kDefaultSpeed)
 
-        if self.breakbeam_1 and not self.breakbeam_2:
+        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
+        self.smartdashboard.putString("Intake State", "first_intaking")
+
+        
+
+        if not self.front_breakbeam.get():
+            self.next_state("second_intaking")
+        if not self.smartdashboard.getBoolean("A Button Pressed", False):
+            self.next_state("idle") 
+
+    @state()
+    def second_intaking(self):        
+        self.intakeMotor.set(consts.kDefaultSpeed)
+
+        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
+        self.smartdashboard.putString("Intake State", "second_intaking")
+
+        
+
+        if not self.back_breakbeam.get():
+            self.next_state("third_intaking")
+
+    @state()
+    def third_intaking(self):        
+        self.intakeMotor.set(consts.kDefaultSpeed)
+
+        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
+        self.smartdashboard.putString("Intake State", "third_intaking")
+
+        
+
+        if self.front_breakbeam and not self.back_breakbeam.get():
             self.next_state("intook")
 
     @state()
     def intook(self):
         self.intakeMotor.set(0)
+
+        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
+        self.smartdashboard.putString("Intake State", "intook")
 
         self.next_state("idle")
