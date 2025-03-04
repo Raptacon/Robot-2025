@@ -2,7 +2,7 @@
 
 import wpilib
 import wpilib.interfaces
-from subsystem import diverCarlChistera
+#from subsystem import diverCarlChistera
 
 class MyRobot(wpilib.TimedRobot):
     """
@@ -11,7 +11,8 @@ class MyRobot(wpilib.TimedRobot):
 
     def robotInit(self):
         """Robot initialization function"""
-        self.arm = diverCarlChistera.DiverCarlChistera()
+        pass
+        #self.arm = diverCarlChistera.DiverCarlChistera()
 
 
     def testInit(self):
@@ -19,7 +20,8 @@ class MyRobot(wpilib.TimedRobot):
         wpilib.SmartDashboard.putNumber("Arm Deg", 0.0)
 
     def testPeriodic(self):
-        self.arm.periodic()
-        wpilib.SmartDashboard.putNumber("Arm Deg", self.arm.getPosDeg())
+        pass
+        #self.arm.periodic()
+        #wpilib.SmartDashboard.putNumber("Arm Deg", self.arm.getPosDeg())
 
-        print("Encoder Pos", self.elevator.getPosDeg())
+        #print("Encoder Pos", self.elevator.getPosDeg())

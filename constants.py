@@ -111,11 +111,11 @@ class DiverCarlElevatorConsts():
     kEncoderPins = (9, 8)
     kMinHeightM = 0
     kMaxHeightM = 1.5
-    kMaxVelMPS = 0.75
-    kMaxAccelMPSS = 0.2
+    kMaxVelMPS = 1
+    kMaxAccelMPSS = 0.5
     kMechDeltaHeightM = 0.3048 # 12 inches to meters - approx height
     kMotorPrimaryInverted = False
-    kPid = (1.3, 0, 0.7)
+    kPid = (1.3, 0, 0)
 
 class DiverCarlChisteraConsts():
     kMotorCanId = 12

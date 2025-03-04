@@ -20,7 +20,7 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
-# from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
     """
@@ -33,6 +33,7 @@ class RobotSwerve:
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.elevator = Elevator()
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
         # HID setup
@@ -162,10 +163,18 @@ class RobotSwerve:
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
-        pass
+        wpilib.SmartDashboard.putNumber("elevator_height", 0)
+        wpilib.SmartDashboard.putBoolean("elevator_on", False)
 
     def testPeriodic(self):
-        pass
+        turn_on = wpilib.SmartDashboard.getBoolean("elevator_on", False)
+        el_h = wpilib.SmartDashboard.getNumber("elevator_height", 0)
+        wpilib.SmartDashboard.putBoolean("button_press", self.driver_controller.getAButtonPressed())
+
+        if turn_on:
+            self.elevator.setHeight(el_h)
+        if self.driver_controller.getAButtonPressed():
+            self.elevator.stopElevator()
 
     def getDeployInfo(self, key: str) -> str:
         """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"

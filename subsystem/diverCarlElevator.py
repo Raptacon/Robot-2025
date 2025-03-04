@@ -5,6 +5,7 @@ import rev
 import wpimath.trajectory
 import wpimath.controller
 import wpimath.units
+import math
 from constants import DiverCarlElevatorConsts as c
 # plan to use 25:1 gear ratio
 # drum TBD
@@ -22,6 +23,7 @@ class DiverCarlElevator(commands2.Subsystem):
         motorConfig = rev.SparkBaseConfig()
         motorConfig.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
         motorConfig.inverted(c.kMotorPrimaryInverted)
+        motorConfig.encoder.positionConversionFactor((math.pi * 0.1016) / 25)
         self._primaryMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
         # set follower like primary except inverted
         motorConfig.inverted(not c.kMotorPrimaryInverted)
@@ -29,9 +31,10 @@ class DiverCarlElevator(commands2.Subsystem):
 
         self._motors = wpilib.MotorControllerGroup(self._primaryMotor, self._followerMotor)
 
-        self._encoder = wpilib.Encoder(*c.kEncoderPins)
+        self._encoder = self._primaryMotor.getEncoder()
+
         # 0.1mm to meters
-        self._encoder.setDistancePerPulse(0.1 / 1000 / 3)
+        #self._encoder.setDistancePerPulse(0.1 / 1000 / 3)
 
         self._constraints = wpimath.trajectory.TrapezoidProfile.Constraints(c.kMaxVelMPS, c.kMaxAccelMPSS)
         self._controller = wpimath.controller.ProfiledPIDController(*c.kPid, self._constraints, self._dt)
@@ -49,27 +52,31 @@ class DiverCarlElevator(commands2.Subsystem):
         self._trackingAlert.set(False)
 
     def periodic(self) -> None:
+        wpilib.SmartDashboard.putNumber("logged_e_height", self.getHeightM())
+        wpilib.SmartDashboard.putBoolean("at_goal", self.atGoal())
+        wpilib.SmartDashboard.putNumber("pos_error", self.getError())
+
         # update telemtry
         if self._controller.atGoal():
-            self._trackingAlert.setText(f"Elevator stable at {self._encoder.getDistance():1.1f}m")
+            self._trackingAlert.setText(f"Elevator stable at {self._encoder.getPosition():1.1f}m")
             self._trackingAlert.set(True)
         else:
-            self._trackingAlert.setText(f"Elevator at {self._encoder.getDistance():1.1f}m goal {self.getSetHeightM():1.1f}m")
+            self._trackingAlert.setText(f"Elevator at {self._encoder.getPosition():1.1f}m goal {self.getSetHeightM():1.1f}m")
             self._trackingAlert.set(True)
 
         if self.getReverseLimit():
-            self._encoder.reset()
+            self._encoder.setPosition(0)
 
         # safe the motors if forward limit is hit
         if self.getForwardLimit() and self._motors.get() > 0:
             self._motors.set(0)
-            self._limitAlert.setText(f"Elevator TOP HIT at {self._encoder.getDistance()}m")
+            self._limitAlert.setText(f"Elevator TOP HIT at {self._encoder.getPosition()}m")
             self._limitAlert.set(True)
             return
 
         if self.getReverseLimit() and self._motors.get() < 0:
             self._motors.set(0)
-            self._limitAlert.setText(f"Elevator BOTTOM HIT at {self._encoder.getDistance()}m")
+            self._limitAlert.setText(f"Elevator BOTTOM HIT at {self._encoder.getPosition()}m")
             self._limitAlert.set(True)
             return
 
@@ -80,11 +87,11 @@ class DiverCarlElevator(commands2.Subsystem):
             self._motors.set(0)
             return
 
-        output = self._controller.calculate(self._encoder.getDistance())
-        if output > 0.1:
-            output = 0.1
+        output = self._controller.calculate(self._encoder.getPosition())
+        if output > 0.01:
+            output = 0.25
         if output < -0.1:
-            output = -0.1
+            output = -0.25
 
 
         self._motors.set(output)
@@ -107,7 +114,7 @@ class DiverCarlElevator(commands2.Subsystem):
         # TODO add max and min set constraints to setters
         if self._disabled:
             self._disabled = False
-            self._controller.reset(self._encoder.getDistance())
+            self._controller.reset(self._encoder.getPosition())
 
         heightM = heightM - self._heightDelta
 
@@ -129,7 +136,7 @@ class DiverCarlElevator(commands2.Subsystem):
     def getHeightM(self) -> float:
         """Returns the current height of the elevator in meters from ground.
         """
-        return self._encoder.getDistance()
+        return self._encoder.getPosition()
 
     def atGoal(self) -> bool:
         """
