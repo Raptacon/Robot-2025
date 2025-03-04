@@ -304,7 +304,7 @@ class SwerveModuleMk4iSparkMaxNeoCanCoder:
             None - PID controllers are updated in-place with new setpoints
         """
         encoder_rotation = Rotation2d.fromDegrees(self.current_raw_absolute_steer_position())
-        state.optimize(encoder_rotation)
+        #state.optimize(encoder_rotation)
         state_degrees = state.angle.degrees()
         state_speed = state.speed
 

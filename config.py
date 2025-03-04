@@ -20,8 +20,8 @@ class OperatorRobotConfig:
     swerve_abs_encoder_calibrations: Tuple[float] = (
         241.3476 / 360.0, 4.131 / 360.0, 1.14264 / 360.0, 59.41404 / 360.0
     )
-    swerve_steer_pid: Tuple[float] = (0.01, 0, 0)
-    swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.23)
+    swerve_steer_pid: Tuple[float] = (0.0055, 0, 0)
+    swerve_drive_pid: Tuple[float] = (0.002, 0, 0, 0.227)
     pathplanner_translation_pid: Tuple[float] = (10.0, 0.0, 0.0)
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 

@@ -167,19 +167,19 @@ class RobotSwerve:
         commands2.CommandScheduler.getInstance().cancelAll()
         wpilib.SmartDashboard.putNumber("PID turn configurator", 0)
         wpilib.SmartDashboard.putNumber("PID speed configurator", 0)
-        wpilib.SmartDashboard.putNumber("PID runtime", 2)
+        wpilib.SmartDashboard.putBoolean("PID stop", True)
 
     def testPeriodic(self):
-        pid_turn_runner = wpilib.SmartDashboard.getNumber("PID turn configurator")
-        pid_speed_runner = wpilib.SmartDashboard.getNumber("PID speed configurator")
-        pid_runtime = wpilib.SmartDashboard.getNumber("PID runtime")
-        commands2.cmd.runOnce(
-            lambda: self.config_pid(pid_turn_runner, pid_speed_runner), self.drivetrain
-        ).withTimeout(pid_runtime)
+        pid_turn_runner = wpilib.SmartDashboard.getNumber("PID turn configurator", 0)
+        pid_speed_runner = wpilib.SmartDashboard.getNumber("PID speed configurator", 0)
+        pid_stop = wpilib.SmartDashboard.getBoolean("PID stop", True)
+
+        if not pid_stop:
+            self.config_pid(pid_turn_runner, pid_speed_runner)
 
     def config_pid(self, turn_value, speed_value):
         for swerve_module in self.drivetrain.swerve_modules:
-            swerve_module.set_state(SwerveModuleState(speed_value, wpimath.geometry.Rotation2d.fromDegrees(turn_value)))
+            swerve_module.set_state(SwerveModuleState(speed_value, wpimath.geometry.Rotation2d.fromDegrees(turn_value)), apply_cosine_scaling=False)
 
     def getDeployInfo(self, key: str) -> str:
         """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"
