@@ -30,7 +30,7 @@ class CaptainIntake(StatefulAutonomous):
             self.next_state("idle")
 
     @state()
-    def first_intaking(self):        
+    def first_intaking(self):
         self.intakeMotor.set(consts.kDefaultSpeed)
 
         self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
@@ -42,10 +42,10 @@ class CaptainIntake(StatefulAutonomous):
         if not self.front_breakbeam.get():
             self.next_state("second_intaking")
         if not self.smartdashboard.getBoolean("A Button Pressed", False):
-            self.next_state("idle") 
+            self.next_state("idle")
 
     @state()
-    def second_intaking(self):        
+    def second_intaking(self):
         self.intakeMotor.set(consts.kDefaultSpeed)
 
         self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
@@ -58,7 +58,7 @@ class CaptainIntake(StatefulAutonomous):
             self.next_state("third_intaking")
 
     @state()
-    def third_intaking(self):        
+    def third_intaking(self):
         self.intakeMotor.set(consts.kDefaultSpeed)
 
         self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
