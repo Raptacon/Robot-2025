@@ -1,0 +1,18 @@
+---
+title: Intake Diagram
+---
+
+graph TB
+    idle(("Idle"))
+    first_intaking(("First Intaking"))
+    second_intaking(("Second Intaking"))
+    third_intaking(("Third Intaking"))
+    intook(("Intook"))
+
+    idle---idle
+    idle---|A Button\nPressed/Held|first_intaking
+    first_intaking-.-|A Button\nReleased|idle
+    first_intaking---|Front Breakbeam\nTriggered|second_intaking
+    second_intaking---|Back Breakbeam\nTriggered|third_intaking
+    third_intaking---|Front & Back\nBreakbeam Triggered|intook
+    intook---|Intake Complete|idle
