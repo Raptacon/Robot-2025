@@ -31,3 +31,5 @@ requires = [
     "raptacon3200>=2025.0.1",
     "numpy"
 ]
+
+pyfrc.isolated = true
