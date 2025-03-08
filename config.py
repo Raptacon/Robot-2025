@@ -1,6 +1,10 @@
 # Native imports
 from typing import Tuple
 
+# Third-party imports
+from wpimath.geometry import Rotation2d
+
+
 class OperatorRobotConfig:
     # Default start position for red alliance using always-blue-alliance coordinates
     # Coordinates are x (meters), y (meters), and rotation (degrees)
@@ -26,5 +30,20 @@ class OperatorRobotConfig:
     robot_Cam_Translation_Right: Tuple[float] = (0.219075, -0.3063875, 0.365125)
     robot_Cam_Rotation_Degress_Left: Tuple[float] = (0.0, 0.0, 0.0)
     robot_Cam_Rotation_Degress_Right: Tuple[float] = (0.0, 0.0, 0.0)
+
     vision_std_dev_basis: float = 1.1
     vision_std_dev_scale_factor: float = 1
+    # First three elements are PID, last two elements are trapezoidal profile
+    # Translation trapezoidal profile units are mps and mps^2, rotation are rps and rps^2
+    pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 3, 1.5)
+    pid_to_pose_rotation_pid_profile: Tuple[float] = (
+        1.0, 0.0, 0.0, Rotation2d.fromDegrees(360).radians(), Rotation2d.fromDegrees(360).radians()
+    )
+    # Tolerance of x, y, and omega position errors within which robot is at target pose
+    # x error is in meters, y error is in meters, omega error is in radians
+    pid_to_pose_setpoint_tolerances: Tuple[float] = (0.25, 0.25, Rotation2d.fromDegrees(10).radians())
+
+    # Robot motion constraints when running PathPlanner during teleop.
+    # Values to give are: max translation velocity (mps), max translation acceleration (mps^2),
+    # max angular velocity (dps), max angular acceleration (dps^2).
+    teleop_pathplan_constraints: Tuple[float] = (3.0, 1.5, 360.0, 360.0)
