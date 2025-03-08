@@ -6,7 +6,6 @@ from wpimath.system.plant import DCMotor
 import math
 
 def test_elevatorSubsystem() -> None:
-    return
     simTime = 0.06
     elevator = DiverCarlElevator(dt=simTime)
     simPrimaryMotor = rev.SparkSim(elevator._primaryMotor, DCMotor(12, 10, 10, 10, 5000, 1))
