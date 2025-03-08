@@ -6,8 +6,12 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
+from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
+from lookups.utils import getCurrentReefZone
+from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from subsystem.captainIntake import CaptainIntake
 
 # Third-party imports
 import commands2
@@ -16,6 +20,7 @@ import wpilib
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
+from pathplannerlib.path import PathPlannerPath
 # from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
@@ -29,6 +34,12 @@ class RobotSwerve:
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
+        self.intake_state_machines = CaptainIntake()
+
+        # Initialize timer
+        self.timer = wpilib.Timer()
+        self.timer.start()
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
@@ -43,6 +54,11 @@ class RobotSwerve:
         self.auto_command = None
         self.auto_chooser = AutoBuilder.buildAutoChooser()
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
+
+        self.telop_stem_paths = {
+            start_location: PathPlannerPath.fromPathFile(start_location)
+            for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)] + [f"Stem_Reef_N{n}" for n in range(1, 7)]
+        }
 
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
@@ -71,11 +87,13 @@ class RobotSwerve:
 
     def robotPeriodic(self):
         if self.enableTelemetry and self.telemetry:
-            self.telemetry.runDataCollections()
+            self.telemetry.runDefaultDataCollections()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
         self.drivetrain.stop_driving()
+
+        self.intake_state_machines.on_disable()
 
     def disabledPeriodic(self):
         pass
@@ -108,9 +126,16 @@ class RobotSwerve:
                      13: commands2.cmd.print_("Key 13 pressed"),
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
+        
+        self.intake_state_machines.on_enable()
 
         if self.auto_command:
             self.auto_command.cancel()
+
+        self.alliance = "blue"
+        if self.drivetrain.flip_to_red_alliance():
+            self.alliance = "red"
+        self.teleop_auto_command = None
 
         self.drivetrain.setDefaultCommand(
             DefaultDrive(
@@ -122,11 +147,31 @@ class RobotSwerve:
             )
         )
 
+        self.teleop_auto_triggers = {
+            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                    {}
+                ).get("pose", None)))
+            ),
+             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                    {}
+                ).get("pose", None)))
+             ),
+        }
+
     def teleopPeriodic(self):
+        if self.driver_controller.getLeftBumperButtonPressed():
+            commands2.CommandScheduler.getInstance().cancelAll()
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
-
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
+
+        wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
+        self.intake_state_machines.on_iteration(self.timer.get())
+
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
