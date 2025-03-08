@@ -13,22 +13,7 @@ class StreamDeck(StatefulAutonomous):
         self.table = self.inst.getTable("Stream_Deck")
 
         self.table.putNumber("pressedKey", -1)
-        self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
-                     1: commands2.cmd.print_("Key 1 pressed"),
-                     2: commands2.cmd.print_("Key 2 pressed"),
-                     3: commands2.cmd.print_("Key 3 pressed"),
-                     4: commands2.cmd.print_("Key 4 pressed"),
-                     5: commands2.cmd.print_("Key 5 pressed"),
-                     6: commands2.cmd.print_("Key 6 pressed"),
-                     7: commands2.cmd.print_("Key 7 pressed"),
-                     8: commands2.cmd.print_("Key 8 pressed"),
-                     9: commands2.cmd.print_("Key 9 pressed"),
-                     10: commands2.cmd.print_("Key 10 pressed"),
-                     11: commands2.cmd.print_("Key 11 pressed"),
-                     12: commands2.cmd.print_("Key 12 pressed"),
-                     13: commands2.cmd.print_("Key 13 pressed"),
-                     14: commands2.cmd.print_("Key 14 pressed"),
-                     -1: commands2.cmd.print_("No key pressed"),}
+        
         self.smartdashboard = wpilib.SmartDashboard()
         super().__init__()
 
@@ -37,8 +22,65 @@ class StreamDeck(StatefulAutonomous):
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
-        self.next_state("idle")
+
+        match self.keyPressed:
+            case 0:
+                self.next_state("align_to_reef_position_L4")
+            case 1:
+                self.next_state("align_to_reef_position_R4")
+            case 3:
+                self.next_state("remove_algae_upper")
+
+        # self.next_state("idle")
 
     @state()
-    def align_to_reef_position(self):
-        self.smartdashboard.put("Auto Align", )
+    def align_to_reef_position_L4(self):
+        
+    
+    @state()
+    def align_to_reef_position_L3(self):
+        pass
+
+    @state()
+    def align_to_reef_position_L2(self):
+        pass
+
+    @state()
+    def align_to_reef_position_R4(self):
+        pass
+
+    @state()
+    def align_to_reef_position_R3(self):
+        pass
+
+    @state()
+    def align_to_reef_position_R2(self):
+        pass
+
+    @state()
+    def remove_algae_upper(self):
+        pass
+
+    @state()
+    def remove_algae_lower(self):
+        pass
+
+    @state()
+    def net_algae(self):
+        pass
+
+    @state()
+    def eject_algae(self):
+        pass
+
+    @state()
+    def align_to_trough(self):
+        pass
+
+    @state()
+    def eject_coral(self):
+        pass
+
+    @state()
+    def coral_chute_intake(self):
+        pass
