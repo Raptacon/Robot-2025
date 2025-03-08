@@ -3,35 +3,65 @@ title: Stream Deck Layout
 ---
 graph TB
 %% @backgroundColor(#202020)
-    streamdeck(("Stream Deck"))
-    autoAlign(("Auto Align"))
-    elevator(("Elevator"))
-    pivot(("Pivot to Reef"))
-    chute(("Chute Intake"))
-    chuteAdjust(("Adjust to Chute Intake"))
-    chutePivot(("Chute Pivot"))
-    chuteElevator(("Chute Elevator"))
 
-    streamdeck---|idle|streamdeck
-    streamdeck---|L2|autoAlign
-    streamdeck---|L3|autoAlign
-    streamdeck---|L4|autoAlign
-    streamdeck---|R2|autoAlign
-    streamdeck---|R3|autoAlign
-    streamdeck---|R4|autoAlign
-    autoAlign---|align|autoAlign
-    autoAlign~~~elevator
-    elevator~~~pivot
-    streamdeck-.-elevator
-    streamdeck-.-pivot
-    elevator-.-LNoteLayer(["auto align, pivot to reef,
-                and elevator simultaneously"])-.-pivot
+style Streamdeck color:white
+style Chute color:white
 
-    linkStyle default stroke:white
-    linkStyle 8 stroke:white,stroke-width:2px,stroke-dasharray:3;
-    linkStyle 9 stroke:white,stroke-width:2px,stroke-dasharray:3;
-    linkStyle 10 stroke:white,stroke-width:2px,stroke-dasharray:3;
-    linkStyle 11 stroke:white,stroke-width:2px,stroke-dasharray:3;
-    linkStyle 12 stroke:white,stroke-width:2px,stroke-dasharray:3;
-    linkStyle 13 stroke:white,stroke-width:2px,stroke-dasharray:3;
-    %% TODO: please make line coloring more efficient, do not know the best way to do this
+streamdeck-->|Intake Coral Pressed|chute
+
+    subgraph Chute
+        direction TB
+
+        style Chute fill:#202020,stroke:#202020
+
+        chute(("Chute Intake"))
+        chuteAdjust(("Adjust to Chute Intake"))
+        chutePivot(("Chute Pivot"))
+        chuteElevator(("Chute Elevator"))
+
+        chute---|No Coral/Empty|chute
+        chute---chuteAdjust
+        chuteAdjust---chute
+        chute---chutePivot
+        chutePivot---|Coral out of way|chuteElevator
+        chutePivot-.-id1{{"pivot and elevator should be able to happen simultaneously"}}
+        chuteElevator---|held|chuteElevator
+        chuteElevator-.-NoteLayer{{"intake starts, see intake mermaid layout"}}
+        
+        linkStyle 2 stroke:white,stroke-width:2px,stroke-:3;
+        linkStyle 8 stroke:white,stroke-width:2px,stroke-dasharray:3;
+        linkStyle 6 stroke:white,stroke-width:2px,stroke-dasharray:3;
+        end
+    
+        subgraph Streamdeck
+        direction TB
+        
+        style Streamdeck fill:#202020,stroke:#202020
+
+        streamdeck(("Stream Deck"))
+        autoAlign(("Auto Align"))
+        elevator(("Elevator"))
+        pivot(("Pivot to Reef"))
+
+        streamdeck---|idle|streamdeck
+        streamdeck---|L2|autoAlign
+        streamdeck---|L3|autoAlign
+        streamdeck---|L4|autoAlign
+        streamdeck---|R2|autoAlign
+        streamdeck---|R3|autoAlign
+        streamdeck---|R4|autoAlign
+        autoAlign---|align|autoAlign
+        autoAlign~~~elevator
+        elevator~~~pivot    
+        streamdeck-.-elevator
+        streamdeck-.-pivot
+        elevator-.-LNoteLayer{{"auto align, pivot to reef,
+                    and elevator simultaneously"}}-.-pivot
+        
+        linkStyle default stroke:white
+        linkStyle 17 stroke:white,stroke-width:2px,stroke-dasharray:3;
+        linkStyle 18 stroke:white,stroke-width:2px,stroke-dasharray:3;
+        linkStyle 19 stroke:white,stroke-width:2px,stroke-dasharray:3;
+        linkStyle 20 stroke:white,stroke-width:2px,stroke-dasharray:3;
+        %% TODO: please make line coloring more efficient, do not know the best way to do this
+        end
