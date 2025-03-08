@@ -22,4 +22,4 @@ class MyRobot(wpilib.TimedRobot):
         self.arm.periodic()
         wpilib.SmartDashboard.putNumber("Arm Deg", self.arm.getPosDeg())
 
-        print("Encoder Pos", self.elevator.getPosDeg())
+        #print("Encoder Pos", self.elevator.getPosDeg())

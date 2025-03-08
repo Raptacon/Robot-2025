@@ -15,11 +15,18 @@ class MyRobot(wpilib.TimedRobot):
 
 
     def testInit(self):
-        self.elevator.setHeight(0.2)
-        wpilib.SmartDashboard.putNumber("Height M", 0.0)
+        #self.elevator.setHeight(0.2)
+        wpilib.SmartDashboard.putNumber("Height CM", 0.0)
 
     def testPeriodic(self):
-        #self.elevator.setHeight(wpilib.SmartDashboard.getNumber("Height M", 0.0))
+        self.elevator.setHeight(wpilib.SmartDashboard.getNumber("Height CM", 0.0))
         self.elevator.periodic()
-        wpilib.SmartDashboard.putNumber("Encoder Pos", self.elevator.getHeightM())
-        print("Encoder Pos", self.elevator.getHeightM())
+        wpilib.SmartDashboard.putNumber("Height Cm", self.elevator.getHeightCm())
+        wpilib.SmartDashboard.putNumber("Encoder Pos", self.elevator._encoder.getPosition())
+        wpilib.SmartDashboard.putBoolean("At Goal", self.elevator.atGoal())
+        wpilib.SmartDashboard.putBoolean("Lower Limit", self.elevator.getReverseLimit())
+        wpilib.SmartDashboard.putBoolean("Upper Limit", self.elevator.getForwardLimit())
+        wpilib.SmartDashboard.putNumber("Vel", self.elevator._encoder.getVelocity())
+        wpilib.SmartDashboard.putNumber("Error", self.elevator.getError())
+
+        #print(self.elevator._primaryMotor.PeriodicStatus0().softForwardLimitReached)
