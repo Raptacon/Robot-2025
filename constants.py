@@ -108,12 +108,12 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 class DiverCarlElevatorConsts():
     kMotorPrimaryCanId = 10
     kMotorFollowerCanId = 11
-    kEncoderPins = (9, 8)
+    kEncoderPins = (9,)
     kMinHeightM = 0
     kMaxHeightM = 1.5
     kMaxVelMPS = 1
     kMaxAccelMPSS = 0.5
-    kMechDeltaHeightM = 0.3048 # 12 inches to meters - approx height
+    kMechDeltaHeightM = 0.282575 # 12 inches to meters - approx height
     kMotorPrimaryInverted = False
     kPid = (1.3, 0, 0)
 

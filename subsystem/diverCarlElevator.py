@@ -18,23 +18,14 @@ class DiverCarlElevator(commands2.Subsystem):
         self._dt = dt
         self._heightDelta = elevatorHeightDelta
         self._primaryMotor = rev.SparkMax(c.kMotorPrimaryCanId, rev.SparkLowLevel.MotorType.kBrushless)
-        self._followerMotor = rev.SparkMax(c.kMotorFollowerCanId, rev.SparkLowLevel.MotorType.kBrushless)
         # setup primary
         motorConfig = rev.SparkBaseConfig()
         motorConfig.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
         motorConfig.inverted(c.kMotorPrimaryInverted)
         motorConfig.encoder.positionConversionFactor((math.pi * 0.1016) / 25)
         self._primaryMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
-        # set follower like primary except inverted
-        motorConfig.inverted(not c.kMotorPrimaryInverted)
-        self._followerMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
-
-        self._motors = wpilib.MotorControllerGroup(self._primaryMotor, self._followerMotor)
 
         self._encoder = self._primaryMotor.getEncoder()
-
-        # 0.1mm to meters
-        #self._encoder.setDistancePerPulse(0.1 / 1000 / 3)
 
         self._constraints = wpimath.trajectory.TrapezoidProfile.Constraints(c.kMaxVelMPS, c.kMaxAccelMPSS)
         self._controller = wpimath.controller.ProfiledPIDController(*c.kPid, self._constraints, self._dt)
@@ -68,14 +59,14 @@ class DiverCarlElevator(commands2.Subsystem):
             self._encoder.setPosition(0)
 
         # safe the motors if forward limit is hit
-        if self.getForwardLimit() and self._motors.get() > 0:
-            self._motors.set(0)
+        if self.getForwardLimit() and self._primaryMotor.get() > 0:
+            self._primaryMotor.set(0)
             self._limitAlert.setText(f"Elevator TOP HIT at {self._encoder.getPosition()}m")
             self._limitAlert.set(True)
             return
 
-        if self.getReverseLimit() and self._motors.get() < 0:
-            self._motors.set(0)
+        if self.getReverseLimit() and self._primaryMotor.get() < 0:
+            self._primaryMotor.set(0)
             self._limitAlert.setText(f"Elevator BOTTOM HIT at {self._encoder.getPosition()}m")
             self._limitAlert.set(True)
             return
@@ -84,27 +75,21 @@ class DiverCarlElevator(commands2.Subsystem):
         self._limitAlert.set(False)
 
         if self._disabled:
-            self._motors.set(0)
+            self._primaryMotor.set(0)
             return
 
         output = self._controller.calculate(self._encoder.getPosition())
-        if output > 0.01:
-            output = 0.25
-        if output < -0.1:
-            output = -0.25
-
-
-        self._motors.set(output)
+        self._primaryMotor.set(output)
 
     def getForwardLimit(self) -> bool:
         """Returns if either motor controller has hit the forward limit switch
         Returns:
             bool: True if either motor controller has hit the forward limit switch
         """
-        return self._primaryMotor.getForwardLimitSwitch().get() or self._followerMotor.getForwardLimitSwitch().get()
+        return self._primaryMotor.getForwardLimitSwitch().get()
 
     def getReverseLimit(self) -> bool:
-        return self._primaryMotor.getReverseLimitSwitch().get() or self._followerMotor.getReverseLimitSwitch().get()
+        return self._primaryMotor.getReverseLimitSwitch().get()
 
 
     def setHeight(self, heightM: float) -> None:
