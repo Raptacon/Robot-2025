@@ -145,7 +145,7 @@ class DiverCarlElevator(commands2.Subsystem):
             self._disabled = False
             self._controller.reset(self._encoder.getDistance())
 
-        heightcM = heightCm - self._heightDelta
+        heightCm = heightCm - self._heightDelta
 
         if heightCm < 0:
             heightCm = 0
