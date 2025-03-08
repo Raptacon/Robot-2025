@@ -1,0 +1,27 @@
+---
+title: Stream Deck Layout
+---
+graph TB
+    streamdeck(("Stream Deck"))
+    autoAlign(("Auto Align"))
+    elevator(("Elevator"))
+    pivot(("Pivot to Reef"))
+    chute(("Chute Intake"))
+    chuteAdjust(("Adjust to Chute Intake"))
+    chutePivot(("Chute Pivot"))
+    chuteElevator(("Chute Elevator"))
+
+    streamdeck---|idle|streamdeck
+    streamdeck---|L2|autoAlign
+    streamdeck---|L3|autoAlign
+    streamdeck---|L4|autoAlign
+    streamdeck---|R2|autoAlign
+    streamdeck---|R3|autoAlign
+    streamdeck---|R4|autoAlign
+    autoAlign---|align|autoAlign
+    autoAlign~~~elevator
+    elevator~~~pivot
+    streamdeck-.-elevator
+    streamdeck-.-pivot
+    elevator-.-LNoteLayer(["auto align, pivot to reef,
+                and elevator simultaneously"])-.-pivot
