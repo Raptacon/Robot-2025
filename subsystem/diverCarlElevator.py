@@ -1,12 +1,7 @@
 import wpilib
-import wpimath
 import math
 import commands2
 import rev
-import wpimath.trajectory
-import wpimath.controller
-import wpimath.units
-import wpiutil
 from constants import DiverCarlElevatorConsts as c
 # plan to use 25:1 gear ratio
 # drum TBD

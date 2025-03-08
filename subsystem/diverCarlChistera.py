@@ -1,12 +1,7 @@
 import wpilib
-import wpimath
 import math
 import commands2
 import rev
-import wpimath.trajectory
-import wpimath.controller
-import wpimath.units
-import wpiutil
 from constants import DiverCarlChisteraConsts as c
 # 25:1
 
