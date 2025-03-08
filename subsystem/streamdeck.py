@@ -62,36 +62,52 @@ class StreamDeck(StatefulAutonomous):
     @state()
     def reef_position_L4(self):
         self.smartdashboard.putString("AutoAlign.Position", "L4")
-        self.smartdashboard.putString("Chute.Position", "L4")
+        self.smartdashboard.putString("Pivot.Position", "L4")
         self.smartdashboard.putString("Elevator.Position", "L4")
     
     @state()
     def reef_position_L3(self):
-        self.smartdashboard.putNumber("L3 Reef Position", self.keyPressed)
+        self.smartdashboard.putNumber("AutoAlign.Position", "L3")
+        self.smartdashboard.putString("Pivot.Position", "L3")
+        self.smartdashboard.putString("Elevator.Position", "L3")
 
     @state()
     def reef_position_L2(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "L2")
+        self.smartdashboard.putString("Pivot.Position", "L2")
+        self.smartdashboard.putString("Elevator.Position", "L2")
 
     @state()
     def reef_position_R4(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "R4")
+        self.smartdashboard.putString("Pivot.Position", "R4")
+        self.smartdashboard.putString("Elevator.Position", "R4")
 
     @state()
     def reef_position_R3(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "R3")
+        self.smartdashboard.putString("Pivot.Position", "R3")
+        self.smartdashboard.putString("Elevator.Position", "R3")
 
     @state()
     def reef_position_R2(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "R2")
+        self.smartdashboard.putString("Pivot.Position", "R2")
+        self.smartdashboard.putString("Elevator.Position", "R2")
 
     @state()
     def remove_algae_upper(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "L3_algae")
+        self.smartdashboard.putString("Pivot.Position", "L3_algae")
+        self.smartdashboard.putString("Elevator.Position", "L3_algae")
+        # run intake & pivot to get the algae out
 
     @state()
     def remove_algae_lower(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "L2_algae")
+        self.smartdashboard.putString("Pivot.Position", "L2_algae")
+        self.smartdashboard.putString("Elevator.Position", "L2_algae")
+        # run intake & pivot to get the algae out
 
     @state()
     def net_algae(self):
