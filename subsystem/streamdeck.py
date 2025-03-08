@@ -21,40 +21,68 @@ class StreamDeck(StatefulAutonomous):
     def idle(self):
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
-        wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
+        wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat) # TODO Need to make something seen on the streamdeck or smartdashboard
 
         match self.keyPressed:
             case 0:
-                self.next_state("align_to_reef_position_L4")
+                self.next_state("reef_position_L4")
             case 1:
-                self.next_state("align_to_reef_position_R4")
-            case 3:
+                self.next_state("reef_position_R4")
+            case 2:
                 self.next_state("remove_algae_upper")
+            case 3:
+                self.next_state("idle")
+            case 4:
+                self.next_state("net_algae")
+            case 5:
+                self.next_state("reef_position_L3")
+            case 6:
+                self.next_state("reef_position_R3")
+            case 7:
+                self.next_state("remove_algae_lower")
+            case 8:
+                self.next_state("idle")
+            case 9:
+                self.next_state("eject_algae")
+            case 10:
+                self.next_state("reef_position_L2")
+            case 11:
+                self.next_state("reef_position_R2")
+            case 12:
+                self.next_state("trough")
+            case 13:
+                self.next_state("coral_chute_intake")
+            case 14:
+                self.next_state("eject_coral")
+            case -1:
+                self.next_state("idle")
 
         # self.next_state("idle")
 
     @state()
-    def align_to_reef_position_L4(self):
-        
+    def reef_position_L4(self):
+        self.smartdashboard.putString("AutoAlign.Position", "L4")
+        self.smartdashboard.putString("Chute.Position", "L4")
+        self.smartdashboard.putString("Elevator.Position", "L4")
     
     @state()
-    def align_to_reef_position_L3(self):
+    def reef_position_L3(self):
+        self.smartdashboard.putNumber("L3 Reef Position", self.keyPressed)
+
+    @state()
+    def reef_position_L2(self):
         pass
 
     @state()
-    def align_to_reef_position_L2(self):
+    def reef_position_R4(self):
         pass
 
     @state()
-    def align_to_reef_position_R4(self):
+    def reef_position_R3(self):
         pass
 
     @state()
-    def align_to_reef_position_R3(self):
-        pass
-
-    @state()
-    def align_to_reef_position_R2(self):
+    def reef_position_R2(self):
         pass
 
     @state()
@@ -74,7 +102,7 @@ class StreamDeck(StatefulAutonomous):
         pass
 
     @state()
-    def align_to_trough(self):
+    def trough(self):
         pass
 
     @state()
