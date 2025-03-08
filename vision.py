@@ -11,37 +11,52 @@ from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from config import OperatorRobotConfig
 
 class Vision:
-    def __init__(self, driveTrain: SwerveDrivetrain, cam_name : str = "Sparky_Arducam_1"):
-        self.cam = PhotonCamera(cam_name)
+    def __init__(
+        self, driveTrain: SwerveDrivetrain,
+        left_cam_name: str = "Blue_Port_Left_Side",
+        right_cam_name: str = "Side_Port_Right_Side"
+    ):
+        self.cam_left = PhotonCamera(left_cam_name)
+        self.cam_right = PhotonCamera(right_cam_name)
         self.drive = driveTrain
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeWelded)
-        self.camPoseEst = PhotonPoseEstimator(
+        self.camPoseEstLeft = PhotonPoseEstimator(
             self.field_layout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            self.cam,
+            self.cam_left,
             Transform3d(
                 Translation3d(
-                    OperatorRobotConfig.robot_Cam_Translation[0],
-                    OperatorRobotConfig.robot_Cam_Translation[1],
-                    OperatorRobotConfig.robot_Cam_Translation[2]
+                    *OperatorRobotConfig.robot_Cam_Translation_Left
                 ),
                 Rotation3d.fromDegrees(
-                    OperatorRobotConfig.robot_Cam_Rotation_Degress[0],
-                    OperatorRobotConfig.robot_Cam_Rotation_Degress[1],
-                    OperatorRobotConfig.robot_Cam_Rotation_Degress[2]
+                    *OperatorRobotConfig.robot_Cam_Rotation_Degress_Left
+                )
+            )
+        )
+        self.camPoseEstRight = PhotonPoseEstimator(
+            self.field_layout,
+            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+            self.cam_left,
+            Transform3d(
+                Translation3d(
+                    *OperatorRobotConfig.robot_Cam_Translation_Right
+                ),
+                Rotation3d.fromDegrees(
+                    *OperatorRobotConfig.robot_Cam_Rotation_Degress_Right
                 )
             )
         )
 
+
     def getCamEstimate(self):
-        bestPipeline = self.cam.getLatestResult()
-        camEstPose = self.camPoseEst.update(bestPipeline)
-        if camEstPose:
-            robot_pose = camEstPose.estimatedPose.toPose2d()
+        bestPipelineLeft = self.cam_left.getLatestResult()
+        camEstPoseLeft = self.camPoseEstLeft.update(bestPipelineLeft)
+        if camEstPoseLeft:
+            robot_pose = camEstPoseLeft.estimatedPose.toPose2d()
 
             tag_distances = [
                 PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
-                for targ in bestPipeline.getTargets()
+                for targ in bestPipelineLeft.getTargets()
                 if targ is not None
             ]
 
@@ -52,7 +67,28 @@ class Vision:
             std_dev = self.distanceToStdDev(distance_to_closest_tag)
 
             self.drive.add_vision_pose_estimate(
-                camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, std_dev
+                camEstPoseLeft.estimatedPose.toPose2d(), camEstPoseLeft.timestampSeconds, std_dev
+            )
+
+        bestPipelineRight = self.cam_right.getLatestResult()
+        camEstPoseRight = self.camPoseEstRight.update(bestPipelineRight)
+        if camEstPoseRight:
+            robot_pose = camEstPoseRight.estimatedPose.toPose2d()
+
+            tag_distances = [
+                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
+                for targ in bestPipelineRight.getTargets()
+                if targ is not None
+            ]
+
+            distance_to_closest_tag = None
+            if len(tag_distances) > 0:
+                distance_to_closest_tag = min(tag_distances)
+
+            std_dev = self.distanceToStdDev(distance_to_closest_tag)
+
+            self.drive.add_vision_pose_estimate(
+                camEstPoseRight.estimatedPose.toPose2d(), camEstPoseRight.timestampSeconds, std_dev
             )
 
     def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
@@ -64,9 +100,9 @@ class Vision:
     
     def showTargetData(self, target : Optional[PhotonTrackedTarget] = None):
         if target == None:
-            target = self.cam.getLatestResult().getBestTarget()
+            target = self.cam_left.getLatestResult().getBestTarget()
 
-        if(not self.cam.getLatestResult().hasTargets() or self.cam.getLatestResult() == None):
+        if(not self.cam_left.getLatestResult().hasTargets() or self.cam_left.getLatestResult() == None):
             return
 
         targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)

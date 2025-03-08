@@ -22,7 +22,9 @@ class OperatorRobotConfig:
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
     #TODO Get the actual values from our robot
-    robot_Cam_Translation: Tuple[float] = (0.5, 0.0, 0.5)
-    robot_Cam_Rotation_Degress: Tuple[float] = (0.0, 30.0, 0.0)
+    robot_Cam_Translation_Left: Tuple[float] = (0.219075, 0.3063875, 0.365125)
+    robot_Cam_Translation_Right: Tuple[float] = (0.219075, -0.3063875, 0.365125)
+    robot_Cam_Rotation_Degress_Left: Tuple[float] = (0.0, 0.0, 0.0)
+    robot_Cam_Rotation_Degress_Right: Tuple[float] = (0.0, 0.0, 0.0)
     vision_std_dev_basis: float = 1.1
     vision_std_dev_scale_factor: float = 1
