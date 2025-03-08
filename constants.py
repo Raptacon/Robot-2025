@@ -109,8 +109,6 @@ class DiverCarlElevatorConsts():
     kMotorPrimaryCanId = 11
     kMinHeightCm = 0
     kMaxHeightCm = 57.912
-    kMaxVelCmPS = 57.912 / 2
-    kMaxAccelMPSS = 30.0
     kMechDeltaHeightCm = 30.48 # 12 inches to meters - approx height
     kMotorPrimaryInverted = True
     kEncoderFullRangeRot = 105
@@ -125,21 +123,19 @@ class DiverCarlElevatorConsts():
                 "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen}
 
 class DiverCarlChisteraConsts():
-    kMotorCanId = 12
-    kMotorInverted = False
-    kGearRatio = 5.0
-    kEncoderZeroOffsetRads = 0
-    kMinDeg = 0
-    kMaxDeg = 250
-    kMaxVelRPS = 6
-    kSoftLimits = {"forward": True, "forwardLimit": 3.14, "reverse": True, "reverseLimit": 0}
+    kMotorPrimaryCanId = 12
+    kMotorPrimaryInverted = False
+    kEncoderFullRangeRot = 12.486 #soft limit
+    kFullRangeDegrees = 180 #Estimate
+    kSoftLimits = {"forward": True, "forwardLimit": 0, "reverse": True, "reverseLimit": -1.0}
     kLimits = {"forward": False,
                 "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
-                "reverse": True,
+                "reverse": False,
                 "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen}
 
-    kMaxAccelRPSS = 0.5
-    kPid = (1.3, 0, 0.7)
+    kPidf0 = (0.8, 0.001, 0.04, 1.5, rev.ClosedLoopSlot.kSlot0) # P I D F Slot
+    kPidf1 = (0.5, 0, 0.0, 0, rev.ClosedLoopSlot.kSlot1) # P I D F Slot
+    kMaxOutRange0 = (-0.15, 0.4, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
 
 class CaptainPlanetConsts():
     kMotorCanId = 14

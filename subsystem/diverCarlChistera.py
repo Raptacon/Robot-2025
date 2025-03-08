@@ -1,26 +1,26 @@
 import wpilib
 import wpimath
+import math
 import commands2
 import rev
 import wpimath.trajectory
 import wpimath.controller
 import wpimath.units
-import math
+import wpiutil
 from constants import DiverCarlChisteraConsts as c
-# plan to use 25:1 gear ratio
-# drum TBD
-# 2 motors one will run opposite direction
+# 25:1
 
 
 class DiverCarlChistera(commands2.Subsystem):
 
     def __init__(self, dt=0.02) -> None:
+        super().__init__()
         self._dt = dt
-        self._primaryMotor = rev.SparkMax(c.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless)
+        self._primaryMotor = rev.SparkMax(c.kMotorPrimaryCanId, rev.SparkLowLevel.MotorType.kBrushless)
         # setup primary
         motorConfig = rev.SparkBaseConfig()
         motorConfig.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
-        motorConfig.inverted(c.kMotorInverted)
+        motorConfig.inverted(c.kMotorPrimaryInverted)
 
         #enable soft forward limits
         softLimit = rev.SoftLimitConfig()
@@ -31,6 +31,7 @@ class DiverCarlChistera(commands2.Subsystem):
 
         motorConfig.apply(softLimit)
 
+        #enable hard limits
         hardLimits = rev.LimitSwitchConfig()
         hardLimits.forwardLimitSwitchEnabled(c.kLimits["forward"])
         hardLimits.forwardLimitSwitchType(c.kLimits["forwardType"])
@@ -38,22 +39,27 @@ class DiverCarlChistera(commands2.Subsystem):
         hardLimits.reverseLimitSwitchType(c.kLimits["reverseType"])
         motorConfig.apply(hardLimits)
 
-
         self._encoder = self._primaryMotor.getEncoder()
         encConfig = rev.EncoderConfig()
-        encConfig.positionConversionFactor(1/c.kGearRatio * math.pi * 2)
-        encConfig.velocityConversionFactor(1/c.kGearRatio * math.pi * 2)
+        #should be set to 0..-1 control range
+        encConfig.positionConversionFactor(1/c.kEncoderFullRangeRot)
+        encConfig.velocityConversionFactor(1.0)
 
         motorConfig.apply(encConfig)
+
+        #setup PID Slot 0 - normal
+        motorConfig.closedLoop.FeedbackSensor(rev.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+        motorConfig.closedLoop.pidf(*c.kPidf0)
+        motorConfig.closedLoop.outputRange(*c.kMaxOutRange0)
+
+        #TODO Setup PID Slot 1 - slow?
+
         self._primaryMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
-        # set follower like primary except inverted
 
-        self._constraints = wpimath.trajectory.TrapezoidProfile.Constraints(c.kMaxVelRPS, c.kMaxAccelRPSS)
-        self._controller = wpimath.controller.ProfiledPIDController(*c.kPid, self._constraints, self._dt)
 
-        #TODO adjust tolerance. Currenlty 4% of 360 roation
-        self._controller.setTolerance(2*math.pi * 0.04)
-
+        self._controller = self._primaryMotor.getClosedLoopController()
+        self._controller.setReference(0, self._primaryMotor.ControlType.kPosition);
+        #TODO add profile states
 
         self._disabled = False
         self._curentGoal = 0.0
@@ -64,28 +70,26 @@ class DiverCarlChistera(commands2.Subsystem):
         self._trackingAlert = wpilib.Alert("mechanism","Arm moving", wpilib.Alert.AlertType.kInfo)
         self._trackingAlert.set(False)
 
+
     def periodic(self) -> None:
         # update telemtry
-        if self._controller.atGoal():
-            self._trackingAlert.setText(f"Arm stable at {self._encoder.getDistance():1.1f}m")
+        if self.atGoal():
+            self._trackingAlert.setText(f"Arm stable at {self._encoder.getPosition():1.1f}cm")
             self._trackingAlert.set(True)
         else:
-            self._trackingAlert.setText(f"arm at {self._encoder.getDistance():1.1f}m goal {self.getSetHeightM():1.1f}m")
+            self._trackingAlert.setText(f"Arm at {self._encoder.getPosition():1.1f}cm goal {self.getSetAngle():1.1f}cm")
             self._trackingAlert.set(True)
 
-        if self.getReverseLimit():
-            self._encoder.reset()
-
         # safe the motors if forward limit is hit
-        if self.getForwardLimit() and self._motors.get() > 0:
-            self._motors.set(0)
-            self._limitAlert.setText(f"Elevator TOP HIT at {self._encoder.getDistance()}m")
+        if self.getForwardLimit():
+            self._limitAlert.setText(f"Arm TOP HIT at {self._encoder.getPosition()}cm")
             self._limitAlert.set(True)
+            self._encoder.setPosition(0)
             return
 
-        if self.getReverseLimit() and self._motors.get() < 0:
-            self._motors.set(0)
-            self._limitAlert.setText(f"Elevator BOTTOM HIT at {self._encoder.getDistance()}m")
+        if self.getReverseLimit() and self._curentGoal > 0:
+            self._primaryMotor.set(0)
+            self._limitAlert.setText(f"Arm BOTTOM HIT at {self._encoder.getPosition()}cm")
             self._limitAlert.set(True)
             return
 
@@ -93,79 +97,84 @@ class DiverCarlChistera(commands2.Subsystem):
         self._limitAlert.set(False)
 
         if self._disabled:
-            self._motors.set(0)
+            self._primaryMotor.disable()
             return
 
-        output = self._controller.calculate(self._encoder.getDistance());
-        if output > 0.1:
-            output = 0.1
-        if output < -0.1:
-            output = -0.1
+        self._controller.setReference(self._curentGoal, self._primaryMotor.ControlType.kPosition)
 
 
-        self._motors.set(output)
+    def getRotFromCm(self, cm : float):
+        return cm * c.kEncoderFullRangeRot / c.kFullRangeDegrees;
+    def getCmFromRot(self, rot:float):
+        return rot * c.kFullRangeDegrees / c.kEncoderFullRangeRot
+
+
 
     def getForwardLimit(self) -> bool:
         """Returns if either motor controller has hit the forward limit switch
         Returns:
             bool: True if either motor controller has hit the forward limit switch
         """
+        #TODO add soft limits?
         return self._primaryMotor.getForwardLimitSwitch().get()
 
     def getReverseLimit(self) -> bool:
+        #TODO add soft limits?
         return self._primaryMotor.getReverseLimitSwitch().get()
 
 
-    def setHeight(self, heightM: float) -> None:
+    def setHeight(self, angleDeg: float) -> None:
         """
-        Sets the height of the elevator goal in meters from ground.
+        Sets the height of the arm goal in meters from ground.
         """
+        #0..-1 control
+        angleDeg = -angleDeg
         # TODO add max and min set constraints to setters
         if self._disabled:
             self._disabled = False
             self._controller.reset(self._encoder.getDistance())
 
-        heightM = heightM - self._heightDelta
+        angleDeg = angleDeg
 
-        if heightM < 0:
-            heightM = 0
+        if angleDeg < 0:
+            angleDeg = 0
 
-        # cache goal for easy access
-        self._curentGoal = heightM
-        self._controller.setGoal(heightM)
 
-    def getSetHeightM(self) -> float:
+        # cache goal for easy access and to use in periodic
+        self._curentGoal = self.getRotFromCm(angleDeg)
+
+    def getSetAngle(self) -> float:
         """
-        Returns the current goal height of the elevator in meters from ground.
+        Returns the current goal height of the arm in meters from ground.
         Returns:
-            float: set heigh in meters
+            float: set heigh in degrees
         """
-        return self._curentGoal+self._heightDelta
+        return self.getCmFromRot(-self._curentGoal)
 
-    def getHeightM(self) -> float:
-        """Returns the current height of the elevator in meters from ground.
+    def getAngleDeg(self) -> float:
+        """Returns the current height of the arm in meters from ground.
         """
-        return self._encoder.getDistance()
+        return self.getCmFromRot(self._encoder.getPosition())
 
     def atGoal(self) -> bool:
         """
-        Returns if the elevator is at the goal height.
+        Returns if the arm is at the goal height.
         """
-        return self._controller.atGoal()
+        return  math.isclose(self._encoder.getVelocity(), 0.0, abs_tol=0.01) and math.isclose(self._encoder.getPosition(), self._curentGoal, abs_tol=0.1)
 
     def getError(self) -> float:
         """
         Returns the error in meters between the goal height and the current height.
         """
-        return self._controller.getPositionError()
+        return self.getCmFromRot(self._curentGoal - self._encoder.getPosition())
 
     def setIncrementalMove(self, deltaM: float) -> None:
         """
-        Moves the elevator by the delta in meters from the current goal height.
+        Moves the arm by the delta in meters from the current goal height.
         """
         self.setHeight(self.getSetHeightM() + deltaM)
 
-    def stopElevator(self) -> None:
+    def stopArm(self) -> None:
         """
         Stops the by setting current height to goal. This will maintain the current height.
         """
@@ -173,6 +182,9 @@ class DiverCarlChistera(commands2.Subsystem):
 
     def disable(self) -> None:
         """
-        Disables the elvators motors. The elevator may fall under gravity.
+        Disables the elvators motors. The arm may fall under gravity.
         """
         self._disabled = True
+
+    def getDisabled(self) -> bool:
+        return self._disabled

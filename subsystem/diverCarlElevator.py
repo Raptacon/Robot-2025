@@ -20,7 +20,6 @@ class DiverCarlElevator(commands2.Subsystem):
         self._dt = dt
         self._heightDelta = elevatorHeightDelta
         self._primaryMotor = rev.SparkMax(c.kMotorPrimaryCanId, rev.SparkLowLevel.MotorType.kBrushless)
-        print("Init Encoder Pos ", self._primaryMotor.getEncoder().getPosition())
         # setup primary
         motorConfig = rev.SparkBaseConfig()
         motorConfig.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
@@ -49,11 +48,7 @@ class DiverCarlElevator(commands2.Subsystem):
         encConfig.positionConversionFactor(1.0)
         encConfig.velocityConversionFactor(1.0)
 
-        print("Init Encoder Pos ", self._primaryMotor.getEncoder().getPosition())
         motorConfig.apply(encConfig)
-        print("Init Encoder Pos ", self._primaryMotor.getEncoder().getPosition())
-
-
 
         #setup PID Slot 0 - normal
         motorConfig.closedLoop.FeedbackSensor(rev.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
@@ -63,7 +58,6 @@ class DiverCarlElevator(commands2.Subsystem):
         #TODO Setup PID Slot 1 - slow?
 
         self._primaryMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
-
 
         self._controller = self._primaryMotor.getClosedLoopController()
         self._controller.setReference(0, self._primaryMotor.ControlType.kPosition);

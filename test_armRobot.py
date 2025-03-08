@@ -20,6 +20,6 @@ class MyRobot(wpilib.TimedRobot):
 
     def testPeriodic(self):
         self.arm.periodic()
-        wpilib.SmartDashboard.putNumber("Arm Deg", self.arm.getPosDeg())
+        wpilib.SmartDashboard.putNumber("Arm Deg", self.arm.getAngleDeg())
 
         #print("Encoder Pos", self.elevator.getPosDeg())
