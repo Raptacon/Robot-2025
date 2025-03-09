@@ -7,8 +7,9 @@ from constants import DiverCarlElevatorConsts as c
 # Third-party imports
 import commands2
 import rev
+from wpilib import Timer, SmartDashboard
 from wpimath.trajectory import TrapezoidProfile
-
+from wpimath.controller import ElevatorFeedforward
 
 class DiverCarlElevator(commands2.Subsystem):
     def __init__(self, elevatorHeightDelta: float = c.kMechDeltaHeightCm, dt=0.02) -> None:
@@ -21,6 +22,7 @@ class DiverCarlElevator(commands2.Subsystem):
         motorConfig = rev.SparkBaseConfig()
         motorConfig.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
         motorConfig.inverted(c.kMotorPrimaryInverted)
+        motorConfig.smartCurrentLimit(c.kCurrentLimit)
 
         #enable soft forward limits
         softLimit = rev.SoftLimitConfig()
@@ -48,10 +50,7 @@ class DiverCarlElevator(commands2.Subsystem):
 
         motorConfig.apply(encConfig)
 
-        # Setup controllers
-        current_state = TrapezoidProfile.State(self._encoder.getPosition(), self._encoder.getVelocity)
-        goal_state = TrapezoidProfile.State(setpoint, 0.0)
-        trap_profile = TrapezoidProfile(TrapezoidProfile.Constraints(10, 5))
+        self._trap_profile = TrapezoidProfile(TrapezoidProfile.Constraints(3, 1.5))
 
         #setup PID Slot 0 - normal
         motorConfig.closedLoop.FeedbackSensor(rev.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
@@ -66,11 +65,24 @@ class DiverCarlElevator(commands2.Subsystem):
         self._disabled = False
         self._curentGoal = 0.0
 
+        self._setpoint = self.resetSetpoint()
+        self.known_positions = {
+            "L1": c.kL1,
+            "L2": c.kL2,
+            "L3": c.kL3,
+            "L4": c.kL4,
+        }
+
     def periodic(self) -> None:
         if self.getReverseLimit():
+            self.resetSetpoint()
             self._encoder.setPosition(0)
 
-        if self.getReverseLimit() and self._curentGoal > 0:
+        if self.getForwardLimit() and self._primaryMotor.get() > 0:
+            self._primaryMotor.set(0)
+            return
+
+        if self.getReverseLimit() and self._primaryMotor.get() < 0:
             self._primaryMotor.set(0)
             return
 
@@ -78,7 +90,16 @@ class DiverCarlElevator(commands2.Subsystem):
            self._primaryMotor.disable()
            return
 
-        self._controller.setReference(self._curentGoal, self._primaryMotor.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0)
+        # Setup profiler
+        goal_state = TrapezoidProfile.State(self._curentGoal, 0.0)
+        self._setpoint = self._trap_profile.calculate(self._dt, self._setpoint, goal_state)
+
+        SmartDashboard.putNumber("Profile elevator velocity", self._setpoint.velocity)
+        SmartDashboard.putNumber("Profile elevator position", self._setpoint.position)
+
+        self._controller.setReference(
+            self._curentGoal, self._primaryMotor.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0
+        )
 
     def getRotFromCm(self, cm: float):
         return cm * c.kEncoderFullRangeRot / c.kFullRangeHeighCm
@@ -91,18 +112,18 @@ class DiverCarlElevator(commands2.Subsystem):
         Returns:
             bool: True if either motor controller has hit the forward limit switch
         """
-        #TODO add soft limits?
         return self._primaryMotor.getForwardLimitSwitch().get()
 
     def getReverseLimit(self) -> bool:
-        #TODO add soft limits?
         return self._primaryMotor.getReverseLimitSwitch().get()
+
+    def resetSetpoint(self) -> TrapezoidProfile.State:
+        return TrapezoidProfile.State(0, 0)
 
     def setHeight(self, heightCm: float) -> None:
         """
         Sets the height of the elevator goal in meters from ground.
         """
-        # TODO add max and min set constraints to setters
         if self._disabled:
             self._disabled = False
             #self._controller.setReference(self._encoder.getPosition())

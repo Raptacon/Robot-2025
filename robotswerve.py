@@ -8,6 +8,7 @@ from typing import Callable
 from data.telemetry import Telemetry
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
+from commands.operateDiverCarlElevator import OperateElevator
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
@@ -159,22 +160,17 @@ class RobotSwerve:
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
 
+        if self.driver_controller.getAButtonPressed():
+            elevator_command = OperateElevator(self.elevator, "L3")
+            elevator_command.schedule()
+
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
     def testInit(self):
-        wpilib.SmartDashboard.putNumber("elevator_height", 0)
-        wpilib.SmartDashboard.putBoolean("elevator_on", False)
+        pass
 
     def testPeriodic(self):
-        turn_on = wpilib.SmartDashboard.getBoolean("elevator_on", False)
-        el_h = wpilib.SmartDashboard.getNumber("elevator_height", 0)
-        wpilib.SmartDashboard.putBoolean("at goal", self.elevator.atGoal())
-        wpilib.SmartDashboard.putBoolean("button_press", self.driver_controller.getAButtonPressed())
-
-        if turn_on:
-            self.elevator.setHeight(el_h)
-        if self.driver_controller.getAButtonPressed():
-            self.elevator.stopElevator()
+        pass
 
     def getDeployInfo(self, key: str) -> str:
         """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"
