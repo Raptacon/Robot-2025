@@ -5,6 +5,9 @@ Collection of numeric constants that define physical properties of the robot
 # Native imports
 import math
 
+# Third-Party Imports
+import rev
+
 #############################
 # ROBOT ###################
 #############################
@@ -105,16 +108,29 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 
 
 class DiverCarlElevatorConsts():
-    kMotorPrimaryCanId = 10
-    kMotorFollowerCanId = 11
-    kEncoderPins = (9, 8)
-    kMinHeightM = 0
-    kMaxHeightM = 1.5
-    kMaxVelMPS = 0.75
-    kMaxAccelMPSS = 0.2
-    kMechDeltaHeightM = 0.3048 # 12 inches to meters - approx height
-    kMotorPrimaryInverted = False
-    kPid = (1.3, 0, 0.7)
+    kCurrentLimitAmps = 40
+    kMotorCanId = 11
+    kMaxHeightAboveZeroCm = 167.64
+    kRotationsToMaxHeight = 105
+    kHeightAtZeroCm = 10.16
+    kMotorInverted = False
+    kTrapezoidProfile = (20, 10) # Max Vel (cm/s) Max Accel (cm/s^2)
+    kFeedforward = (0, 0.28, 0.07, 0) # kS kG kV kA
+    kPid0 = (1.3, 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D Slot
+    kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
+    kSoftLimits = {"forward": True, "forwardLimit": 165, "reverse": False, "reverseLimit": 0}
+    kLimits = {
+        "forward": True,
+        "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
+        "reverse": True,
+        "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen
+    }
+
+    kL1HeightCm = 20
+    kL2HeightCm = 32
+    kL3HeightCm = 44
+    kL4HeightCm = 66
+
 
 class DiverCarlChisteraConsts():
     kMotorCanId = 12

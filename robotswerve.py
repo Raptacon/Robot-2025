@@ -8,6 +8,7 @@ from typing import Callable
 from data.telemetry import Telemetry
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
+from commands.operate_elevator import OperateElevator
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
@@ -21,7 +22,7 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
-# from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
     """
@@ -34,6 +35,7 @@ class RobotSwerve:
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.elevator = Elevator()
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
         self.intake_state_machines = CaptainIntake()
 
@@ -63,7 +65,7 @@ class RobotSwerve:
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
-            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, wpilib.DriverStation)
+            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, self.elevator, wpilib.DriverStation)
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
         wpilib.SmartDashboard.putString("Git Branch", self.getDeployInfo("git-branch"))
@@ -92,6 +94,8 @@ class RobotSwerve:
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
         self.drivetrain.stop_driving()
+
+        self.elevator.motor.set(0)
 
         self.intake_state_machines.on_disable()
 
@@ -172,9 +176,9 @@ class RobotSwerve:
         wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
         self.intake_state_machines.on_iteration(self.timer.get())
 
-
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
+        elevator_command = OperateElevator(self.elevator, lambda: 50, False)
         pass
 
     def testPeriodic(self):
