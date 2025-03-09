@@ -110,7 +110,7 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 class DiverCarlElevatorConsts():
     kCurrentLimitAmps = 40
     kMotorCanId = 11
-    kMaxHeightAboveZeroCm = 167.64
+    kMaxHeightAboveZeroCm = 180
     kRotationsToMaxHeight = 105
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
@@ -118,18 +118,20 @@ class DiverCarlElevatorConsts():
     kFeedforward = (0, 0.28, 0.07, 0) # kS kG kV kA
     kPid0 = (1.3, 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D Slot
     kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
-    kSoftLimits = {"forward": True, "forwardLimit": 165, "reverse": False, "reverseLimit": 0}
+    kSoftLimits = {"forward": True, "forwardLimit": 188, "reverse": False, "reverseLimit": 0}
     kLimits = {
         "forward": True,
         "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
         "reverse": True,
         "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen
     }
-
-    kL1HeightCm = 20
-    kL2HeightCm = 32
-    kL3HeightCm = 44
-    kL4HeightCm = 66
+    # Offsets from the top of the reef pole and the elevator position (from the ground) for the chute,
+    # in centimeters
+    kL1OffsetCm = 3
+    kL2OffsetCm = 2
+    kL3OffsetCm = 2
+    kL4OffsetCm = 3
+    kChuteHeightCm = 40
 
 
 class DiverCarlChisteraConsts():

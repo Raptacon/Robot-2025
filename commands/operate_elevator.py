@@ -8,31 +8,91 @@ from subsystem.diverCarlElevator import DiverCarlElevator
 import commands2
 
 
-class OperateElevator(commands2.Command):
+class ElevateToGoal(commands2.Command):
     """
     """
     def __init__(
         self,
         elevator: DiverCarlElevator,
-        goal_height_cm: Callable[[], float],
-        terminate_at_goal: bool = False
+        goal_height_cm: float,
     ) -> None:
         """
         """
         super().__init__()
         self.elevator = elevator
         self.goal_height_cm = goal_height_cm
-        self.terminate_at_goal = terminate_at_goal
+        self.addRequirements(self.elevator)
+
+    def initialize(self):
+        """
+        """
+        self.elevator.resetProfilerState()
+        self.elevator.setGoalHeight(self.goal_height_cm)
+
+    def execute(self):
+        """
+        """
+        self.elevator.goToGoalHeight()
+
+    def isFinished(self) -> bool:
+        """
+        """
+        return self.elevator.checkIfAtGoalHeight()
+
+
+class ElevateToIncrementedGoal(commands2.Command):
+    """
+    """
+    def __init__(
+        self,
+        elevator: DiverCarlElevator,
+        goal_height_increment_cm: float,
+    ) -> None:
+        """
+        """
+        super().__init__()
+        self.elevator = elevator
+        self.goal_height_increment_cm = goal_height_increment_cm
+        self.addRequirements(self.elevator)
+
+    def initialize(self):
+        """
+        """
+        self.elevator.resetProfilerState()
+        self.elevator.incrementGoalHeight(self.goal_height_increment_cm)
+
+    def execute(self):
+        """
+        """
+        self.elevator.goToGoalHeight()
+
+    def isFinished(self) -> bool:
+        """
+        """
+        return self.elevator.checkIfAtGoalHeight()
+
+
+class ElevateManually(commands2.Command):
+    """
+    """
+    def __init__(
+        self,
+        elevator: DiverCarlElevator,
+        velocity_percentaage: Callable[[], float],
+    ) -> None:
+        """
+        """
+        super().__init__()
+        self.elevator = elevator
+        self.velocity_percentaage = velocity_percentaage
         self.addRequirements(self.elevator)
 
     def execute(self):
         """
         """
-        self.elevator.setGoalHeight(self.goal_height_cm())
+        self.elevator.manualControl(self.velocity_percentaage())
 
     def isFinished(self) -> bool:
         """
         """
-        if self.terminate_at_goal:
-            return self.elevator.at_goal
         return False

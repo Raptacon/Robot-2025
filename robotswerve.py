@@ -6,11 +6,12 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
+from constants import DiverCarlElevatorConsts
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
-from commands.operate_elevator import OperateElevator
+from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
-from lookups.reef_positions import reef_position_lookup
+from lookups.reef_positions import reef_position_lookup, reef_height_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.captainIntake import CaptainIntake
 
@@ -42,6 +43,7 @@ class RobotSwerve:
         # Initialize timer
         self.timer = wpilib.Timer()
         self.timer.start()
+        self.last_elevator_choice = "None"
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
@@ -166,6 +168,32 @@ class RobotSwerve:
              ),
         }
 
+        self.elevator.setDefaultCommand(ElevateManually(
+            self.elevator,
+            lambda: (
+                (-1 * wpimath.applyDeadband(self.driver_controller.getLeftTriggerAxis(), 0.2))
+                + wpimath.applyDeadband(self.driver_controller.getRightTriggerAxis(), 0.2)
+            )
+        ))
+
+        wpilib.SmartDashboard.putNumber("key_press", -1)
+
+        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL1OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 2).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL2OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 3).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 4).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL4OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
+        )
+
     def teleopPeriodic(self):
         if self.driver_controller.getLeftBumperButtonPressed():
             commands2.CommandScheduler.getInstance().cancelAll()
@@ -178,11 +206,11 @@ class RobotSwerve:
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
-        elevator_command = OperateElevator(self.elevator, lambda: 50, False)
-        pass
+        self.elevator.resetProfilerState()
+        self.elevator.setGoalHeight(60)
 
     def testPeriodic(self):
-        pass
+        self.elevator.goToGoalHeight()
 
     def getDeployInfo(self, key: str) -> str:
         """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"
@@ -211,3 +239,14 @@ class RobotSwerve:
             return "unknown"
         except json.JSONDecodeError:
             return "bad json in deploy file check for unescaped "
+
+    def keyChoice(self, key: int) -> bool:
+        """
+        """
+        latest_choice = wpilib.SmartDashboard.putNumber("key_press", -1)
+        return latest_choice == key
+
+    def isArmSafe(self) -> bool:
+        """
+        """
+        return True
