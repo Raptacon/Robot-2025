@@ -210,11 +210,9 @@ class RobotSwerve:
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
-        self.elevator.resetProfilerState()
-        self.elevator.setGoalHeight(60)
 
     def testPeriodic(self):
-        self.elevator.goToGoalHeight()
+        pass
 
     def getDeployInfo(self, key: str) -> str:
         """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"
