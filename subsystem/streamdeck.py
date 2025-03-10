@@ -111,20 +111,30 @@ class StreamDeck(StatefulAutonomous):
 
     @state()
     def net_algae(self):
-        pass
+        self.smartdashboard.putString("Pivot.Position", "net")
+        self.smartdashboard.putString("Elevator.Position", "net")
+        # intake unintakes the algae
 
     @state()
     def eject_algae(self):
-        pass
+        self.smartdashboard.putString("Pivot.Position", "eject_algae")
+        self.smartdashboard.putString("Elevatot.Position", "eject_algae")
+        # intake unintakes the algae
 
     @state()
     def trough(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "trough")
+        self.smartdashboard.putString("Pivot.Position", "trough")
+        self.smartdashboard.putString("Elevator.Position", "trough")
 
     @state()
     def eject_coral(self):
-        pass
+        self.smartdashboard.putString("Pivot.Position", "L2_algae")
+        self.smartdashboard.putString("Elevator.Position", "L2_algae")
+        # unintake algae
 
     @state()
     def coral_chute_intake(self):
-        pass
+        self.smartdashboard.putNumber("AutoAlign.Position", "chute_intake")
+        self.smartdashboard.putString("Pivot.Position", "chute_intake")
+        self.smartdashboard.putString("Elevator.Position", "chute_intake")
