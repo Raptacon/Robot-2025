@@ -43,7 +43,6 @@ class RobotSwerve:
         # Initialize timer
         self.timer = wpilib.Timer()
         self.timer.start()
-        self.last_elevator_choice = "None"
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
@@ -241,12 +240,6 @@ class RobotSwerve:
             return "unknown"
         except json.JSONDecodeError:
             return "bad json in deploy file check for unescaped "
-
-    def keyChoice(self, key: int) -> bool:
-        """
-        """
-        latest_choice = wpilib.SmartDashboard.putNumber("key_press", -1)
-        return latest_choice == key
 
     def isArmSafe(self) -> bool:
         """

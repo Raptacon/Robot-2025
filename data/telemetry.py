@@ -67,7 +67,7 @@ elevatorEntries = [
     ["elevatorCurrentHeight", FloatLogEntry, "/positions"],
     ["elevatorCurrentGoalHeight", FloatLogEntry, "/positions"],
     ["elevatorCurrentGoalHeightAboveZero", FloatLogEntry, "/positions"],
-    ["elevatorAtGoal", BooleanLogEntry, "/positions"],
+    ["elevatorAtGoal", BooleanLogEntry, "/positions/atgoal"],
     ["elevatorErrorFromGoal", FloatLogEntry, "/positions"],
     ["elevatorAtTopLimit", BooleanLogEntry, "/limits"],
     ["elevatorAtBottomLimit", BooleanLogEntry, "/limits"],
