@@ -51,8 +51,12 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
-        NamedCommands.registerCommand('Raise_Place', commands2.cmd.print_("Raise_place"))
-        NamedCommands.registerCommand('Coral_Intake', commands2.cmd.print_("Coral_Intake"))
+        NamedCommands.registerCommand('Raise_Place', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L1', ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L2', ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L3', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L4', ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Coral_Intake', ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm))
 
         # Autonomous setup
         self.auto_command = None
