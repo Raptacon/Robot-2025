@@ -1,8 +1,7 @@
-
-
 # Internal imports
 from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from subsystem.diverCarlElevator import DiverCarlElevator
 
 # Third-party imports
 import wpilib
@@ -52,6 +51,31 @@ for i in range(len(OperatorRobotConfig.swerve_module_channels)):
         [f"moduleVelocity{i + 1}", FloatLogEntry, f"module{i + 1}/velocity"],
     ])
 
+elevatorEntries = [
+        # self.current_height_above_zero = self.encoder.getPosition()
+        # self.current_height = self.height_at_zero + self.current_height_above_zero
+        # self.current_goal_height = self.height_at_zero
+        # self.current_goal_height_above_zero = 0
+        # self.at_goal = self.checkIfAtGoalHeight()
+        # self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
+        # self.at_top_limit = self.motor.getForwardLimitSwitch().get()
+        # self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
+        # self.motor_current = self.motor.getOutputCurrent()
+        # self.motor_output = self.motor.getAppliedOutput()
+        # self.motor_velocity = self.encoder.getVelocity()
+    ["elevatorCurrentHeightAboveZero", FloatLogEntry, "/positions"],
+    ["elevatorCurrentHeight", FloatLogEntry, "/positions"],
+    ["elevatorCurrentGoalHeight", FloatLogEntry, "/positions"],
+    ["elevatorCurrentGoalHeightAboveZero", FloatLogEntry, "/positions"],
+    ["elevatorAtGoal", BooleanLogEntry, "/positions/atgoal"],
+    ["elevatorErrorFromGoal", FloatLogEntry, "/positions"],
+    ["elevatorAtTopLimit", BooleanLogEntry, "/limits"],
+    ["elevatorAtBottomLimit", BooleanLogEntry, "/limits"],
+    ["elevatorMotorCurrent", FloatLogEntry, "/output"],
+    ["elevatorMotorOutput", FloatLogEntry, "/output"],
+    ["elevatorMotorVelocity", FloatLogEntry, "/output"],
+]
+
 driverStationEntries = [
     ["alliance", StringLogEntry, "alliance"],
     ["autonomous", BooleanLogEntry, "autonomous"],
@@ -67,6 +91,7 @@ class Telemetry:
         driverController: wpilib.XboxController = None,
         mechController: wpilib.XboxController = None,
         driveTrain: SwerveDrivetrain = None,
+        elevator: DiverCarlElevator = None,
         driverStation: wpilib.DriverStation = None,
     ):
         self.driverController = driverController
@@ -74,6 +99,7 @@ class Telemetry:
         self.odometryPosition = driveTrain.pose_estimator
         self.driveTrain = driveTrain
         self.swerveModules = driveTrain.swerve_modules
+        self.elevator = elevator
         self.driverStation = driverStation
 
         self.networkTable = NetworkTableInstance.getDefault()
@@ -91,6 +117,8 @@ class Telemetry:
             setattr(self, "mech" + entryname, entrytype(self.datalog, "mech/" + logname))
         for entryname, entrytype, logname in telemetryRawSwerveDriveTrainEntries:
             setattr(self, entryname, entrytype(self.datalog, "rawswervedrivetrain/" + logname))
+        for entryname, entrytype, logname in elevatorEntries:
+            setattr(self, entryname, entrytype(self.datalog, "elevator/" + logname))
         for entryname, entrytype, logname in driverStationEntries:
             setattr(self, entryname, entrytype(self.datalog, "driverstation/" + logname))
 
@@ -167,6 +195,23 @@ class Telemetry:
             getattr(self, f"drivePercent{i + 1}").append(swerveModule.drive_motor.getAppliedOutput())
             getattr(self, f"moduleVelocity{i + 1}").append(swerveModule.current_state().speed)
 
+    def getElevatorInputs(self):
+        """
+        Retrieves values reflecting the current state of the elevator and information about
+        the goal position of the elevator
+        """
+        self.elevatorCurrentHeightAboveZero.append(self.elevator.current_height_above_zero)
+        self.elevatorCurrentHeight.append(self.elevator.current_height)
+        self.elevatorCurrentGoalHeight.append(self.elevator.current_goal_height)
+        self.elevatorCurrentGoalHeightAboveZero.append(self.elevator.current_goal_height_above_zero)
+        self.elevatorAtGoal.append(self.elevator.at_goal)
+        self.elevatorErrorFromGoal.append(self.elevator.error_from_goal)
+        self.elevatorAtTopLimit.append(self.elevator.at_top_limit)
+        self.elevatorAtBottomLimit.append(self.elevator.at_bottom_limit)
+        self.elevatorMotorCurrent.append(self.elevator.motor_current)
+        self.elevatorMotorOutput.append(self.elevator.motor_output)
+        self.elevatorMotorVelocity.append(self.elevator.motor_velocity)
+
     def getDriverStationInputs(self):
         """
         Gets the inputs of some match/general robot things,
@@ -195,6 +240,8 @@ class Telemetry:
             self.getFullSwerveState()
         if self.swerveModules is not None:
             self.getRawSwerveInputs()
+        if self.elevator is not None:
+            self.getElevatorInputs()
         if self.driverStation is not None:
             self.getDriverStationInputs()
 
