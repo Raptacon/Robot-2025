@@ -178,19 +178,19 @@ class RobotSwerve:
 
         wpilib.SmartDashboard.putNumber("key_press", -1)
 
-        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
             ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL1OffsetCm)
         )
-        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 2).and_(self.isArmSafe).onTrue(
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 2).and_(self.isArmSafe).onTrue(
             ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL2OffsetCm)
         )
-        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 3).and_(self.isArmSafe).onTrue(
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 3).and_(self.isArmSafe).onTrue(
             ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm)
         )
-        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 4).and_(self.isArmSafe).onTrue(
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 4).and_(self.isArmSafe).onTrue(
             ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL4OffsetCm)
         )
-        Trigger(lambda: wpilib.SmartDashboard.putNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
             ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
         )
 

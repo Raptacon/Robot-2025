@@ -29,7 +29,8 @@ class DiverCarlElevator(commands2.Subsystem):
         self.motor = rev.SparkFlex(c.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless)
         self.encoder = self.motor.getEncoder()
         self.motor_pid = self.motor.getClosedLoopController()
-        self.profiler = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfile))
+        self.profilerUp = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileUp))
+        self.profilerDown = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileDown))
         self.feedforward = ElevatorFeedforward(*c.kFeedforward, self.update_period)
 
         # Configure motor
@@ -37,8 +38,10 @@ class DiverCarlElevator(commands2.Subsystem):
         self.encoder.setPosition(0)
 
         # Instantiate elevator state variables for telemetry
-        self.updateSensorRecordings()
+        self.current_goal_height = self.height_at_zero
+        self.current_goal_height_above_zero = 0
         self.last_profiler_state = TrapezoidProfile.State(0, 0)
+        self.updateSensorRecordings()
 
     def configureMotor(self) -> None:
         """
@@ -127,7 +130,11 @@ class DiverCarlElevator(commands2.Subsystem):
         """
         Sets the height of the elevator goal in centimeters from the ground.
         """
-        self.last_profiler_state = self.profiler.calculate(
+        profiler_use = self.profilerDown
+        if self.current_goal_height_above_zero > self.last_profiler_state.position:
+            profiler_use = self.profilerUp
+
+        self.last_profiler_state = profiler_use.calculate(
             self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
         )
 
@@ -149,7 +156,9 @@ class DiverCarlElevator(commands2.Subsystem):
     def manualControl(self, velocity_percentage: float) -> None:
         """
         """
-        desired_velocity = velocity_percentage * c.kTrapezoidProfile[0]
+        desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
+        if desired_velocity < 0:
+            desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)
         if self.at_bottom_limit or self.at_top_limit:
             desired_velocity = 0
         self.motor.setVoltage(self.feedforward.calculate(desired_velocity))
@@ -159,8 +168,6 @@ class DiverCarlElevator(commands2.Subsystem):
         """
         self.current_height_above_zero = self.encoder.getPosition()
         self.current_height = self.height_at_zero + self.current_height_above_zero
-        self.current_goal_height = self.height_at_zero
-        self.current_goal_height_above_zero = 0
         self.at_top_limit = self.motor.getForwardLimitSwitch().get()
         self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
         self.motor_current = self.motor.getOutputCurrent()

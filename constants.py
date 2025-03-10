@@ -111,14 +111,15 @@ class DiverCarlElevatorConsts():
     kCurrentLimitAmps = 40
     kMotorCanId = 11
     kMaxHeightAboveZeroCm = 180
-    kRotationsToMaxHeight = 105
+    kRotationsToMaxHeight = 101
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
-    kTrapezoidProfile = (20, 10) # Max Vel (cm/s) Max Accel (cm/s^2)
-    kFeedforward = (0, 0.28, 0.07, 0) # kS kG kV kA
-    kPid0 = (1.3, 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D Slot
+    kTrapezoidProfileUp = (135, 150) # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (35, 37.5)
+    kFeedforward = (0, 0.28, 0.1, 0) # kS kG kV kA
+    kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D Slot
     kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
-    kSoftLimits = {"forward": True, "forwardLimit": 188, "reverse": False, "reverseLimit": 0}
+    kSoftLimits = {"forward": True, "forwardLimit": 178, "reverse": False, "reverseLimit": 0}
     kLimits = {
         "forward": True,
         "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
@@ -127,11 +128,11 @@ class DiverCarlElevatorConsts():
     }
     # Offsets from the top of the reef pole and the elevator position (from the ground) for the chute,
     # in centimeters
-    kL1OffsetCm = 3
-    kL2OffsetCm = 2
-    kL3OffsetCm = 2
-    kL4OffsetCm = 3
-    kChuteHeightCm = 40
+    kL1OffsetCm = 0
+    kL2OffsetCm = 0
+    kL3OffsetCm = 0
+    kL4OffsetCm = 0
+    kChuteHeightCm = 10.16
 
 
 class DiverCarlChisteraConsts():
