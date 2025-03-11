@@ -4,7 +4,7 @@ import rev
 from constants import DiverCarlChisteraConsts as c
 # 25:1
 
-from robotpy_ext.autonomous import StatefulAutonomous, state, timed_state
+from robotpy_ext.autonomous import StatefulAutonomous, state
 
 componentName = "DiverCarlChistera"
 CONST_ELEVATOR_DOWN = "elevator.down"
