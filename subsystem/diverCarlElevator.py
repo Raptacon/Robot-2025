@@ -13,11 +13,12 @@ from wpimath.trajectory import TrapezoidProfile
 
 
 class DiverCarlElevator(commands2.Subsystem):
-    """
-    """
-    def __init__(self, height_at_zero: float = c.kHeightAtZeroCm, update_period: float = 0.05) -> None:
-        """
-        """
+    """ """
+
+    def __init__(
+        self, height_at_zero: float = c.kHeightAtZeroCm, update_period: float = 0.05
+    ) -> None:
+        """ """
         super().__init__()
 
         # Save starting configurations
@@ -26,11 +27,17 @@ class DiverCarlElevator(commands2.Subsystem):
 
         # Set up objects for controlling the motor
         self.timer = Timer()
-        self.motor = rev.SparkFlex(c.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless)
+        self.motor = rev.SparkFlex(
+            c.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
+        )
         self.encoder = self.motor.getEncoder()
         self.motor_pid = self.motor.getClosedLoopController()
-        self.profilerUp = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileUp))
-        self.profilerDown = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileDown))
+        self.profilerUp = TrapezoidProfile(
+            TrapezoidProfile.Constraints(*c.kTrapezoidProfileUp)
+        )
+        self.profilerDown = TrapezoidProfile(
+            TrapezoidProfile.Constraints(*c.kTrapezoidProfileDown)
+        )
         self.feedforward = ElevatorFeedforward(*c.kFeedforward, self.update_period)
 
         # Configure motor
@@ -44,22 +51,19 @@ class DiverCarlElevator(commands2.Subsystem):
         self.updateSensorRecordings()
 
     def configureMotor(self) -> None:
-        """
-        """
+        """ """
         motor_config = rev.SparkBaseConfig()
 
         # Set overall configurations
         (
-            motor_config
-            .setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
+            motor_config.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
             .inverted(c.kMotorInverted)
             .smartCurrentLimit(c.kCurrentLimitAmps)
         )
 
         # Configure soft limits (software-enforced elevator range of motion limits)
         (
-            motor_config.softLimit
-            .forwardSoftLimit(c.kSoftLimits["forwardLimit"])
+            motor_config.softLimit.forwardSoftLimit(c.kSoftLimits["forwardLimit"])
             .forwardSoftLimitEnabled(c.kSoftLimits["forward"])
             .reverseSoftLimit(c.kSoftLimits["reverseLimit"])
             .reverseSoftLimitEnabled(c.kSoftLimits["reverse"])
@@ -67,8 +71,7 @@ class DiverCarlElevator(commands2.Subsystem):
 
         # Conigure hard limits (hardware triggers to stop motor execution)
         (
-            motor_config.limitSwitch
-            .forwardLimitSwitchEnabled(c.kLimits["forward"])
+            motor_config.limitSwitch.forwardLimitSwitchEnabled(c.kLimits["forward"])
             .forwardLimitSwitchType(c.kLimits["forwardType"])
             .reverseLimitSwitchEnabled(c.kLimits["reverse"])
             .reverseLimitSwitchType(c.kLimits["reverseType"])
@@ -76,32 +79,35 @@ class DiverCarlElevator(commands2.Subsystem):
 
         # Set conversion factors to turn motor units into centimeters
         (
-            motor_config.encoder
-            .positionConversionFactor(c.kMaxHeightAboveZeroCm / c.kRotationsToMaxHeight)
-            .velocityConversionFactor((c.kMaxHeightAboveZeroCm / c.kRotationsToMaxHeight) / 60)
+            motor_config.encoder.positionConversionFactor(
+                c.kMaxHeightAboveZeroCm / c.kRotationsToMaxHeight
+            ).velocityConversionFactor(
+                (c.kMaxHeightAboveZeroCm / c.kRotationsToMaxHeight) / 60
+            )
         )
 
         # Set up the PID controller
         (
-            motor_config.closedLoop
-            .pid(*c.kPid0)
+            motor_config.closedLoop.pid(*c.kPid0)
             .outputRange(*c.kMaxOutRange0)
             .setFeedbackSensor(rev.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
         )
 
         # Apply the configuration and burn to the SparkFlex's flash memory
         self.motor.configure(
-            motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters, rev.SparkBase.PersistMode.kPersistParameters
+            motor_config,
+            rev.SparkBase.ResetMode.kNoResetSafeParameters,
+            rev.SparkBase.PersistMode.kPersistParameters,
         )
 
     def resetProfilerState(self) -> None:
-        """
-        """
-        self.last_profiler_state = TrapezoidProfile.State(self.current_height_above_zero, self.motor_velocity)
+        """ """
+        self.last_profiler_state = TrapezoidProfile.State(
+            self.current_height_above_zero, self.motor_velocity
+        )
 
     def validateGoalHeight(self) -> None:
-        """
-        """
+        """ """
         if self.current_goal_height < self.height_at_zero:
             self.current_goal_height = self.height_at_zero
         if self.current_goal_height > (c.kMaxHeightAboveZeroCm + self.height_at_zero):
@@ -113,17 +119,19 @@ class DiverCarlElevator(commands2.Subsystem):
             self.current_goal_height_above_zero = c.kMaxHeightAboveZeroCm
 
     def setGoalHeight(self, height_cm: float) -> None:
-        """
-        """
+        """ """
         self.current_goal_height = height_cm
-        self.current_goal_height_above_zero = self.current_goal_height - self.height_at_zero
+        self.current_goal_height_above_zero = (
+            self.current_goal_height - self.height_at_zero
+        )
         self.validateGoalHeight()
 
     def incrementGoalHeight(self, height_increment_cm: float) -> None:
-        """
-        """
+        """ """
         self.current_goal_height = self.current_goal_height + height_increment_cm
-        self.current_goal_height_above_zero = self.current_goal_height_above_zero + height_increment_cm
+        self.current_goal_height_above_zero = (
+            self.current_goal_height_above_zero + height_increment_cm
+        )
         self.validateGoalHeight()
 
     def goToGoalHeight(self) -> None:
@@ -135,27 +143,31 @@ class DiverCarlElevator(commands2.Subsystem):
             profiler_use = self.profilerUp
 
         self.last_profiler_state = profiler_use.calculate(
-            self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
+            self.update_period,
+            self.last_profiler_state,
+            TrapezoidProfile.State(self.current_goal_height_above_zero, 0),
         )
 
         self.motor_pid.setReference(
             self.last_profiler_state.position,
-            rev.SparkLowLevel.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0,
-            self.feedforward.calculate(self.motor_velocity, self.last_profiler_state.velocity),
-            rev.SparkClosedLoopController.ArbFFUnits.kVoltage
+            rev.SparkLowLevel.ControlType.kPosition,
+            rev.ClosedLoopSlot.kSlot0,
+            self.feedforward.calculate(
+                self.motor_velocity, self.last_profiler_state.velocity
+            ),
+            rev.SparkClosedLoopController.ArbFFUnits.kVoltage,
         )
 
     def checkIfAtGoalHeight(self) -> bool:
-        """
-        """
-        return (
-            math.isclose(self.encoder.getVelocity(), 0.0, abs_tol=0.1)
-            and math.isclose(self.encoder.getPosition(), self.current_goal_height_above_zero, abs_tol=1)
+        """ """
+        return math.isclose(
+            self.encoder.getVelocity(), 0.0, abs_tol=0.1
+        ) and math.isclose(
+            self.encoder.getPosition(), self.current_goal_height_above_zero, abs_tol=1
         )
 
     def manualControl(self, velocity_percentage: float) -> None:
-        """
-        """
+        """ """
         desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
         if desired_velocity < 0:
             desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)
@@ -164,8 +176,7 @@ class DiverCarlElevator(commands2.Subsystem):
         self.motor.setVoltage(self.feedforward.calculate(desired_velocity))
 
     def updateSensorRecordings(self) -> None:
-        """
-        """
+        """ """
         self.current_height_above_zero = self.encoder.getPosition()
         self.current_height = self.height_at_zero + self.current_height_above_zero
         self.at_top_limit = self.motor.getForwardLimitSwitch().get()
@@ -174,21 +185,26 @@ class DiverCarlElevator(commands2.Subsystem):
         self.motor_output = self.motor.getAppliedOutput()
         self.motor_velocity = self.encoder.getVelocity()
         self.at_goal = self.checkIfAtGoalHeight()
-        self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
+        self.error_from_goal = (
+            self.current_height_above_zero - self.current_goal_height_above_zero
+        )
 
     def periodic(self) -> None:
-        """
-        """
+        """ """
         self.updateSensorRecordings()
+
+        # Tell everybody that the elevator is at the bottom
+        self.smartdashboard.setBoolean(c.CONST_ELEVATOR_DOWN, self.at_bottom_limit)
 
         if self.at_bottom_limit:
             self.encoder.setPosition(0)
 
-        if (self.at_top_limit and self.motor.get() > 0) or (self.at_bottom_limit and self.motor.get() < 0):
+        if (self.at_top_limit and self.motor.get() > 0) or (
+            self.at_bottom_limit and self.motor.get() < 0
+        ):
             self.motor.set(0)
             return
 
     def disable(self) -> None:
-        """
-        """
+        """ """
         self.motor.disable()
