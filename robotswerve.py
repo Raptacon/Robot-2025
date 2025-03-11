@@ -6,10 +6,13 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
+from constants import DiverCarlElevatorConsts
+from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
+from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
-from lookups.reef_positions import reef_position_lookup
+from lookups.reef_positions import reef_position_lookup, reef_height_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.captainIntake import CaptainIntake
 
@@ -21,7 +24,7 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
-# from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
     """
@@ -34,6 +37,7 @@ class RobotSwerve:
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
+        self.elevator = Elevator()
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
         self.intake_state_machines = CaptainIntake()
 
@@ -47,8 +51,12 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
-        NamedCommands.registerCommand('Raise_Place', commands2.cmd.print_("Raise_place"))
-        NamedCommands.registerCommand('Coral_Intake', commands2.cmd.print_("Coral_Intake"))
+        NamedCommands.registerCommand('Raise_Place', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L1', ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L2', ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L3', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L4', ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Coral_Intake', ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm))
 
         # Autonomous setup
         self.auto_command = None
@@ -63,7 +71,7 @@ class RobotSwerve:
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
-            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, wpilib.DriverStation)
+            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, self.elevator, wpilib.DriverStation)
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
         wpilib.SmartDashboard.putString("Git Branch", self.getDeployInfo("git-branch"))
@@ -73,6 +81,9 @@ class RobotSwerve:
         wpilib.SmartDashboard.putString(
             "Deploy User", self.getDeployInfo("deploy-user")
         )
+
+        # Vision setup
+        self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -89,9 +100,14 @@ class RobotSwerve:
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDefaultDataCollections()
 
+        self.vision.getCamEstimate()
+        self.vision.showTargetData()
+
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
         self.drivetrain.stop_driving()
+
+        self.elevator.motor.set(0)
 
         self.intake_state_machines.on_disable()
 
@@ -162,6 +178,32 @@ class RobotSwerve:
              ),
         }
 
+        self.elevator.setDefaultCommand(ElevateManually(
+            self.elevator,
+            lambda: (
+                (-1 * wpimath.applyDeadband(self.driver_controller.getLeftTriggerAxis(), 0.2))
+                + wpimath.applyDeadband(self.driver_controller.getRightTriggerAxis(), 0.2)
+            )
+        ))
+
+        wpilib.SmartDashboard.putNumber("key_press", -1)
+
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL1OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 2).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL2OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 3).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 4).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL4OffsetCm)
+        )
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
+            ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
+        )
+
     def teleopPeriodic(self):
         if self.driver_controller.getLeftBumperButtonPressed():
             commands2.CommandScheduler.getInstance().cancelAll()
@@ -172,10 +214,8 @@ class RobotSwerve:
         wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
         self.intake_state_machines.on_iteration(self.timer.get())
 
-
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
-        pass
 
     def testPeriodic(self):
         pass
@@ -207,3 +247,8 @@ class RobotSwerve:
             return "unknown"
         except json.JSONDecodeError:
             return "bad json in deploy file check for unescaped "
+
+    def isArmSafe(self) -> bool:
+        """
+        """
+        return True

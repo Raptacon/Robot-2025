@@ -6,6 +6,9 @@ Collection of numeric constants that define physical properties of the robot
 import math
 import rev
 
+# Third-Party Imports
+import rev
+
 #############################
 # ROBOT ###################
 #############################
@@ -118,31 +121,6 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
     moduleType: str = "Mk4i_L2"
 
 
-class DiverCarlElevatorConsts:
-    kMotorPrimaryCanId = 11
-    kMinHeightCm = 0
-    kMaxHeightCm = 57.912
-    kMechDeltaHeightCm = 30.48  # 12 inches to meters - approx height
-    kMotorPrimaryInverted = True
-    kEncoderFullRangeRot = 105
-    kFullRangeHeighCm = 57.912
-    kPidf0 = (1.3, 0, 0.7, 0, rev.ClosedLoopSlot.kSlot0)  # P I D F Slot
-    kPidf1 = (0.5, 0, 0.0, 0, rev.ClosedLoopSlot.kSlot1)  # P I D F Slot
-    kMaxOutRange0 = (-0.5, 1.0, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
-    kSoftLimits = {
-        "forward": True,
-        "forwardLimit": 101,
-        "reverse": True,
-        "reverseLimit": 0,
-    }
-    kLimits = {
-        "forward": False,
-        "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
-        "reverse": True,
-        "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen,
-    }
-
-
 class DiverCarlChisteraConsts:
     kMotorPrimaryCanId = 12
     kMotorPrimaryInverted = False
@@ -161,9 +139,38 @@ class DiverCarlChisteraConsts:
         "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen,
     }
 
-    kPidf0 = (0.8, 0.001, 0.04, 1.5, rev.ClosedLoopSlot.kSlot0)  # P I D F Slot
-    kPidf1 = (0.5, 0, 0.0, 0, rev.ClosedLoopSlot.kSlot1)  # P I D F Slot
-    kMaxOutRange0 = (-0.15, 0.4, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
+
+class DiverCarlElevatorConsts:
+    kCurrentLimitAmps = 40
+    kMotorCanId = 11
+    kMaxHeightAboveZeroCm = 180
+    kRotationsToMaxHeight = 101
+    kHeightAtZeroCm = 10.16
+    kMotorInverted = False
+    kTrapezoidProfileUp = (135, 150)  # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (35, 37.5)
+    kFeedforward = (0, 0.28, 0.1, 0)  # kS kG kV kA
+    kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0)  # P I D Slot
+    kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
+    kSoftLimits = {
+        "forward": True,
+        "forwardLimit": 178,
+        "reverse": False,
+        "reverseLimit": 0,
+    }
+    kLimits = {
+        "forward": True,
+        "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
+        "reverse": True,
+        "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen,
+    }
+    # Offsets from the top of the reef pole and the elevator position (from the ground) for the chute,
+    # in centimeters
+    kL1OffsetCm = 0
+    kL2OffsetCm = 0
+    kL3OffsetCm = 0
+    kL4OffsetCm = 0
+    kChuteHeightCm = 10.16
 
 
 class CaptainPlanetConsts:
