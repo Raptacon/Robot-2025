@@ -1,13 +1,13 @@
 import wpilib
 import math
 import rev
-from constants import DiverCarlChisteraConsts as c
+from constants import DiverCarlChisteraConsts as c, DiverCarlElevatorConsts as ec
+
 # 25:1
 
 from robotpy_ext.autonomous import StatefulAutonomous, state
 
 componentName = "DiverCarlChistera"
-CONST_ELEVATOR_DOWN = "elevator.down"
 CONST_PIVOT_CLEAR = "pivot.clear"
 
 
@@ -75,7 +75,7 @@ class DiverCarlChistera(StatefulAutonomous):
         # State machine stuff
         self.desiredAngle = 0.0
         self.smartdashboard.setDefaultString(f"{componentName}.position", "idle")
-        self.smartdashboard.setDefaultBoolean(CONST_ELEVATOR_DOWN, False)
+        self.smartdashboard.setDefaultBoolean(ec.CONST_ELEVATOR_DOWN, False)
 
     def periodic(self) -> None:
         # update telemtry
@@ -198,6 +198,7 @@ class DiverCarlChistera(StatefulAutonomous):
             f"{componentName}.position", "idle"
         )
         # Check the various positions and move to the correct one
+        # TODO refactor to use the constants
         match self.desred_position:
             case "intake":
                 self.desiredAngle = 0
@@ -212,6 +213,9 @@ class DiverCarlChistera(StatefulAutonomous):
                 self.desiredAngle = 10
                 self.next_state("wait_for_elevator")
             case "eject4":
+                self.desiredAngle = 40
+                self.next_state("wait_for_elevator")
+            case "vertical":
                 self.desiredAngle = 40
                 self.next_state("wait_for_elevator")
             case "safe":
@@ -232,9 +236,9 @@ class DiverCarlChistera(StatefulAutonomous):
         """Wait for the elevator to clear, if it doesn't if 5 seconds move to safe"""
         self.smartdashboard.putString(f"{componentName} State", "wait_for_elevator")
 
-        if self.smartdashboard.getBoolean(CONST_ELEVATOR_DOWN, False):
+        if self.smartdashboard.getBoolean(ec.CONST_ELEVATOR_DOWN, False):
             self.next_state("move_to_position")
-        elif state_tm > 5:
+        elif state_tm > c.WAIT_FOR_ELEVATOR_TIMEOUT:
             self.next_state("abort_pivot")
 
     @state()

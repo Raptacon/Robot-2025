@@ -193,6 +193,9 @@ class DiverCarlElevator(commands2.Subsystem):
         """ """
         self.updateSensorRecordings()
 
+        # Tell everybody that the elevator is at the bottom
+        self.smartdashboard.setBoolean(c.CONST_ELEVATOR_DOWN, self.at_bottom_limit)
+
         if self.at_bottom_limit:
             self.encoder.setPosition(0)
 

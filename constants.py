@@ -121,6 +121,7 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 
 
 class DiverCarlChisteraConsts:
+    WAIT_FOR_ELEVATOR_TIMEOUT_SEC = 10
     kMotorPrimaryCanId = 12
     kMotorPrimaryInverted = False
     kEncoderFullRangeRot = 12.486  # soft limit
@@ -138,8 +139,12 @@ class DiverCarlChisteraConsts:
         "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen,
     }
 
+    kPidf0 = (0.8, 0.001, 0.04, 1.5, rev.ClosedLoopSlot.kSlot0)  # P I D F Slot
+    kPidf1 = (0.5, 0, 0.0, 0, rev.ClosedLoopSlot.kSlot1)  # P I D F Slot
+    kMaxOutRange0 = (-0.15, 0.4, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
 
 class DiverCarlElevatorConsts:
+    CONST_ELEVATOR_DOWN = "elevator.down"
     kCurrentLimitAmps = 40
     kMotorCanId = 11
     kMaxHeightAboveZeroCm = 180
