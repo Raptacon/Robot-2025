@@ -40,9 +40,18 @@ reef_position_lookup = {
     ("blue", 5, "r"): {"pose": Pose2d(5.385, 2.823, Rotation2d.fromDegrees(120)), "path": "Stem_Reef_F5"},
 }
 
-# reef_center_lookup: provides the field coordinate of the center of the reef structure
+# reef_center_lookup: provides the field coordinate of the center of the reef structure in meters
 
 reef_center_lookup = {
     "red": Translation2d(13.05, 4.025),
     "blue": Translation2d(4.5, 4.025)
+}
+
+# reef_height_lookup: provides the height, in centimeters, of a reef scoring level
+
+reef_height_lookup = {
+    "L1": 46,
+    "L2": 81,
+    "L3": 121,
+    "L4": 183
 }

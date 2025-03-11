@@ -5,6 +5,9 @@ Collection of numeric constants that define physical properties of the robot
 # Native imports
 import math
 
+# Third-Party Imports
+import rev
+
 #############################
 # ROBOT ###################
 #############################
@@ -105,16 +108,32 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 
 
 class DiverCarlElevatorConsts():
-    kMotorPrimaryCanId = 10
-    kMotorFollowerCanId = 11
-    kEncoderPins = (9, 8)
-    kMinHeightM = 0
-    kMaxHeightM = 1.5
-    kMaxVelMPS = 0.75
-    kMaxAccelMPSS = 0.2
-    kMechDeltaHeightM = 0.3048 # 12 inches to meters - approx height
-    kMotorPrimaryInverted = False
-    kPid = (1.3, 0, 0.7)
+    kCurrentLimitAmps = 40
+    kMotorCanId = 11
+    kMaxHeightAboveZeroCm = 180
+    kRotationsToMaxHeight = 101
+    kHeightAtZeroCm = 10.16
+    kMotorInverted = False
+    kTrapezoidProfileUp = (135, 150) # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (35, 37.5)
+    kFeedforward = (0, 0.28, 0.1, 0) # kS kG kV kA
+    kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D Slot
+    kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
+    kSoftLimits = {"forward": True, "forwardLimit": 178, "reverse": False, "reverseLimit": 0}
+    kLimits = {
+        "forward": True,
+        "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
+        "reverse": True,
+        "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen
+    }
+    # Offsets from the top of the reef pole and the elevator position (from the ground) for the chute,
+    # in centimeters
+    kL1OffsetCm = 0
+    kL2OffsetCm = 0
+    kL3OffsetCm = 0
+    kL4OffsetCm = 0
+    kChuteHeightCm = 10.16
+
 
 class DiverCarlChisteraConsts():
     kMotorCanId = 12
