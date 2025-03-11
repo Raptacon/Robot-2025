@@ -194,12 +194,12 @@ class DiverCarlChistera(StatefulAutonomous):
     @state(first=True)
     def idle(self):
         self.smartdashboard.putString(f"{componentName} State", "idle")
-        self.desred_position = self.smartdashboard.getString(
+        self.desired_position = self.smartdashboard.getString(
             f"{componentName}.position", "idle"
         )
         # Check the various positions and move to the correct one
         # TODO refactor to use the constants
-        match self.desred_position:
+        match self.desired_position:
             case "intake":
                 self.desiredAngle = 0
                 self.next_state("wait_for_elevator")
