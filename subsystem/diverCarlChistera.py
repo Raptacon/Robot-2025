@@ -238,7 +238,7 @@ class DiverCarlChistera(StatefulAutonomous):
 
         if self.smartdashboard.getBoolean(ec.CONST_ELEVATOR_DOWN, False):
             self.next_state("move_to_position")
-        elif state_tm > c.WAIT_FOR_ELEVATOR_TIMEOUT:
+        elif state_tm > c.WAIT_FOR_ELEVATOR_TIMEOUT_SEC:
             self.next_state("abort_pivot")
 
     @state()
