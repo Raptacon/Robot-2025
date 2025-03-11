@@ -4,7 +4,6 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
-import rev
 
 # Third-Party Imports
 import rev
