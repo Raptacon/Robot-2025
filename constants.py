@@ -146,6 +146,14 @@ class DiverCarlChisteraConsts():
     kMaxAccelRPSS = 0.5
     kPid = (1.3, 0, 0.7)
 
+
+class DiverCarlChute():
+    kMotorCanId = 14
+    kBreakBeamPort = 4
+    kMotorInverted = False
+    kCurrentLimitAmps = 20
+    kDefaultSpeed = 0.3
+
 class CaptainPlanetConsts():
     kMotorCanId = 13
     kMotorInverted = False

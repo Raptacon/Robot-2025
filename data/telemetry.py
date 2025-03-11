@@ -1,6 +1,7 @@
 # Internal imports
 from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from subsystem.diverCarlChute import DiverCarlChute
 from subsystem.diverCarlElevator import DiverCarlElevator
 
 # Third-party imports
@@ -52,17 +53,6 @@ for i in range(len(OperatorRobotConfig.swerve_module_channels)):
     ])
 
 elevatorEntries = [
-        # self.current_height_above_zero = self.encoder.getPosition()
-        # self.current_height = self.height_at_zero + self.current_height_above_zero
-        # self.current_goal_height = self.height_at_zero
-        # self.current_goal_height_above_zero = 0
-        # self.at_goal = self.checkIfAtGoalHeight()
-        # self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
-        # self.at_top_limit = self.motor.getForwardLimitSwitch().get()
-        # self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
-        # self.motor_current = self.motor.getOutputCurrent()
-        # self.motor_output = self.motor.getAppliedOutput()
-        # self.motor_velocity = self.encoder.getVelocity()
     ["elevatorCurrentHeightAboveZero", FloatLogEntry, "/positions"],
     ["elevatorCurrentHeight", FloatLogEntry, "/positions"],
     ["elevatorCurrentGoalHeight", FloatLogEntry, "/positions"],
@@ -76,6 +66,14 @@ elevatorEntries = [
     ["elevatorMotorVelocity", FloatLogEntry, "/output"],
 ]
 
+chuteEntries = [
+    ["chuteMotorSpeed", FloatLogEntry, "/motor"],
+    ["chuteMotorCurrent", FloatLogEntry, "/motor"],
+    ["chuteMotorOutput", FloatLogEntry, "/motor"],
+    ["chuteMotorVelocity", FloatLogEntry, "/motor"],
+    ["chuteBreakbeamBroken", BooleanLogEntry, "/breakbeam"],
+]
+
 driverStationEntries = [
     ["alliance", StringLogEntry, "alliance"],
     ["autonomous", BooleanLogEntry, "autonomous"],
@@ -84,14 +82,17 @@ driverStationEntries = [
     ["enabled", BooleanLogEntry, "enabled"]
 ]
 
-class Telemetry:
 
+class Telemetry:
+    """
+    """
     def __init__(
         self,
         driverController: wpilib.XboxController = None,
         mechController: wpilib.XboxController = None,
         driveTrain: SwerveDrivetrain = None,
         elevator: DiverCarlElevator = None,
+        chute: DiverCarlChute = None,
         driverStation: wpilib.DriverStation = None,
     ):
         self.driverController = driverController
@@ -100,6 +101,7 @@ class Telemetry:
         self.driveTrain = driveTrain
         self.swerveModules = driveTrain.swerve_modules
         self.elevator = elevator
+        self.chute = chute
         self.driverStation = driverStation
 
         self.networkTable = NetworkTableInstance.getDefault()
@@ -119,6 +121,8 @@ class Telemetry:
             setattr(self, entryname, entrytype(self.datalog, "rawswervedrivetrain/" + logname))
         for entryname, entrytype, logname in elevatorEntries:
             setattr(self, entryname, entrytype(self.datalog, "elevator/" + logname))
+        for entryname, entrytype, logname in chuteEntries:
+            setattr(self, entryname, entrytype(self.datalog, "chute/" + logname))
         for entryname, entrytype, logname in driverStationEntries:
             setattr(self, entryname, entrytype(self.datalog, "driverstation/" + logname))
 
@@ -212,6 +216,15 @@ class Telemetry:
         self.elevatorMotorOutput.append(self.elevator.motor_output)
         self.elevatorMotorVelocity.append(self.elevator.motor_velocity)
 
+    def getChuteInputs(self):
+        """
+        """
+        self.chuteMotorSpeed.append(self.chute.motor_speed)
+        self.chuteMotorCurrent.append(self.chute.motor_current)
+        self.chuteMotorOutput.append(self.chute.motor_output)
+        self.chuteMotorVelocity.append(self.chute.motor_velocity)
+        self.chuteBreakbeamBroken.append(self.chute.breakbeam_broken)
+
     def getDriverStationInputs(self):
         """
         Gets the inputs of some match/general robot things,
@@ -242,6 +255,8 @@ class Telemetry:
             self.getRawSwerveInputs()
         if self.elevator is not None:
             self.getElevatorInputs()
+        if self.chute is not None:
+            self.getChuteInputs()
         if self.driverStation is not None:
             self.getDriverStationInputs()
 
