@@ -249,6 +249,18 @@ class SwerveDrivetrain(Subsystem):
         """
         self.pose_estimator.update(self.current_yaw(), self.current_module_positions())
 
+    def add_vision_pose_estimate(self, pose: Pose2d, timestamp: float, stdDevs: Tuple[float]) -> None:
+        """
+        Adds a vision-based pose estimate to the pose estimator. This method is expected to be called from the Vision class.
+
+        Args:
+            pose: the vision-based pose estimate
+
+        Returns:
+            None: pose estimator is updated in-place
+        """
+        self.pose_estimator.addVisionMeasurement(pose, timestamp, stdDevs)
+
     def reset_pose_estimator(self, current_pose: Pose2d) -> None:
         """
         Reset the robot's current pose to the given input. Should be called, at a minimum, before

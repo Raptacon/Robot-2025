@@ -25,6 +25,14 @@ class OperatorRobotConfig:
     pathplanner_translation_pid: Tuple[float] = (10.0, 0.0, 0.0)
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
+    #TODO Get the actual values from our robot
+    robot_Cam_Translation_Left: Tuple[float] = (0.219075, 0.3063875, 0.365125)
+    robot_Cam_Translation_Right: Tuple[float] = (0.219075, -0.3063875, 0.365125)
+    robot_Cam_Rotation_Degress_Left: Tuple[float] = (0.0, 0.0, 0.0)
+    robot_Cam_Rotation_Degress_Right: Tuple[float] = (0.0, 0.0, 0.0)
+
+    vision_std_dev_basis: float = 1.1
+    vision_std_dev_scale_factor: float = 1
     # First three elements are PID, last two elements are trapezoidal profile
     # Translation trapezoidal profile units are mps and mps^2, rotation are rps and rps^2
     pid_to_pose_translation_pid_profile: Tuple[float] = (2.0, 0.0, 0.0, 3, 1.5)
