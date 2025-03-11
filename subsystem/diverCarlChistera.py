@@ -1,6 +1,5 @@
 import wpilib
 import math
-import commands2
 import rev
 from constants import DiverCarlChisteraConsts as c
 # 25:1
@@ -12,7 +11,6 @@ CONST_ELEVATOR_DOWN = "elevator.down"
 CONST_PIVOT_CLEAR = "pivot.clear"
 
 
-# class DiverCarlChistera(commands2.Subsystem):
 class DiverCarlChistera(StatefulAutonomous):
     MODE_NAME = componentName
 
