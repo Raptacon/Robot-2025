@@ -121,23 +121,19 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
     moduleType: str = "Mk4i_L2"
 
 
-class DiverCarlChisteraConsts:
+class DiverCarlChisteraConsts():
     kMotorPrimaryCanId = 12
     kMotorPrimaryInverted = False
-    kEncoderFullRangeRot = 12.486  # soft limit
-    kFullRangeDegrees = 180  # Estimate
-    kSoftLimits = {
-        "forward": True,
-        "forwardLimit": 0,
-        "reverse": True,
-        "reverseLimit": -1.0,
-    }
-    kLimits = {
-        "forward": False,
-        "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
-        "reverse": False,
-        "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen,
-    }
+    kEncoderFullRangeRot = 19.0 #soft limit
+    kFullRangeDegrees = 180 #Estimate
+    kSoftLimits = {"forward": True, "forwardLimit": 0, "reverse": True, "reverseLimit": -1.0}
+    kLimits = {"forward": True,
+                "forwardType": rev.LimitSwitchConfig.Type.kNormallyOpen,
+                "reverse": False,
+                "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen}
+
+    kPidf0 = (0.3, 0.001, 0.0, 0, rev.ClosedLoopSlot.kSlot0) # P I D F Slot
+    kMaxOutRange0 = (-0.25, 0.7, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
 
 
 class DiverCarlElevatorConsts:

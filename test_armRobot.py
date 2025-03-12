@@ -13,21 +13,14 @@ class MyRobot(wpilib.TimedRobot):
         """Robot initialization function"""
         self.arm = diverCarlChistera.DiverCarlChistera()
 
-        self.timer = wpilib.Timer()
-        self.timer.start()
-
-    def disabledInit(self):
-        self.arm.on_disable()
 
     def testInit(self):
-        wpilib.SmartDashboard.putNumber("Arm Rad", 0.0)
-        wpilib.SmartDashboard.putNumber("Arm Deg", 0.0)
-        self.arm.on_enable()
+        wpilib.SmartDashboard.putNumber("set arc", 0.0)
+        wpilib.SmartDashboard.putNumber("curr arc", 0.0)
 
     def testPeriodic(self):
+        self.arm.setArc(wpilib.SmartDashboard.getNumber("set arc", 0.0))
         self.arm.periodic()
-        wpilib.SmartDashboard.putNumber("Arm Deg", self.arm.getAngleDeg())
+        wpilib.SmartDashboard.putNumber("curr arc", self.arm.getArc())
 
-        self.arm.on_iteration(self.timer.get())
-
-        # print("Encoder Pos", self.elevator.getPosDeg())
+        #print("Encoder Pos", self.elevator.getPosDeg())
