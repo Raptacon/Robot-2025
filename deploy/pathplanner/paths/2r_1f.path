@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.365,
-        "y": 5.217
+        "x": 5.37605591858737,
+        "y": 4.97914161784056
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.923500619352958,
-        "y": 5.85383328475663
+        "x": 4.934556537940328,
+        "y": 5.61597490259719
       },
       "isLocked": false,
       "linkedName": "2r"
     },
     {
       "anchor": {
-        "x": 1.625,
-        "y": 7.2
+        "x": 1.555568181818182,
+        "y": 7.27075284090909
       },
       "prevControl": {
-        "x": 2.170459823537815,
-        "y": 6.8998413899711055
+        "x": 2.101028005355997,
+        "y": 6.970594230880195
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.65,
-    "maxAcceleration": 3.0,
+    "maxVelocity": 1.5,
+    "maxAcceleration": 2.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 126.0
+    "rotation": -54.0
   },
   "reversed": false,
   "folder": "Paths2025_Blue",
