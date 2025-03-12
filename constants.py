@@ -175,3 +175,13 @@ class CaptainPlanetConsts:
     kFrontBreakBeam = 2
     kBackBreakBeam = 3
     kDefaultSpeed = -0.25
+
+class MechConsts:
+    kArmRestPosition = 0.0 # movement arc
+    kArmRestPosTol = 0.02 # % of movement arc
+    kArmSafPosTol = 0.02 # % of movement arc
+    kArmSafeAngleStart = 0.105 # movement arc
+    kArmSafeAngleEnd = 0.13 # movement arc
+    kArmVerical = 0.259
+    kArmLevel2Position = 0.153
+    kElevatorSafeHeight = 5 #cm

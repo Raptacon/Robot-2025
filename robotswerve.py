@@ -25,6 +25,7 @@ from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
 from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlChistera import DiverCarlChistera as Arm
 
 class RobotSwerve:
     """
@@ -38,6 +39,10 @@ class RobotSwerve:
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
         self.elevator = Elevator()
+        self.arm = Arm()
+        #cross link arm and elevator
+        self.arm.setElevator(self.elevator)
+        self.elevator.setArm(self.arm)
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
         self.intake_state_machines = CaptainIntake()
 
@@ -142,7 +147,7 @@ class RobotSwerve:
                      13: commands2.cmd.print_("Key 13 pressed"),
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
-        
+
         self.intake_state_machines.on_enable()
 
         if self.auto_command:

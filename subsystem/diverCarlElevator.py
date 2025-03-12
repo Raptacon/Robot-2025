@@ -3,6 +3,7 @@ import math
 
 # Internal imports
 from constants import DiverCarlElevatorConsts as c
+from constants import MechConsts as mc
 
 # Third-party imports
 import commands2
@@ -14,6 +15,8 @@ from wpimath.trajectory import TrapezoidProfile
 
 class DiverCarlElevator(commands2.Subsystem):
     """ """
+    constants = c
+    _arm : "DiverCarlChistera"
 
     def __init__(
         self, height_at_zero: float = c.kHeightAtZeroCm, update_period: float = 0.05
@@ -118,6 +121,11 @@ class DiverCarlElevator(commands2.Subsystem):
         if self.current_goal_height_above_zero > c.kMaxHeightAboveZeroCm:
             self.current_goal_height_above_zero = c.kMaxHeightAboveZeroCm
 
+    def setArm(self, arm: "DiverCarlChistera") -> None:
+        """ """
+        self._arm = arm
+
+
     def setGoalHeight(self, height_cm: float) -> None:
         """ """
         self.current_goal_height = height_cm
@@ -125,6 +133,10 @@ class DiverCarlElevator(commands2.Subsystem):
             self.current_goal_height - self.height_at_zero
         )
         self.validateGoalHeight()
+
+    def getPosition(self) -> float:
+        """Returns postion in motor rotations"""
+        return self.encoder.getPosition()
 
     def incrementGoalHeight(self, height_increment_cm: float) -> None:
         """ """
@@ -148,8 +160,21 @@ class DiverCarlElevator(commands2.Subsystem):
             TrapezoidProfile.State(self.current_goal_height_above_zero, 0),
         )
 
+        # Protect the arm from moving into unsafe postion while arm is not in the correct position
+        currArmArc = 0
+        if self._arm is not None:
+            currArmArc = self._arm.getArc()
+
+        currPos = self.last_profiler_state.position
+        #if arm is near parked, max height = 10 rotations
+        if currArmArc < mc.kArmSafeAngleStart:
+            if currPos > cm.kElevatorSafeHeight:
+                currPos = cm.kElevatorSafeHeight
+        #if arm is in safe zone, any height is valid
+
+
         self.motor_pid.setReference(
-            self.last_profiler_state.position,
+            currPos,
             rev.SparkLowLevel.ControlType.kPosition,
             rev.ClosedLoopSlot.kSlot0,
             self.feedforward.calculate(

@@ -3,13 +3,18 @@ import math
 import commands2
 import rev
 from constants import DiverCarlChisteraConsts as c
-
+from constants import MechConsts as mc
 
 class DiverCarlChistera(commands2.Subsystem):
+    elevator: "DiverCarlElevator"
+
+    armSafeAngleStart = 0.105 # movement arc
+
 
     def __init__(self, dt=0.02) -> None:
         super().__init__()
         self._dt = dt
+        self.elevator = None
         self._primaryMotor = rev.SparkFlex(c.kMotorPrimaryCanId, rev.SparkLowLevel.MotorType.kBrushless)
         # setup primary
         motorConfig = rev.SparkBaseConfig()
@@ -64,30 +69,36 @@ class DiverCarlChistera(commands2.Subsystem):
         self._trackingAlert = wpilib.Alert("mechanism","Arm moving", wpilib.Alert.AlertType.kInfo)
         self._trackingAlert.set(False)
 
+        wpilib.SmartDashboard.putNumber("Mech/Arm/PostionA", 0)
+        wpilib.SmartDashboard.putNumber("Mech/Arm/SetA", 0)
+        wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", 0)
+
+    def setElevator(self, elevator: "DiverCarlElevator") -> None:
+        self.elevator = elevator
+
 
     def periodic(self) -> None:
         # update telemtry
         if self.atGoal():
-            self._trackingAlert.setText(f"Arm stable at {self._encoder.getPosition():1.1f}cm")
+            self._trackingAlert.setText(f"Arm stable at {self.getArc():1.1f}")
             self._trackingAlert.set(True)
         else:
-            self._trackingAlert.setText(f"Arm at {self._encoder.getPosition():1.1f}cm goal {self.getSetAngle():1.1f}cm")
+            self._trackingAlert.setText(f"Arm at {self.getArc():1.1f} goal {self.getSetArc():1.1f}")
             self._trackingAlert.set(True)
 
-        """
+
         # safe the motors if forward limit is hit
         if self.getForwardLimit():
-            self._limitAlert.setText(f"Arm TOP HIT at {self._encoder.getPosition()}cm")
+            self._limitAlert.setText(f"Arm TOP HIT at {self.getArc()}")
             self._limitAlert.set(True)
             self._encoder.setPosition(0)
             return
 
         if self.getForwardLimit() and self._curentGoal > 0:
             self._primaryMotor.set(0)
-            self._limitAlert.setText(f"Arm BOTTOM HIT at {self._encoder.getPosition()}cm")
+            self._limitAlert.setText(f"Arm BOTTOM HIT at {self.getArc()}")
             self._limitAlert.set(True)
             return
-        """
 
         # clear the alert as we no longer are at the limit
         self._limitAlert.set(False)
@@ -96,15 +107,32 @@ class DiverCarlChistera(commands2.Subsystem):
             self._primaryMotor.disable()
             return
 
-        print(f"{-self._curentGoal} / {self._encoder.getPosition()}")
+        calcGoal = self._curentGoal
+        currHeight = 0
+        if self.elevator is not None:
+            currHeight = self.elevator.getPosition()
+        #only allow arm > min safe when elevator is up
+        if currHeight > mc.kElevatorSafeHeight: #arb 10 rotations for now
+            if calcGoal < mc.kArmSafeAngleStart:
+                calcGoal = mc.kArmSafeAngleStart
+        #only allow arm < max safe when elevator is down
+        else:
+            if calcGoal > mc.kArmSafeAngleEnd:
+                calcGoal = mc.kArmSafeAngleEnd
 
-        self._controller.setReference(-self._curentGoal, self._primaryMotor.ControlType.kPosition, slot = rev.ClosedLoopSlot.kSlot0)
+        #TODO add checks if elevator is moving keep in safe zone until postion is reached
+
+        wpilib.SmartDashboard.putNumber("Mech/Arm/PostionA", calcGoal)
+        wpilib.SmartDashboard.putNumber("Mech/Arm/SetA", self.getArc())
+        wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", self._curentGoal)
+
+        self._controller.setReference(-calcGoal, self._primaryMotor.ControlType.kPosition, slot = rev.ClosedLoopSlot.kSlot0)
 
 
-    def getRotFromCm(self, cm : float):
-        return cm * c.kEncoderFullRangeRot / c.kFullRangeDegrees;
-    def getCmFromRot(self, rot:float):
-        return rot * c.kFullRangeDegrees / c.kEncoderFullRangeRot
+    def getRotFromArc(self, arc : float):
+        return arc * c.kEncoderFullRangeRot / c.kFullRangeDegrees;
+    def getArcFromRot(self, deg:float):
+        return deg * c.kFullRangeDegrees / c.kEncoderFullRangeRot
 
 
 
@@ -124,70 +152,34 @@ class DiverCarlChistera(commands2.Subsystem):
         if self._disabled:
             self._disabled = False
 
+        if arc < 0:
+            arc = 0
+
         self._curentGoal = arc
 
     def getArc(self) -> float:
-        return self._encoder.getPosition()
+        return -self._encoder.getPosition()
 
     def getSetArc(self) -> float:
         return self._curentGoal
-
-
-    def setAngle(self, angleDeg: float) -> None:
-        """
-        Sets the height of the arm goal in meters from ground.
-        """
-        #0..-1 control
-        angleDeg = -angleDeg
-        # TODO add max and min set constraints to setters
-        if self._disabled:
-            self._disabled = False
-
-        angleDeg = angleDeg
-
-        if angleDeg < 0:
-            angleDeg = 0
-
-
-        # cache goal for easy access and to use in periodic
-        self._curentGoal = self.getRotFromCm(angleDeg)
-
-    def getSetAngle(self) -> float:
-        """
-        Returns the current goal height of the arm in meters from ground.
-        Returns:
-            float: set heigh in degrees
-        """
-        return self.getCmFromRot(-self._curentGoal)
-
-    def getAngleDeg(self) -> float:
-        """Returns the current height of the arm in meters from ground.
-        """
-        return self.getCmFromRot(self._encoder.getPosition())
 
     def atGoal(self) -> bool:
         """
         Returns if the arm is at the goal height.
         """
-        return  math.isclose(self._encoder.getVelocity(), 0.0, abs_tol=0.01) and math.isclose(self._encoder.getPosition(), self._curentGoal, abs_tol=0.1)
+        return  math.isclose(self._encoder.getVelocity(), 0.0, abs_tol=0.01) and math.isclose(self.getArc(), self._curentGoal, abs_tol=0.1)
 
     def getError(self) -> float:
         """
-        Returns the error in meters between the goal height and the current height.
+        Returns the error full arc between the goal height and the current height.
         """
-        return self.getCmFromRot(self._curentGoal - self._encoder.getPosition())
-
-    def setIncrementalMove(self, deltaM: float) -> None:
-        """
-        Moves the arm by the delta in meters from the current goal height.
-        """
-        self.setHeight(self.getSetHeightM() + deltaM)
+        return self._curentGoal - self.getArc()
 
     def stopArm(self) -> None:
         """
         Stops the by setting current height to goal. This will maintain the current height.
         """
-        self.setHeight(self.getHeightM())
+        self.setArc(self.getArc())
 
     def disable(self) -> None:
         """
