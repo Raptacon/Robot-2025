@@ -22,7 +22,6 @@ class MyRobot(wpilib.TimedRobot):
 
     def testInit(self):
         self.state_machine.schedule()
-        pass
 
     def testPeriodic(self):
         wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())

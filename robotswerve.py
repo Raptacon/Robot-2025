@@ -14,7 +14,7 @@ from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup, reef_height_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
-from subsystem.captainIntake import CaptainIntake
+from subsystem.captainIntake import CaptainIntakeSubsystem, CaptainIntakeStateMachine
 
 # Third-party imports
 import commands2
@@ -31,11 +31,10 @@ class RobotSwerve:
     """
     Container to hold the main robot code
     """
-    #forward declare critical types for editors
+    # forward declare critical types for editors
     drivetrain: SwerveDrivetrain
     elevator: Elevator
     arm: Arm
-
 
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
         # networktables setup
@@ -46,11 +45,14 @@ class RobotSwerve:
         self.drivetrain = SwerveDrivetrain()
         self.elevator = Elevator()
         self.arm = Arm()
-        #cross link arm and elevator
+        # cross link arm and elevator
         self.arm.setElevator(self.elevator)
         self.elevator.setArm(self.arm)
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
-        self.intake_state_machines = CaptainIntake()
+
+        self.intake_subsystem = CaptainIntakeSubsystem()
+        self.intake_state_machine = CaptainIntakeStateMachine(self.intake_subsystem)
+        self.intake_command_scheduler = commands2.CommandScheduler.getInstance()
 
         # Initialize timer
         self.timer = wpilib.Timer()
@@ -111,6 +113,8 @@ class RobotSwerve:
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDefaultDataCollections()
 
+        self.intake_command_scheduler.run()
+
         self.vision.getCamEstimate()
         self.vision.showTargetData()
 
@@ -120,7 +124,7 @@ class RobotSwerve:
 
         self.elevator.motor.set(0)
 
-        self.intake_state_machines.on_disable()
+        self.intake_command_scheduler.cancelAll()
 
     def disabledPeriodic(self):
         pass
@@ -154,7 +158,7 @@ class RobotSwerve:
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
 
-        self.intake_state_machines.on_enable()
+        self.intake_state_machine.schedule()
 
         if self.auto_command:
             self.auto_command.cancel()
@@ -223,7 +227,7 @@ class RobotSwerve:
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
         wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
-        self.intake_state_machines.on_iteration(self.timer.get())
+        self.intake_command_scheduler.run()
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
