@@ -23,7 +23,7 @@ class MyRobot(commands2.TimedCommandRobot):
         # Instantiate our RobotContainer. This will perform all our button bindings, and put our
         # autonomous chooser on the dashboard.
         if not hasattr(self, "container"):
-            # to work around sim creating motors during tests, assing to class and if already created keep using created robot class for tests.
+            # to work around sim creating motors during tests, assign to class and if already created keep using created robot class for tests.
             # during robot running, this is only every called once
             MyRobot.container = RobotSwerve(lambda: self.isDisabled)
 
@@ -64,6 +64,9 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def testPeriodic(self) -> None:
         self.container.testPeriodic()
+
+    def getRobot(self) -> RobotSwerve:
+        return self.container
 
 
 if __name__ == "__main__":
