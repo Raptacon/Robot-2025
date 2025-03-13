@@ -149,7 +149,7 @@ class DiverCarlChisteraConsts():
 
 class DiverCarlChute():
     kMotorCanId = 14
-    kBreakBeamPort = 4
+    kBreakBeamPort = 3
     kMotorInverted = False
     kCurrentLimitAmps = 20
     kDefaultSpeed = 0.3
