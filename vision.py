@@ -55,7 +55,13 @@ class Vision:
             robot_pose = camEstPoseLeft.estimatedPose.toPose2d()
 
             tag_distances = [
-                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
+                #PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
+                PhotonUtils.calculateDistanceToTargetMeters(
+                    self.camPoseEstRight.robotToCamera.translation.Z(),
+                    self.field_layout.getTagPose(targ.getFiducialId()).Z(),
+                    0,
+                    targ.getPitch()
+                )
                 for targ in bestPipelineLeft.getTargets()
                 if targ is not None
             ]
@@ -74,9 +80,15 @@ class Vision:
         camEstPoseRight = self.camPoseEstRight.update(bestPipelineRight)
         if camEstPoseRight:
             robot_pose = camEstPoseRight.estimatedPose.toPose2d()
-
+            
             tag_distances = [
-                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
+                #PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
+                PhotonUtils.calculateDistanceToTargetMeters(
+                    self.camPoseEstRight.robotToCamera.translation.Z(),
+                    self.field_layout.getTagPose(targ.getFiducialId()).Z(),
+                    0,
+                    targ.getPitch()
+                )
                 for targ in bestPipelineRight.getTargets()
                 if targ is not None
             ]
