@@ -170,7 +170,7 @@ class DiverCarlElevator(commands2.Subsystem):
             currArmArc = self._arm.getArc()
 
         currPos = self.last_profiler_state.position
-        #if arm is near parked, max height = 10 rotations
+        #if arm is near parked, max height = mc.kElevatorSafeHeight
         if currArmArc < mc.kArmSafeAngleStart:
             if currPos > mc.kElevatorSafeHeight:
                 currPos = mc.kElevatorSafeHeight
