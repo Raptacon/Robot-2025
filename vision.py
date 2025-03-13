@@ -113,7 +113,11 @@ class Vision:
         SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
-        std_dev = 0.9
+        std_dev = 3
         if distance:
-            std_dev = -1 + (OperatorRobotConfig.vision_std_dev_basis)**(OperatorRobotConfig.vision_std_dev_scale_factor * distance)
-        return (std_dev, std_dev, std_dev)
+            if distance > 2:
+                # Ignore vision if too far away from tag
+                std_dev = 10000
+            else:
+                std_dev = -1 + (OperatorRobotConfig.vision_std_dev_basis)**(OperatorRobotConfig.vision_std_dev_scale_factor * distance)
+        return (std_dev, std_dev, std_dev * 2)
