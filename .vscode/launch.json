@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Run Sim",
             "type": "python",
@@ -22,6 +23,22 @@
             "justMyCode": true
         },
         {
+            "name": "Run UT",
+            "type": "python",
+            "request": "launch",
+            "module": "robotpy",
+            "args": ["test"],
+            "justMyCode": true
+        },
+        {
+            "name": "Run diverCarlChistera Sim",
+            "type": "python",
+            "request": "launch",
+            "module": "robotpy",
+            "args": ["--main", "test_armRobot.py", "sim"],
+            "justMyCode": true
+        },
+{
             "name": "Deploy",
             "type": "python",
             "request": "launch",
