@@ -4,9 +4,11 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
+from enum import Enum
 
 # Third-Party Imports
 import rev
+
 
 #############################
 # ROBOT ###################
@@ -174,6 +176,10 @@ class CaptainPlanetConsts:
     kFrontBreakBeam = 0
     kBackBreakBeam = 1
     kDefaultSpeed = -0.25
+    class BreakBeam(Enum):
+        FRONT = 1  # Closest to large green wheels
+        BACK = 2
+
 
 class MechConsts:
     kArmRestPosition = 0.0 # movement arc

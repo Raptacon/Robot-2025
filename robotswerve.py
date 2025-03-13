@@ -14,7 +14,7 @@ from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup, reef_height_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
-from subsystem.captainIntake import CaptainIntakeSubsystem, CaptainIntakeStateMachine
+from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine
 
 # Third-party imports
 import commands2
@@ -50,7 +50,7 @@ class RobotSwerve:
         self.elevator.setArm(self.arm)
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
-        self.intake_subsystem = CaptainIntakeSubsystem()
+        self.intake_subsystem = CaptainIntake()
         self.intake_state_machine = CaptainIntakeStateMachine(self.intake_subsystem)
         self.intake_command_scheduler = commands2.CommandScheduler.getInstance()
 

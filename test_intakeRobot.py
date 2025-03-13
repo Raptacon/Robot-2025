@@ -1,6 +1,6 @@
 import wpilib
 import wpilib.interfaces
-from subsystem.captainIntake import CaptainIntakeSubsystem, CaptainIntakeStateMachine
+from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine
 import commands2
 
 class MyRobot(wpilib.TimedRobot):
@@ -10,7 +10,7 @@ class MyRobot(wpilib.TimedRobot):
 
     def robotInit(self):
         """Robot initialization function"""
-        self.intake = CaptainIntakeSubsystem()
+        self.intake = CaptainIntake()
         self.state_machine = CaptainIntakeStateMachine(self.intake)
         self.command_scheduler = commands2.CommandScheduler.getInstance()
 

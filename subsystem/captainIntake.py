@@ -5,8 +5,7 @@ import commands2
 from constants import CaptainPlanetConsts as consts
 
 
-# class CaptainIntake(commands2.Subsystem):
-class CaptainIntakeSubsystem(commands2.Subsystem):
+class CaptainIntake(commands2.Subsystem):
 
     def __init__(self) -> None:
         super().__init__()
@@ -26,25 +25,17 @@ class CaptainIntakeSubsystem(commands2.Subsystem):
         self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
         self.smartdashboard.putString("Intake State", state)
 
-
-# @state(first=True)
-# def idle(self):
-#     self.intakeMotor.set(0)
-
-#     self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-#     self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-#     self.smartdashboard.putString("Intake State", "idle")
-
-#     if self.smartdashboard.getBoolean("A Button Pressed", False):
-#         self.next_state("first_intaking")
-
-#     if not self.smartdashboard.getBoolean("A Button Pressed", False):
-#         self.next_state("idle")
+    def getBreakBeam(self, position: consts.BreakBeam) -> bool:
+        if position == consts.BreakBeam.FRONT:
+            return self.front_breakbeam.get()
+        else:
+            return self.back_breakbeam.get()
 
 
 # FIRST STATE
 class IdleState(commands2.Command):
-    def __init__(self, intake: CaptainIntakeSubsystem) -> None:
+
+    def __init__(self, intake: CaptainIntake) -> None:
         super().__init__()
         self.intake = intake
         self.addRequirements(intake)
@@ -58,22 +49,9 @@ class IdleState(commands2.Command):
     def isFinished(self) -> bool:
         return self.intake.smartdashboard.getBoolean("A Button Pressed", False)
 
-    # @state()
-    # def first_intaking(self):
-    #     self.intakeMotor.set(consts.kDefaultSpeed)
-
-    #     self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-    #     self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-    #     self.smartdashboard.putString("Intake State", "first_intaking")
-
-    #     if not self.front_breakbeam.get():
-    #         self.next_state("second_intaking")
-    #     if not self.smartdashboard.getBoolean("A Button Pressed", False):
-    #         self.next_state("idle")
-
-
 class FirstIntaking(commands2.Command):
-    def __init__(self, intake: CaptainIntakeSubsystem) -> None:
+
+    def __init__(self, intake: CaptainIntake) -> None:
         super().__init__()
         self.intake = intake
         self.addRequirements(intake)
@@ -90,20 +68,9 @@ class FirstIntaking(commands2.Command):
             or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
         )
 
-    # @state()
-    # def second_intaking(self):
-    #     self.intakeMotor.set(consts.kDefaultSpeed)
-
-    #     self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-    #     self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-    #     self.smartdashboard.putString("Intake State", "second_intaking")
-
-    #     if not self.back_breakbeam.get():
-    #         self.next_state("third_intaking")
-
-
 class SecondIntaking(commands2.Command):
-    def __init__(self, intake: CaptainIntakeSubsystem) -> None:
+
+    def __init__(self, intake: CaptainIntake) -> None:
         super().__init__()
         self.intake = intake
         self.addRequirements(intake)
@@ -117,20 +84,9 @@ class SecondIntaking(commands2.Command):
     def isFinished(self) -> bool:
         return not self.intake.back_breakbeam.get()
 
-    # @state()
-    # def third_intaking(self):
-    #     self.intakeMotor.set(consts.kDefaultSpeed)
-
-    #     self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-    #     self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-    #     self.smartdashboard.putString("Intake State", "third_intaking")
-
-    #     if self.front_breakbeam and not self.back_breakbeam.get():
-    #         self.next_state("intook")
-
-
 class ThirdIntaking(commands2.Command):
-    def __init__(self, intake: CaptainIntakeSubsystem) -> None:
+
+    def __init__(self, intake: CaptainIntake) -> None:
         super().__init__()
         self.intake = intake
         self.addRequirements(intake)
@@ -146,19 +102,9 @@ class ThirdIntaking(commands2.Command):
             self.intake.front_breakbeam.get() and not self.intake.back_breakbeam.get()
         )
 
-    # @state()
-    # def intook(self):
-    #     self.intakeMotor.set(0)
-
-    #     self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-    #     self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-    #     self.smartdashboard.putString("Intake State", "intook")
-
-    #     self.next_state("idle")
-
-
 class Intook(commands2.Command):
-    def __init__(self, intake: CaptainIntakeSubsystem) -> None:
+
+    def __init__(self, intake: CaptainIntake) -> None:
         super().__init__()
         self.intake = intake
         self.addRequirements(intake)
@@ -172,7 +118,8 @@ class Intook(commands2.Command):
 
 
 class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
-    def __init__(self, intake: CaptainIntakeSubsystem):
+
+    def __init__(self, intake: CaptainIntake):
         super().__init__()
 
         self.addCommands(

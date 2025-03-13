@@ -3,6 +3,9 @@ from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.diverCarlElevator import DiverCarlElevator
 from subsystem.diverCarlChistera import DiverCarlChistera
+from subsystem.captainIntake import CaptainIntake
+
+from constants import CaptainPlanetConsts as intakeConstants
 
 # Third-party imports
 import wpilib
@@ -32,6 +35,7 @@ telemetryButtonEntries = [
     ["JoystickRightX", FloatLogEntry, "button/joystick/rightx"],
     ["DPad", IntegerLogEntry, "button/dpad"]
 ]
+
 
 telemetryOdometryEntries = [
     ["robotPose", "robotpose"],
@@ -95,6 +99,13 @@ driverStationEntries = [
     ["enabled", BooleanLogEntry, "enabled"]
 ]
 
+intakeEntries = [
+    ["intakeFrontBreakBeam", BooleanLogEntry, "/breakbeams"],
+    ["intakeBackBreakBeam", BooleanLogEntry, "/breakbeams"],
+    ["intakeMotorCurrent", FloatLogEntry, "/output"],
+    ["intakeMotorOutput", FloatLogEntry, "/output"],
+    ["intakeMotorVelocity", FloatLogEntry, "/output"],
+]
 class Telemetry:
 
     def __init__(
@@ -105,6 +116,7 @@ class Telemetry:
         elevator: DiverCarlElevator = None,
         driverStation: wpilib.DriverStation = None,
         arm: DiverCarlChistera = None,
+        intake: CaptainIntake = None,
     ):
         self.driverController = driverController
         self.mechController = mechController
@@ -114,6 +126,7 @@ class Telemetry:
         self.elevator = elevator
         self.driverStation = driverStation
         self.arm = arm
+        self.intake = intake
 
         self.networkTable = NetworkTableInstance.getDefault()
         for entryname, logname in telemetryOdometryEntries:
@@ -136,6 +149,8 @@ class Telemetry:
             setattr(self, entryname, entrytype(self.datalog, "driverstation/" + logname))
         for entryname, entrytype, logname in armEntries:
             setattr(self, entryname, entrytype(self.datalog, "arm/" + logname))
+        for entryname, entrytype, logname in intakeEntries:
+            setattr(self, entryname, entrytype(self.datalog, "intake/" + logname))
 
         if self.driverStation:
             self.driverStation.startDataLog(self.datalog)
@@ -253,6 +268,20 @@ class Telemetry:
         self.armAtHardlimit.append(self.arm.getForwardLimit())
         self.armDisabled.append(self.arm.getDisabled())
 
+    def getIntakeInputs(self):
+        self.intakeFrontBreakBeam.append(
+            self.intake.getBreakBeam(intakeConstants.BreakBeam.FRONT)
+        )
+        self.intakeBackBreakBeam.append(
+            self.intake.getBreakBeam(intakeConstants.BreakBeam.BACK)
+        )
+        self.intakeMotorTemperature.append(
+            self.intake.intakeMotor.getMotorTemperature()
+        )
+        self.intakeMotorCurrent.append(self.intake.intakeMotor.getOutputCurrent())
+        self.intakeMotorOutput.append(self.intake.intakeMotor.getAppliedOutput())
+        self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
+
     def runDefaultDataCollections(self):
         if self.driverController is not None:
             self.getDriverControllerInputs()
@@ -268,6 +297,8 @@ class Telemetry:
             self.getElevatorInputs()
         if self.driverStation is not None:
             self.getDriverStationInputs()
+        if self.intake is not None:
+            self.getIntakeInputs()
 
     def logAdditionalOdometry(self, odometer_value: Pose2d, log_entry_name: str) -> None:
         getattr(self, log_entry_name).set(odometer_value)
