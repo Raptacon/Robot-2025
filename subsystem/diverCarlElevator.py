@@ -3,6 +3,7 @@ import math
 
 # Internal imports
 from constants import DiverCarlElevatorConsts as c
+from constants import MechConsts as mc
 
 # Third-party imports
 import commands2
@@ -10,6 +11,10 @@ import rev
 from wpilib import Timer
 from wpimath.controller import ElevatorFeedforward
 from wpimath.trajectory import TrapezoidProfile
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from subsystem.diverCarlChistera import DiverCarlChistera
 
 
 class DiverCarlElevator(commands2.Subsystem):
@@ -65,7 +70,7 @@ class DiverCarlElevator(commands2.Subsystem):
             .reverseSoftLimitEnabled(c.kSoftLimits["reverse"])
         )
 
-        # Conigure hard limits (hardware triggers to stop motor execution)
+        # Configure hard limits (hardware triggers to stop motor execution)
         (
             motor_config.limitSwitch
             .forwardLimitSwitchEnabled(c.kLimits["forward"])
@@ -112,12 +117,21 @@ class DiverCarlElevator(commands2.Subsystem):
         if self.current_goal_height_above_zero > c.kMaxHeightAboveZeroCm:
             self.current_goal_height_above_zero = c.kMaxHeightAboveZeroCm
 
+    def setArm(self, arm: "DiverCarlChistera") -> None:
+        """ """
+        self._arm = arm
+
+
     def setGoalHeight(self, height_cm: float) -> None:
         """
         """
         self.current_goal_height = height_cm
         self.current_goal_height_above_zero = self.current_goal_height - self.height_at_zero
         self.validateGoalHeight()
+
+    def getPosition(self) -> float:
+        """Returns position in motor rotations"""
+        return self.encoder.getPosition()
 
     def incrementGoalHeight(self, height_increment_cm: float) -> None:
         """
@@ -138,11 +152,27 @@ class DiverCarlElevator(commands2.Subsystem):
             self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
         )
 
+        # Protect the arm from moving into unsafe position while arm is not in the correct position
+        currArmArc = 0
+        if self._arm is not None:
+            currArmArc = self._arm.getArc()
+
+        currPos = self.last_profiler_state.position
+        #if arm is near parked, max height = mc.kElevatorSafeHeight
+        if currArmArc < mc.kArmSafeAngleStart:
+            if currPos > mc.kElevatorSafeHeight:
+                currPos = mc.kElevatorSafeHeight
+        #if arm is in safe zone, any height is valid
+
+
         self.motor_pid.setReference(
-            self.last_profiler_state.position,
-            rev.SparkLowLevel.ControlType.kPosition, rev.ClosedLoopSlot.kSlot0,
-            self.feedforward.calculate(self.motor_velocity, self.last_profiler_state.velocity),
-            rev.SparkClosedLoopController.ArbFFUnits.kVoltage
+            currPos,
+            rev.SparkLowLevel.ControlType.kPosition,
+            rev.ClosedLoopSlot.kSlot0,
+            self.feedforward.calculate(
+                self.motor_velocity, self.last_profiler_state.velocity
+            ),
+            rev.SparkClosedLoopController.ArbFFUnits.kVoltage,
         )
 
     def checkIfAtGoalHeight(self) -> bool:

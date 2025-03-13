@@ -25,11 +25,18 @@ from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
 from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlChistera import DiverCarlChistera as Arm
 
 class RobotSwerve:
     """
     Container to hold the main robot code
     """
+    #forward declare critical types for editors
+    drivetrain: SwerveDrivetrain
+    elevator: Elevator
+    arm: Arm
+
+
     def __init__(self, is_disabled: Callable[[], bool]) -> None:
         # networktables setup
         self.inst = ntcore.NetworkTableInstance.getDefault()
@@ -38,6 +45,10 @@ class RobotSwerve:
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
         self.elevator = Elevator()
+        self.arm = Arm()
+        #cross link arm and elevator
+        self.arm.setElevator(self.elevator)
+        self.elevator.setArm(self.arm)
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
         self.intake_state_machines = CaptainIntake()
 
@@ -63,7 +74,7 @@ class RobotSwerve:
         self.auto_chooser = AutoBuilder.buildAutoChooser()
         wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
 
-        self.telop_stem_paths = {
+        self.teleop_stem_paths = {
             start_location: PathPlannerPath.fromPathFile(start_location)
             for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)] + [f"Stem_Reef_N{n}" for n in range(1, 7)]
         }
@@ -142,7 +153,7 @@ class RobotSwerve:
                      13: commands2.cmd.print_("Key 13 pressed"),
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
-        
+
         self.intake_state_machines.on_enable()
 
         if self.auto_command:
@@ -221,7 +232,7 @@ class RobotSwerve:
         pass
 
     def getDeployInfo(self, key: str) -> str:
-        """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavilable will return "unknown"
+        """Gets the Git SHA of the deployed robot by parsing ~/deploy.json and returning the git-hash from the JSON key OR if deploy.json is unavailable will return "unknown"
             example deploy.json: '{"deploy-host": "DESKTOP-80HA89O", "deploy-user": "ehsra", "deploy-date": "2023-03-02T17:54:14", "code-path": "blah", "git-hash": "3f4e89f138d9d78093bd4869e0cac9b61becd2b9", "git-desc": "3f4e89f-dirty", "git-branch": "fix-recal-nbeasley"}
 
         Args:
