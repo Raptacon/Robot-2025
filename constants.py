@@ -14,9 +14,9 @@ import rev
 
 
 class RobotConstants:
-    massKG: float = 74.088
+    massKG: float = 52.1631
     #MOI: Moment of inertia, kg*m^2
-    MOI: float = 6.883
+    MOI: float = 2.8619536067265
 
 
 #############################
