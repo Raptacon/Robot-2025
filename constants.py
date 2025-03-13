@@ -149,6 +149,6 @@ class DiverCarlChisteraConsts():
 class CaptainPlanetConsts():
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 2
-    kBackBreakBeam = 3
+    kFrontBreakBeam = 0
+    kBackBreakBeam = 1
     kDefaultSpeed = -0.25
