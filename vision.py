@@ -114,7 +114,6 @@ class Vision:
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
         std_dev = 3
-        SmartDashboard.putNumber("vis dist", distance)
         if distance:
             if distance > 2:
                 # Ignore vision if too far away from tag
