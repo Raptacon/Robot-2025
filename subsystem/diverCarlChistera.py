@@ -75,6 +75,7 @@ class DiverCarlChistera(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("Mech/Arm/PositionA", 0)
         wpilib.SmartDashboard.putNumber("Mech/Arm/SetA", 0)
         wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", 0)
+        self._requestedGoal = 0
 
     def setElevator(self, elevator: "DiverCarlElevator") -> None:
         self.elevator = elevator
@@ -130,6 +131,7 @@ class DiverCarlChistera(commands2.Subsystem):
         wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", self._currentGoal)
 
         self._controller.setReference(-calcGoal, self._primaryMotor.ControlType.kPosition, slot = rev.ClosedLoopSlot.kSlot0)
+        self._requestedGoal = calcGoal
 
 
     def getRotFromArc(self, arc : float):

@@ -2,6 +2,7 @@
 from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.diverCarlElevator import DiverCarlElevator
+from subsystem.diverCarlChistera import DiverCarlChistera
 
 # Third-party imports
 import wpilib
@@ -76,6 +77,16 @@ elevatorEntries = [
     ["elevatorMotorVelocity", FloatLogEntry, "/output"],
 ]
 
+armEntries = [
+    ["armPositionArc", FloatLogEntry, "/positions"],
+    ["armSetArc", FloatLogEntry, "/positions"],
+    ["armReqArc", FloatLogEntry, "/positions"],
+    ["armAtGoal", BooleanLogEntry, "/positions"],
+    ["armError", FloatLogEntry, "/positions"],
+    ["armAtHardlimit", BooleanLogEntry, "/limits"],
+    ["armDisabled", BooleanLogEntry, "/output"]
+]
+
 driverStationEntries = [
     ["alliance", StringLogEntry, "alliance"],
     ["autonomous", BooleanLogEntry, "autonomous"],
@@ -93,6 +104,7 @@ class Telemetry:
         driveTrain: SwerveDrivetrain = None,
         elevator: DiverCarlElevator = None,
         driverStation: wpilib.DriverStation = None,
+        arm: DiverCarlChistera = None,
     ):
         self.driverController = driverController
         self.mechController = mechController
@@ -101,6 +113,7 @@ class Telemetry:
         self.swerveModules = driveTrain.swerve_modules
         self.elevator = elevator
         self.driverStation = driverStation
+        self.arm = arm
 
         self.networkTable = NetworkTableInstance.getDefault()
         for entryname, logname in telemetryOdometryEntries:
@@ -121,6 +134,8 @@ class Telemetry:
             setattr(self, entryname, entrytype(self.datalog, "elevator/" + logname))
         for entryname, entrytype, logname in driverStationEntries:
             setattr(self, entryname, entrytype(self.datalog, "driverstation/" + logname))
+        for entryname, entrytype, logname in armEntries:
+            setattr(self, entryname, entrytype(self.datalog, "arm/" + logname))
 
         if self.driverStation:
             self.driverStation.startDataLog(self.datalog)
@@ -228,6 +243,15 @@ class Telemetry:
         self.teleop.append(self.driverStation.isTeleop())
         self.test.append(self.driverStation.isTest())
         self.enabled.append(self.driverStation.isEnabled())
+
+    def getArmInputs(self):
+        self.armPositionArc.append(self.arm.getArc())
+        self.armSetArc.append(self.arm.getSetArc())
+        self.armReqArc.append(self.arm._requestedGoal)
+        self.armAtGoal.append(self.arm.atGoal())
+        self.armError.append(self.arm.getError())
+        self.armAtHardlimit.append(self.arm.getForwardLimit())
+        self.armDisabled.append(self.arm.getDisabled())
 
     def runDefaultDataCollections(self):
         if self.driverController is not None:
