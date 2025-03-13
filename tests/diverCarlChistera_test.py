@@ -49,4 +49,3 @@ def test_elevatorSubsystemSafety(robot : MyRobot) -> None:
         arm.setArc(0)
         arm.periodic()
         assert simArmMotor.getSetpoint() == pytest.approx(-mc.kArmSafeAngleStart)
-
