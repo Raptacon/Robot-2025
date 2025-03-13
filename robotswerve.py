@@ -11,10 +11,13 @@ from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 from commands.operate_elevator import ElevateManually, ElevateToGoal
+from commands.run_chute import RunChute, RunChuteUntilFree, RunChuteUntilHeld
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup, reef_height_lookup
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.captainIntake import CaptainIntake
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlChute import DiverCarlChute as Chute
 
 # Third-party imports
 import commands2
@@ -24,7 +27,6 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
-from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
     """
@@ -38,8 +40,9 @@ class RobotSwerve:
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
         self.elevator = Elevator()
-        self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
         self.intake_state_machines = CaptainIntake()
+        self.chute = Chute()
+        self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
         # Initialize timer
         self.timer = wpilib.Timer()
@@ -71,7 +74,10 @@ class RobotSwerve:
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
-            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, self.elevator, wpilib.DriverStation)
+            self.telemetry = Telemetry(
+                self.driver_controller, self.mech_controller, self.drivetrain,
+                self.elevator, self.chute, wpilib.DriverStation
+            )
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
         wpilib.SmartDashboard.putString("Git Branch", self.getDeployInfo("git-branch"))
@@ -186,6 +192,8 @@ class RobotSwerve:
             )
         ))
 
+        self.chute.setDefaultCommand(commands2.cmd.run(self.chute.stopChute, self.chute))
+
         wpilib.SmartDashboard.putNumber("key_press", -1)
 
         Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
@@ -216,6 +224,19 @@ class RobotSwerve:
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()
+        RunChute(self.chute).withTimeout(7.5).schedule()
+        commands2.cmd.waitSeconds(10).schedule()
+        RunChuteUntilHeld(self.chute).schedule()
+        commands2.cmd.waitSeconds(2).schedule()
+        RunChuteUntilFree(self.chute).schedule()
+        commands2.cmd.waitSeconds(10).schedule()
+        RunChuteUntilHeld(self.chute, 0.5).schedule()
+        commands2.cmd.waitSeconds(2).schedule()
+        RunChuteUntilFree(self.chute).schedule()
+        commands2.cmd.waitSeconds(10).schedule()
+        RunChuteUntilHeld(self.chute, 0.5).schedule()
+        commands2.cmd.waitSeconds(2).schedule()
+        RunChute(self.chute, True).withTimeout(2).schedule()
 
     def testPeriodic(self):
         pass
