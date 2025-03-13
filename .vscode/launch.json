@@ -23,6 +23,14 @@
             "justMyCode": true
         },
         {
+            "name": "Run UT",
+            "type": "python",
+            "request": "launch",
+            "module": "robotpy",
+            "args": ["test"],
+            "justMyCode": true
+        },
+        {
             "name": "Run diverCarlChistera Sim",
             "type": "python",
             "request": "launch",
