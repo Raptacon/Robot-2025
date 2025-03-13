@@ -20,14 +20,14 @@ class OperatorRobotConfig:
     swerve_abs_encoder_calibrations: Tuple[float] = (
         241.3476 / 360.0, 4.131 / 360.0, 1.14264 / 360.0, 59.41404 / 360.0
     )
-    swerve_steer_pid: Tuple[float] = (0.01, 0, 0)
-    swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.23)
+    swerve_steer_pid: Tuple[float] = (0.007, 0, 0)
+    swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.227)
     pathplanner_translation_pid: Tuple[float] = (10.0, 0.0, 0.0)
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
     #TODO Get the actual values from our robot
-    robot_Cam_Translation_Left: Tuple[float] = (0.219075, 0.3063875, 0.365125)
-    robot_Cam_Translation_Right: Tuple[float] = (0.219075, -0.3063875, 0.365125)
+    robot_Cam_Translation_Left: Tuple[float] = (0.15291697084, 0.3063875, 0.365125) #0.219075
+    robot_Cam_Translation_Right: Tuple[float] = (0.15291697084, -0.3063875, 0.365125)
     robot_Cam_Rotation_Degress_Left: Tuple[float] = (0.0, 0.0, 0.0)
     robot_Cam_Rotation_Degress_Right: Tuple[float] = (0.0, 0.0, 0.0)
 

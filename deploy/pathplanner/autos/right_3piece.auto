@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "bs_1r"
+            "pathName": "rs_6r"
           }
         },
         {
@@ -19,7 +19,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1r_1f"
+            "pathName": "6r_2f"
           }
         },
         {
@@ -31,7 +31,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "1f_12r"
+            "pathName": "2f_8r"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise_Place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "8r_2f"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Coral_Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2f_7r"
           }
         },
         {
