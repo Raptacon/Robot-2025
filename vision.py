@@ -55,13 +55,7 @@ class Vision:
             robot_pose = camEstPoseLeft.estimatedPose.toPose2d()
 
             tag_distances = [
-                #PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
-                PhotonUtils.calculateDistanceToTargetMeters(
-                    self.camPoseEstRight.robotToCamera.translation.Z(),
-                    self.field_layout.getTagPose(targ.getFiducialId()).Z(),
-                    0,
-                    targ.getPitch()
-                )
+                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                 for targ in bestPipelineLeft.getTargets()
                 if targ is not None
             ]
@@ -82,13 +76,7 @@ class Vision:
             robot_pose = camEstPoseRight.estimatedPose.toPose2d()
             
             tag_distances = [
-                #PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
-                PhotonUtils.calculateDistanceToTargetMeters(
-                    self.camPoseEstRight.robotToCamera.translation.Z(),
-                    self.field_layout.getTagPose(targ.getFiducialId()).Z(),
-                    0,
-                    targ.getPitch()
-                )
+                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                 for targ in bestPipelineRight.getTargets()
                 if targ is not None
             ]
@@ -126,6 +114,7 @@ class Vision:
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
         std_dev = 3
+        SmartDashboard.putNumber("vis dist", distance)
         if distance:
             if distance > 2:
                 # Ignore vision if too far away from tag
