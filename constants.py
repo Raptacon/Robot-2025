@@ -4,7 +4,6 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
-import rev
 
 # Third-Party Imports
 import rev
@@ -60,10 +59,10 @@ class SwerveModuleMk4iConsts(SwerveDriveConsts):
     """
 
     kNominalVoltage: float = 12.0
-    # cuurrent limits use amps
+    # current limits use amps
     kDriveCurrentLimit: int = 40
     kSteerCurrentLimit: int = 20
-    # ramp rate: how fast the bot can go from 0% to 100%, mesured in seconds
+    # ramp rate: how fast the bot can go from 0% to 100%, measured in seconds
     kRampRate: float = 0.25
     kTicksPerRotation: int = 1
     kCanStatusFrameHz: int = 10
@@ -182,6 +181,6 @@ class MechConsts:
     kArmSafPosTol = 0.02 # % of movement arc
     kArmSafeAngleStart = 0.105 # movement arc
     kArmSafeAngleEnd = 0.13 # movement arc
-    kArmVerical = 0.259
+    kArmVertical = 0.259
     kArmLevel2Position = 0.153
     kElevatorSafeHeight = 5 #cm

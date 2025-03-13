@@ -4,6 +4,9 @@ import commands2
 import rev
 from constants import DiverCarlChisteraConsts as c
 from constants import MechConsts as mc
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from subsystem.diverCarlElevator import DiverCarlElevator
 
 class DiverCarlChistera(commands2.Subsystem):
     elevator: "DiverCarlElevator"
@@ -61,7 +64,7 @@ class DiverCarlChistera(commands2.Subsystem):
         #TODO add profile states
 
         self._disabled = False
-        self._curentGoal = 0.0
+        self._currentGoal = 0.0
 
         # setup telem
         self._limitAlert = wpilib.Alert("mechanism","Arm Limit Reached", wpilib.Alert.AlertType.kWarning)
@@ -69,7 +72,7 @@ class DiverCarlChistera(commands2.Subsystem):
         self._trackingAlert = wpilib.Alert("mechanism","Arm moving", wpilib.Alert.AlertType.kInfo)
         self._trackingAlert.set(False)
 
-        wpilib.SmartDashboard.putNumber("Mech/Arm/PostionA", 0)
+        wpilib.SmartDashboard.putNumber("Mech/Arm/PositionA", 0)
         wpilib.SmartDashboard.putNumber("Mech/Arm/SetA", 0)
         wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", 0)
 
@@ -78,7 +81,7 @@ class DiverCarlChistera(commands2.Subsystem):
 
 
     def periodic(self) -> None:
-        # update telemtry
+        # update telemetry
         if self.atGoal():
             self._trackingAlert.setText(f"Arm stable at {self.getArc():1.1f}")
             self._trackingAlert.set(True)
@@ -94,7 +97,7 @@ class DiverCarlChistera(commands2.Subsystem):
             self._encoder.setPosition(0)
             return
 
-        if self.getForwardLimit() and self._curentGoal > 0:
+        if self.getForwardLimit() and self._currentGoal > 0:
             self._primaryMotor.set(0)
             self._limitAlert.setText(f"Arm BOTTOM HIT at {self.getArc()}")
             self._limitAlert.set(True)
@@ -107,7 +110,7 @@ class DiverCarlChistera(commands2.Subsystem):
             self._primaryMotor.disable()
             return
 
-        calcGoal = self._curentGoal
+        calcGoal = self._currentGoal
         currHeight = 0
         if self.elevator is not None:
             currHeight = self.elevator.getPosition()
@@ -120,11 +123,11 @@ class DiverCarlChistera(commands2.Subsystem):
             if calcGoal > mc.kArmSafeAngleEnd:
                 calcGoal = mc.kArmSafeAngleEnd
 
-        #TODO add checks if elevator is moving keep in safe zone until postion is reached
+        #TODO add checks if elevator is moving keep in safe zone until position is reached
 
-        wpilib.SmartDashboard.putNumber("Mech/Arm/PostionA", calcGoal)
+        wpilib.SmartDashboard.putNumber("Mech/Arm/PositionA", calcGoal)
         wpilib.SmartDashboard.putNumber("Mech/Arm/SetA", self.getArc())
-        wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", self._curentGoal)
+        wpilib.SmartDashboard.putNumber("Mech/Arm/ReqA", self._currentGoal)
 
         self._controller.setReference(-calcGoal, self._primaryMotor.ControlType.kPosition, slot = rev.ClosedLoopSlot.kSlot0)
 
@@ -155,25 +158,25 @@ class DiverCarlChistera(commands2.Subsystem):
         if arc < 0:
             arc = 0
 
-        self._curentGoal = arc
+        self._currentGoal = arc
 
     def getArc(self) -> float:
         return -self._encoder.getPosition()
 
     def getSetArc(self) -> float:
-        return self._curentGoal
+        return self._currentGoal
 
     def atGoal(self) -> bool:
         """
         Returns if the arm is at the goal height.
         """
-        return  math.isclose(self._encoder.getVelocity(), 0.0, abs_tol=0.01) and math.isclose(self.getArc(), self._curentGoal, abs_tol=0.1)
+        return  math.isclose(self._encoder.getVelocity(), 0.0, abs_tol=0.01) and math.isclose(self.getArc(), self._currentGoal, abs_tol=0.1)
 
     def getError(self) -> float:
         """
         Returns the error full arc between the goal height and the current height.
         """
-        return self._curentGoal - self.getArc()
+        return self._currentGoal - self.getArc()
 
     def stopArm(self) -> None:
         """
@@ -183,7 +186,7 @@ class DiverCarlChistera(commands2.Subsystem):
 
     def disable(self) -> None:
         """
-        Disables the elvators motors. The arm may fall under gravity.
+        Disables the arm motors. The arm may fall under gravity.
         """
         self._disabled = True
 

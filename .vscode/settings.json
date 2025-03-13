@@ -10,7 +10,7 @@
         "venv*/"
     ],
     "flake8.args": [
-        "--config=.flake8s"
+        "--config=.flake8"
     ],
     "flake8.importStrategy": "fromEnvironment",
     "cSpell.words": [
@@ -51,6 +51,7 @@
         "softlimits",
         "sshcmd",
         "sshcontroller",
+        "telem",
         "teleop",
         "tryfirst",
         "venv",

@@ -12,6 +12,10 @@ from wpilib import Timer
 from wpimath.controller import ElevatorFeedforward
 from wpimath.trajectory import TrapezoidProfile
 
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from subsystem.diverCarlChistera import DiverCarlChistera
+
 
 class DiverCarlElevator(commands2.Subsystem):
     """ """
@@ -72,7 +76,7 @@ class DiverCarlElevator(commands2.Subsystem):
             .reverseSoftLimitEnabled(c.kSoftLimits["reverse"])
         )
 
-        # Conigure hard limits (hardware triggers to stop motor execution)
+        # Configure hard limits (hardware triggers to stop motor execution)
         (
             motor_config.limitSwitch.forwardLimitSwitchEnabled(c.kLimits["forward"])
             .forwardLimitSwitchType(c.kLimits["forwardType"])
@@ -135,7 +139,7 @@ class DiverCarlElevator(commands2.Subsystem):
         self.validateGoalHeight()
 
     def getPosition(self) -> float:
-        """Returns postion in motor rotations"""
+        """Returns position in motor rotations"""
         return self.encoder.getPosition()
 
     def incrementGoalHeight(self, height_increment_cm: float) -> None:
@@ -160,7 +164,7 @@ class DiverCarlElevator(commands2.Subsystem):
             TrapezoidProfile.State(self.current_goal_height_above_zero, 0),
         )
 
-        # Protect the arm from moving into unsafe postion while arm is not in the correct position
+        # Protect the arm from moving into unsafe position while arm is not in the correct position
         currArmArc = 0
         if self._arm is not None:
             currArmArc = self._arm.getArc()
@@ -168,8 +172,8 @@ class DiverCarlElevator(commands2.Subsystem):
         currPos = self.last_profiler_state.position
         #if arm is near parked, max height = 10 rotations
         if currArmArc < mc.kArmSafeAngleStart:
-            if currPos > cm.kElevatorSafeHeight:
-                currPos = cm.kElevatorSafeHeight
+            if currPos > mc.kElevatorSafeHeight:
+                currPos = mc.kElevatorSafeHeight
         #if arm is in safe zone, any height is valid
 
 
