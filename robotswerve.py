@@ -245,7 +245,7 @@ class RobotSwerve:
                 )
             )
         )
-        self.mech_controller.rightTrigger(0.1).whileTrue(
+        Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
             SetCaptainIntakeIdleSpeed(self.intake_subsystem, self.mech_controller.getRightTriggerAxis)
         )
         Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06)).whileTrue(
