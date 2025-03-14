@@ -16,9 +16,9 @@ import rev
 
 
 class RobotConstants:
-    massKG: float = 63.5029
+    massKG: float = 64
     #MOI: Moment of inertia, kg*m^2
-    MOI: float = 3.48411719573017
+    MOI: float = 5.94579419069215
 
 
 #############################
@@ -104,13 +104,13 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 
     wheelDiameter: float = 0.10033  # in meters
     # COf: coefficient, force/force (no units)
-    wheelCOF: float = 1.0
+    wheelCOF: float = 1.127 #0.812801
     driveGearRatio: float = 6.75
     steerGearRatio: float = 150 / 7
 
     # position: meters per rotation
     # velocity: meters per second
-    drivePositionConversionFactor: float = (math.pi * wheelDiameter) / (
+    drivePositionConversionFactor: float = (wheelCOF * (math.pi * wheelDiameter)) / (
         driveGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation
     )
     driveVelocityConversionFactor: float = drivePositionConversionFactor / 60.0
@@ -199,9 +199,9 @@ class MechConsts:
     kElevatorSafeHeight = 5 #cm
     kElevatorTrough = 46 #cm
     kArmAngleTrough = 0.11
-    kElevatorReef2 = 60 #cm # THIS IS A GUESS
+    kElevatorReef2 = 68 #cm # THIS IS A GUESS
     kArmAngleReef2 = 0.11
-    kElevatorReef3 = 121 #cm # THIS IS A GUESS
+    kElevatorReef3 = 115 #cm # THIS IS A GUESS
     kArmAngleReef3 = 0.11
     kElevatorReef4 = 183 #cm
     kArmAngleReef4 = 0.15
