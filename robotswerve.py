@@ -228,6 +228,10 @@ class RobotSwerve:
         Trigger(self.mech_controller.getXButtonPressed).onTrue(
             elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH)
         )
+        Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
+        )
+
 
 
     def teleopPeriodic(self):
