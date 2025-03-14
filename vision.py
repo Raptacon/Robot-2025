@@ -57,7 +57,7 @@ class Vision:
             tag_distances = [
                 PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                 for targ in bestPipelineLeft.getTargets()
-                if targ is not None
+                if targ is not None and targ.getPoseAmbiguity() < 0.1
             ]
 
             distance_to_closest_tag = None
@@ -73,12 +73,13 @@ class Vision:
         bestPipelineRight = self.cam_right.getLatestResult()
         camEstPoseRight = self.camPoseEstRight.update(bestPipelineRight)
         if camEstPoseRight:
+            bestPipelineRight.pose
             robot_pose = camEstPoseRight.estimatedPose.toPose2d()
             
             tag_distances = [
                 PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                 for targ in bestPipelineRight.getTargets()
-                if targ is not None
+                if targ is not None and targ.getPoseAmbiguity() < 0.1
             ]
 
             distance_to_closest_tag = None
