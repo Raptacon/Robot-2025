@@ -173,9 +173,9 @@ class DiverCarlElevatorConsts:
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 0
-    kBackBreakBeam = 1
-    kDefaultSpeed = -0.25
+    kFrontBreakBeam = 1
+    kBackBreakBeam = 0
+    kDefaultSpeed = 0.15
     class BreakBeam(Enum):
         FRONT = 1  # Closest to large green wheels
         BACK = 2

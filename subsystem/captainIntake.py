@@ -21,8 +21,8 @@ class CaptainIntake(commands2.Subsystem):
         self.intakeMotor.set(speed)
 
     def updateDashboard(self, state: str):
-        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
+        self.smartdashboard.putBoolean("Front 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Back 2", self.back_breakbeam.get())
         self.smartdashboard.putString("Intake State", state)
 
     def getBreakBeam(self, position: consts.BreakBeam) -> bool:
