@@ -65,7 +65,7 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
-        NamedCommands.registerCommand('Raise_Place', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
         NamedCommands.registerCommand('Raise_Place_L1', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
         NamedCommands.registerCommand('Raise_Place_L2', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
         NamedCommands.registerCommand('Raise_Place_L3', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
