@@ -176,7 +176,7 @@ class RobotSwerve:
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: False
+                lambda: self.driver_controller.getLeftBumperButton()
             )
         )
 
@@ -249,7 +249,7 @@ class RobotSwerve:
 
 
     def teleopPeriodic(self):
-        if self.driver_controller.getLeftBumperButtonPressed():
+        if self.driver_controller.getLeftTriggerAxis() > 0.5:
             commands2.CommandScheduler.getInstance().cancelAll()
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
