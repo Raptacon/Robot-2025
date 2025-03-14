@@ -97,7 +97,7 @@ class RobotSwerve:
         )
 
         # Vision setup
-        self.vision = Vision(self.drivetrain)
+        #self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
