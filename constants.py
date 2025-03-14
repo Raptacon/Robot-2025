@@ -196,6 +196,7 @@ class MechConsts:
     kArmSafeAngleEnd = 0.13 # movement arc
     kArmVertical = 0.259
     kArmLevel2Position = 0.153
+    kArmAngleIncrement = 0.1
     kElevatorSafeHeight = 5 #cm
     kElevatorTrough = 46 #cm
     kArmAngleTrough = 0.11
