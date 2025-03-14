@@ -133,7 +133,7 @@ class DiverCarlChisteraConsts():
                 "reverse": False,
                 "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen}
 
-    kPidf0 = (0.3, 0.001, 0.0, 0, rev.ClosedLoopSlot.kSlot0) # P I D F Slot
+    kPidf0 = (0.3, 0.001 , 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D F Slot
     kMaxOutRange0 = (-0.25, 0.7, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
 
 
@@ -145,10 +145,10 @@ class DiverCarlElevatorConsts:
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
     kTrapezoidProfileUp = (135, 150)  # Max Vel (cm/s) Max Accel (cm/s^2)
-    kTrapezoidProfileDown = (35, 37.5)
+    kTrapezoidProfileDown = (35*0.8, 37.5/3.3)
     kFeedforward = (0, 0.28, 0.1, 0)  # kS kG kV kA
     kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0)  # P I D Slot
-    kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
+    kMaxOutRange0 = (-0.35, 1.0, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
     kSoftLimits = {
         "forward": True,
         "forwardLimit": 178,
@@ -192,7 +192,7 @@ class MechConsts:
     kArmRestPosition = 0.0 # movement arc
     kArmRestPosTol = 0.02 # % of movement arc
     kArmSafPosTol = 0.02 # % of movement arc
-    kArmSafeAngleStart = 0.105 # movement arc
+    kArmSafeAngleStart = 0.085 # movement arc
     kArmSafeAngleEnd = 0.13 # movement arc
     kArmVertical = 0.259
     kArmLevel2Position = 0.153

@@ -6,10 +6,20 @@ from constants import MechConsts as mc
 
 from robot import MyRobot
 
+from subsystem.diverCarlChistera import DiverCarlChistera
+from subsystem.diverCarlElevator import DiverCarlElevator
+
 def test_elevatorSubsystemSafety(robot : MyRobot) -> None:
-    robot = robot.getRobot()
-    elevator = robot.elevator
-    arm = robot.arm
+    elevator: DiverCarlElevator
+    arm: DiverCarlChistera
+
+    if hasattr(robot, "getRobot"):
+        robot = robot.getRobot()
+        elevator = robot.elevator
+        arm = robot.arm
+    else:
+        elevator = DiverCarlElevator()
+        arm = DiverCarlChistera()
     simArmMotor = rev.SparkSim(arm._primaryMotor, DCMotor(12, 10, 10, 10, 5000, 1))
     simElevMotor = rev.SparkSim(elevator.motor, DCMotor(12, 10, 10, 10, 5000, 1))
 
