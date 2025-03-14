@@ -197,6 +197,7 @@ class RobotSwerve:
 
         self.elevator.setDefaultCommand(ElevateManually(
             self.elevator,
+            self.arm,
             lambda: (
                 wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
             )

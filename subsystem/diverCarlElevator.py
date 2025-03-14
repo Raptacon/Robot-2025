@@ -148,9 +148,15 @@ class DiverCarlElevator(commands2.Subsystem):
     def incrementGoalHeight(self, height_increment_cm: float) -> None:
         """
         """
+        self.resetProfilerState()
         self.current_goal_height = self.current_goal_height + height_increment_cm
         self.current_goal_height_above_zero = self.current_goal_height_above_zero + height_increment_cm
         self.validateGoalHeight()
+
+        #if arm starts in unsafe postion, protect it until it moves.
+        # after that then the arm is on its own.
+        if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
+            self.lockMaxHeight(mc.kElevatorSafeHeight)
 
     def goToGoalHeight(self) -> None:
         """
@@ -206,6 +212,8 @@ class DiverCarlElevator(commands2.Subsystem):
     def manualControl(self, velocity_percentage: float) -> None:
         """
         """
+        if velocity_percentage > 0.25:
+            velocity_percentage = 0.25
         desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
         if desired_velocity < 0:
             desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)

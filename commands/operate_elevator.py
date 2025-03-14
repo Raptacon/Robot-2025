@@ -54,6 +54,7 @@ class ElevateToIncrementedGoal(commands2.Command):
         """
         super().__init__()
         self.elevator = elevator
+        self.elevator
         self.goal_height_increment_cm = goal_height_increment_cm
         self.addRequirements(self.elevator)
 
@@ -80,14 +81,20 @@ class ElevateManually(commands2.Command):
     def __init__(
         self,
         elevator: DiverCarlElevator,
+        pivot: DiverCarlChistera,
         velocity_percentaage: Callable[[], float],
     ) -> None:
         """
         """
         super().__init__()
         self.elevator = elevator
+        self.pivot = pivot
         self.velocity_percentaage = velocity_percentaage
         self.addRequirements(self.elevator)
+        self.addRequirements(self.pivot)
+
+    def initialize(self):
+        self.pivot.setArc(mc.kArmAngleReef2)
 
     def execute(self):
         """
@@ -155,3 +162,10 @@ def genPivotElevatorCommand(pivot: DiverCarlChistera,
         PivotToGoal(pivot, goal_arc),
         ElevateToGoal(elevator, goal_height_cm)
     )
+
+
+def genManualPivotElevatorCommand(pivot: DiverCarlChistera,
+                            elevator: DiverCarlElevator,
+                            manual_goal_height_cm = None,
+                            manual_goal_arc = None):
+    
