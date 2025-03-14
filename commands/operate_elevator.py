@@ -128,8 +128,8 @@ class PivotToIncrementedGoal(commands2.Command):
     def isFinished(self):
         self.pivot.atGoal()
     
-def genPivotElevatorCommand(pivot: DiverCarlChistera, 
-                            elevator: DiverCarlElevator, 
+def genPivotElevatorCommand(pivot: DiverCarlChistera,
+                            elevator: DiverCarlElevator,
                             reef_opt: p_opt):
     match reef_opt:
         case p_opt.REST:
