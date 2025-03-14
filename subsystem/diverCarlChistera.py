@@ -95,14 +95,8 @@ class DiverCarlChistera(commands2.Subsystem):
         if self.getForwardLimit():
             self._limitAlert.setText(f"Arm TOP HIT at {self.getArc()}")
             self._limitAlert.set(True)
-            self._encoder.setPosition(0)
-            return
+            #self._encoder.setPosition(0)
 
-        if self.getForwardLimit() and self._currentGoal > 0:
-            self._primaryMotor.set(0)
-            self._limitAlert.setText(f"Arm BOTTOM HIT at {self.getArc()}")
-            self._limitAlert.set(True)
-            return
 
         # clear the alert as we no longer are at the limit
         self._limitAlert.set(False)
