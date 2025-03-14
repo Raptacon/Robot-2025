@@ -4,9 +4,11 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
+from enum import Enum
 
 # Third-Party Imports
 import rev
+
 
 #############################
 # ROBOT ###################
@@ -168,12 +170,23 @@ class DiverCarlElevatorConsts:
     kChuteHeightCm = 10.16
 
 
+class DiverCarlChute:
+    kMotorCanId = 14
+    kMotorInverted = False
+    kCurrentLimitAmps = 20
+    kDefaultSpeed = 0.3
+
+
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 2
-    kBackBreakBeam = 3
-    kDefaultSpeed = -0.25
+    kFrontBreakBeam = 1
+    kBackBreakBeam = 0
+    kDefaultSpeed = 0.15
+    class BreakBeam(Enum):
+        FRONT = 1  # Closest to large green wheels
+        BACK = 2
+
 
 class MechConsts:
     kArmRestPosition = 0.0 # movement arc
@@ -184,3 +197,21 @@ class MechConsts:
     kArmVertical = 0.259
     kArmLevel2Position = 0.153
     kElevatorSafeHeight = 5 #cm
+    kElevatorTrough = 46 #cm
+    kArmAngleTrough = 0.11
+    kElevatorReef2 = 60 #cm # THIS IS A GUESS
+    kArmAngleReef2 = 0.11
+    kElevatorReef3 = 121 #cm # THIS IS A GUESS
+    kArmAngleReef3 = 0.11
+    kElevatorReef4 = 183 #cm
+    kArmAngleReef4 = 0.15
+
+class PoseOptions(Enum):
+    MANUAL = -1
+    REST = 0
+    TROUGH = 1
+    REEF2 = 2
+    REEF3 = 3
+    REEF4 = 4
+    ALGAE2 = 5
+    ALGAE3 = 6

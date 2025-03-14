@@ -1,7 +1,7 @@
 import wpilib
 import wpilib.interfaces
-from subsystem.captainIntake import CaptainIntake
-
+from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine
+import commands2
 
 class MyRobot(wpilib.TimedRobot):
     """
@@ -10,19 +10,19 @@ class MyRobot(wpilib.TimedRobot):
 
     def robotInit(self):
         """Robot initialization function"""
-        self.intake_state_machines = CaptainIntake()
+        self.intake = CaptainIntake()
+        self.state_machine = CaptainIntakeStateMachine(self.intake)
+        self.command_scheduler = commands2.CommandScheduler.getInstance()
 
         self.driver_controller = wpilib.XboxController(0)
 
-        self.timer = wpilib.Timer()
-        self.timer.start()
-
     def disabledInit(self):
-        self.intake_state_machines.on_disable()
+        # commands2.CommandScheduler.getInstance().cancelAll()
+        self.command_scheduler.cancelAll()
 
     def testInit(self):
-        self.intake_state_machines.on_enable()
+        self.state_machine.schedule()
 
     def testPeriodic(self):
         wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
-        self.intake_state_machines.on_iteration(self.timer.get())
+        self.command_scheduler.run()

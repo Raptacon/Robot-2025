@@ -3,15 +3,16 @@ from config import OperatorRobotConfig
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.diverCarlElevator import DiverCarlElevator
 from subsystem.diverCarlChistera import DiverCarlChistera
+from subsystem.captainIntake import CaptainIntake
+
+from constants import CaptainPlanetConsts as intakeConstants
 
 # Third-party imports
 import wpilib
 from ntcore import NetworkTableInstance
 from wpimath.geometry import Pose2d, Rotation2d
 from wpimath.kinematics import ChassisSpeeds, SwerveModuleState
-from wpiutil.log import (
-    BooleanLogEntry, StringLogEntry, FloatLogEntry, IntegerLogEntry
-)
+from wpiutil.log import BooleanLogEntry, StringLogEntry, FloatLogEntry, IntegerLogEntry
 
 telemetryButtonEntries = [
     ["AButton", BooleanLogEntry, "/button/letter/a"],
@@ -30,8 +31,9 @@ telemetryButtonEntries = [
     ["JoystickLeftX", FloatLogEntry, "button/joystick/leftx"],
     ["JoystickRightY", FloatLogEntry, "button/joystick/righty"],
     ["JoystickRightX", FloatLogEntry, "button/joystick/rightx"],
-    ["DPad", IntegerLogEntry, "button/dpad"]
+    ["DPad", IntegerLogEntry, "button/dpad"],
 ]
+
 
 telemetryOdometryEntries = [
     ["robotPose", "robotpose"],
@@ -41,29 +43,31 @@ telemetryOdometryEntries = [
 telemetryFullSwerveDriveTrainEntries = [
     ["moduleStates", SwerveModuleState, True, "swervemodeulestates"],
     ["drivetrainVelocity", ChassisSpeeds, False, "swervevelocity"],
-    ["drivetrainRotation", Rotation2d, False, "swerverotation"]
+    ["drivetrainRotation", Rotation2d, False, "swerverotation"],
 ]
 
 telemetryRawSwerveDriveTrainEntries = []
 for i in range(len(OperatorRobotConfig.swerve_module_channels)):
-    telemetryRawSwerveDriveTrainEntries.extend([
-        [f"steerDegree{i + 1}", FloatLogEntry, f"module{i + 1}/steerdegree"],
-        [f"drivePercent{i + 1}", FloatLogEntry, f"module{i + 1}/drivepercent"],
-        [f"moduleVelocity{i + 1}", FloatLogEntry, f"module{i + 1}/velocity"],
-    ])
+    telemetryRawSwerveDriveTrainEntries.extend(
+        [
+            [f"steerDegree{i + 1}", FloatLogEntry, f"module{i + 1}/steerdegree"],
+            [f"drivePercent{i + 1}", FloatLogEntry, f"module{i + 1}/drivepercent"],
+            [f"moduleVelocity{i + 1}", FloatLogEntry, f"module{i + 1}/velocity"],
+        ]
+    )
 
 elevatorEntries = [
-        # self.current_height_above_zero = self.encoder.getPosition()
-        # self.current_height = self.height_at_zero + self.current_height_above_zero
-        # self.current_goal_height = self.height_at_zero
-        # self.current_goal_height_above_zero = 0
-        # self.at_goal = self.checkIfAtGoalHeight()
-        # self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
-        # self.at_top_limit = self.motor.getForwardLimitSwitch().get()
-        # self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
-        # self.motor_current = self.motor.getOutputCurrent()
-        # self.motor_output = self.motor.getAppliedOutput()
-        # self.motor_velocity = self.encoder.getVelocity()
+    # self.current_height_above_zero = self.encoder.getPosition()
+    # self.current_height = self.height_at_zero + self.current_height_above_zero
+    # self.current_goal_height = self.height_at_zero
+    # self.current_goal_height_above_zero = 0
+    # self.at_goal = self.checkIfAtGoalHeight()
+    # self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
+    # self.at_top_limit = self.motor.getForwardLimitSwitch().get()
+    # self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
+    # self.motor_current = self.motor.getOutputCurrent()
+    # self.motor_output = self.motor.getAppliedOutput()
+    # self.motor_velocity = self.encoder.getVelocity()
     ["elevatorCurrentHeightAboveZero", FloatLogEntry, "/positions"],
     ["elevatorCurrentHeight", FloatLogEntry, "/positions"],
     ["elevatorCurrentGoalHeight", FloatLogEntry, "/positions"],
@@ -84,7 +88,7 @@ armEntries = [
     ["armAtGoal", BooleanLogEntry, "/positions"],
     ["armError", FloatLogEntry, "/positions"],
     ["armAtHardlimit", BooleanLogEntry, "/limits"],
-    ["armDisabled", BooleanLogEntry, "/output"]
+    ["armDisabled", BooleanLogEntry, "/output"],
 ]
 
 driverStationEntries = [
@@ -92,8 +96,17 @@ driverStationEntries = [
     ["autonomous", BooleanLogEntry, "autonomous"],
     ["teleop", BooleanLogEntry, "teleop"],
     ["test", BooleanLogEntry, "test"],
-    ["enabled", BooleanLogEntry, "enabled"]
+    ["enabled", BooleanLogEntry, "enabled"],
 ]
+
+intakeEntries = [
+    ["intakeFrontBreakBeam", BooleanLogEntry, "/breakbeams"],
+    ["intakeBackBreakBeam", BooleanLogEntry, "/breakbeams"],
+    ["intakeMotorCurrent", FloatLogEntry, "/output"],
+    ["intakeMotorOutput", FloatLogEntry, "/output"],
+    ["intakeMotorVelocity", FloatLogEntry, "/output"],
+]
+
 
 class Telemetry:
 
@@ -105,6 +118,7 @@ class Telemetry:
         elevator: DiverCarlElevator = None,
         driverStation: wpilib.DriverStation = None,
         arm: DiverCarlChistera = None,
+        intake: CaptainIntake = None,
     ):
         self.driverController = driverController
         self.mechController = mechController
@@ -114,28 +128,64 @@ class Telemetry:
         self.elevator = elevator
         self.driverStation = driverStation
         self.arm = arm
+        self.intake = intake
 
         self.networkTable = NetworkTableInstance.getDefault()
         for entryname, logname in telemetryOdometryEntries:
-            setattr(self, entryname, self.networkTable.getStructTopic("odometry/" + logname, Pose2d).publish())
-        for entryname, entrytype, isarraytype, logname in telemetryFullSwerveDriveTrainEntries:
+            setattr(
+                self,
+                entryname,
+                self.networkTable.getStructTopic(
+                    "odometry/" + logname, Pose2d
+                ).publish(),
+            )
+        for (
+            entryname,
+            entrytype,
+            isarraytype,
+            logname,
+        ) in telemetryFullSwerveDriveTrainEntries:
             if isarraytype:
-                setattr(self, entryname, self.networkTable.getStructArrayTopic("swervedrivetrain/" + logname, entrytype).publish())
+                setattr(
+                    self,
+                    entryname,
+                    self.networkTable.getStructArrayTopic(
+                        "swervedrivetrain/" + logname, entrytype
+                    ).publish(),
+                )
             else:
-                setattr(self, entryname, self.networkTable.getStructTopic("swervedrivetrain/" + logname, entrytype).publish())
+                setattr(
+                    self,
+                    entryname,
+                    self.networkTable.getStructTopic(
+                        "swervedrivetrain/" + logname, entrytype
+                    ).publish(),
+                )
 
         self.datalog = wpilib.DataLogManager.getLog()
         for entryname, entrytype, logname in telemetryButtonEntries:
-            setattr(self, "driver" + entryname, entrytype(self.datalog, "driver/" + logname))
-            setattr(self, "mech" + entryname, entrytype(self.datalog, "mech/" + logname))
+            setattr(
+                self, "driver" + entryname, entrytype(self.datalog, "driver/" + logname)
+            )
+            setattr(
+                self, "mech" + entryname, entrytype(self.datalog, "mech/" + logname)
+            )
         for entryname, entrytype, logname in telemetryRawSwerveDriveTrainEntries:
-            setattr(self, entryname, entrytype(self.datalog, "rawswervedrivetrain/" + logname))
+            setattr(
+                self,
+                entryname,
+                entrytype(self.datalog, "rawswervedrivetrain/" + logname),
+            )
         for entryname, entrytype, logname in elevatorEntries:
             setattr(self, entryname, entrytype(self.datalog, "elevator/" + logname))
         for entryname, entrytype, logname in driverStationEntries:
-            setattr(self, entryname, entrytype(self.datalog, "driverstation/" + logname))
+            setattr(
+                self, entryname, entrytype(self.datalog, "driverstation/" + logname)
+            )
         for entryname, entrytype, logname in armEntries:
             setattr(self, entryname, entrytype(self.datalog, "arm/" + logname))
+        for entryname, entrytype, logname in intakeEntries:
+            setattr(self, entryname, entrytype(self.datalog, "intake/" + logname))
 
         if self.driverStation:
             self.driverStation.startDataLog(self.datalog)
@@ -144,45 +194,73 @@ class Telemetry:
         """
         Records data for buttons and axis inputs for the first controller
         """
-        self.driverAButton.append(self.driverController.getAButton()) #bool
-        self.driverBButton.append(self.driverController.getBButton()) #bool
-        self.driverXButton.append(self.driverController.getXButton()) #bool
-        self.driverYButton.append(self.driverController.getYButton()) #bool
-        self.driverBackButton.append(self.driverController.getBackButton()) #left side , bool
-        self.driverStartButton.append(self.driverController.getStartButton()) #right side , bool
-        self.driverLeftBumper.append(self.driverController.getLeftBumper()) #bool
-        self.driverRightBumper.append(self.driverController.getRightBumper()) #bool
-        self.driverLeftStickButton.append(self.driverController.getLeftStickButton()) #bool
-        self.driverRightStickButton.append(self.driverController.getRightStickButton()) #bool
-        self.driverLeftTrigger.append(self.driverController.getLeftTriggerAxis()) #float 0-1
-        self.driverRightTrigger.append(self.driverController.getRightTriggerAxis()) #float 0-1
-        self.driverJoystickLeftY.append(self.driverController.getLeftY()) #float -1-1
-        self.driverJoystickLeftX.append(self.driverController.getLeftX()) #float -1-1
-        self.driverJoystickRightY.append(self.driverController.getRightY()) #float -1-1
-        self.driverJoystickRightX.append(self.driverController.getRightX()) #float -1-1
-        self.driverDPad.append(self.driverController.getPOV()) #ints
+        self.driverAButton.append(self.driverController.getAButton())  # bool
+        self.driverBButton.append(self.driverController.getBButton())  # bool
+        self.driverXButton.append(self.driverController.getXButton())  # bool
+        self.driverYButton.append(self.driverController.getYButton())  # bool
+        self.driverBackButton.append(
+            self.driverController.getBackButton()
+        )  # left side , bool
+        self.driverStartButton.append(
+            self.driverController.getStartButton()
+        )  # right side , bool
+        self.driverLeftBumper.append(self.driverController.getLeftBumper())  # bool
+        self.driverRightBumper.append(self.driverController.getRightBumper())  # bool
+        self.driverLeftStickButton.append(
+            self.driverController.getLeftStickButton()
+        )  # bool
+        self.driverRightStickButton.append(
+            self.driverController.getRightStickButton()
+        )  # bool
+        self.driverLeftTrigger.append(
+            self.driverController.getLeftTriggerAxis()
+        )  # float 0-1
+        self.driverRightTrigger.append(
+            self.driverController.getRightTriggerAxis()
+        )  # float 0-1
+        self.driverJoystickLeftY.append(self.driverController.getLeftY())  # float -1-1
+        self.driverJoystickLeftX.append(self.driverController.getLeftX())  # float -1-1
+        self.driverJoystickRightY.append(
+            self.driverController.getRightY()
+        )  # float -1-1
+        self.driverJoystickRightX.append(
+            self.driverController.getRightX()
+        )  # float -1-1
+        self.driverDPad.append(self.driverController.getPOV())  # ints
 
     def getMechControllerInputs(self):
         """
         Records data for buttons and axis inputs for the second controller
         """
-        self.mechAButton.append(self.mechController.getAButton()) #bool
-        self.mechBButton.append(self.mechController.getBButton()) #bool
-        self.mechXButton.append(self.mechController.getXButton()) #bool
-        self.mechYButton.append(self.mechController.getYButton()) #bool
-        self.mechBackButton.append(self.mechController.getBackButton()) #left side , bool
-        self.mechStartButton.append(self.mechController.getStartButton()) #right side , bool
-        self.mechLeftBumper.append(self.mechController.getLeftBumper()) #bool
-        self.mechRightBumper.append(self.mechController.getRightBumper()) #bool
-        self.mechLeftStickButton.append(self.mechController.getLeftStickButton()) #bool
-        self.mechRightStickButton.append(self.mechController.getRightStickButton()) #bool
-        self.mechLeftTrigger.append(self.mechController.getLeftTriggerAxis()) #float 0-1
-        self.mechRightTrigger.append(self.mechController.getRightTriggerAxis()) #float 0-1
-        self.mechJoystickLeftY.append(self.mechController.getLeftY()) #float -1-1
-        self.mechJoystickLeftX.append(self.mechController.getLeftX()) #float -1-1
-        self.mechJoystickRightY.append(self.mechController.getRightY()) #float -1-1
-        self.mechJoystickRightX.append(self.mechController.getRightX()) #float -1-1
-        self.mechDPad.append(self.mechController.getPOV()) #ints
+        self.mechAButton.append(self.mechController.getAButton())  # bool
+        self.mechBButton.append(self.mechController.getBButton())  # bool
+        self.mechXButton.append(self.mechController.getXButton())  # bool
+        self.mechYButton.append(self.mechController.getYButton())  # bool
+        self.mechBackButton.append(
+            self.mechController.getBackButton()
+        )  # left side , bool
+        self.mechStartButton.append(
+            self.mechController.getStartButton()
+        )  # right side , bool
+        self.mechLeftBumper.append(self.mechController.getLeftBumper())  # bool
+        self.mechRightBumper.append(self.mechController.getRightBumper())  # bool
+        self.mechLeftStickButton.append(
+            self.mechController.getLeftStickButton()
+        )  # bool
+        self.mechRightStickButton.append(
+            self.mechController.getRightStickButton()
+        )  # bool
+        self.mechLeftTrigger.append(
+            self.mechController.getLeftTriggerAxis()
+        )  # float 0-1
+        self.mechRightTrigger.append(
+            self.mechController.getRightTriggerAxis()
+        )  # float 0-1
+        self.mechJoystickLeftY.append(self.mechController.getLeftY())  # float -1-1
+        self.mechJoystickLeftX.append(self.mechController.getLeftX())  # float -1-1
+        self.mechJoystickRightY.append(self.mechController.getRightY())  # float -1-1
+        self.mechJoystickRightX.append(self.mechController.getRightX())  # float -1-1
+        self.mechDPad.append(self.mechController.getPOV())  # ints
 
     def getOdometryInputs(self):
         """
@@ -196,7 +274,9 @@ class Telemetry:
         """
         Retrieves values reflecting the current state of the swerve drive
         """
-        self.moduleStates.set([swerveModule.current_state() for swerveModule in self.swerveModules])
+        self.moduleStates.set(
+            [swerveModule.current_state() for swerveModule in self.swerveModules]
+        )
         self.drivetrainVelocity.set(self.driveTrain.current_robot_relative_speed())
         self.drivetrainRotation.set(self.driveTrain.current_yaw())
 
@@ -206,19 +286,29 @@ class Telemetry:
         it get the steer angle, the drive percent and the velocity
         """
         for i, swerveModule in enumerate(self.swerveModules):
-            getattr(self, f"steerDegree{i + 1}").append(swerveModule.current_raw_absolute_steer_position())
-            getattr(self, f"drivePercent{i + 1}").append(swerveModule.drive_motor.getAppliedOutput())
-            getattr(self, f"moduleVelocity{i + 1}").append(swerveModule.current_state().speed)
+            getattr(self, f"steerDegree{i + 1}").append(
+                swerveModule.current_raw_absolute_steer_position()
+            )
+            getattr(self, f"drivePercent{i + 1}").append(
+                swerveModule.drive_motor.getAppliedOutput()
+            )
+            getattr(self, f"moduleVelocity{i + 1}").append(
+                swerveModule.current_state().speed
+            )
 
     def getElevatorInputs(self):
         """
         Retrieves values reflecting the current state of the elevator and information about
         the goal position of the elevator
         """
-        self.elevatorCurrentHeightAboveZero.append(self.elevator.current_height_above_zero)
+        self.elevatorCurrentHeightAboveZero.append(
+            self.elevator.current_height_above_zero
+        )
         self.elevatorCurrentHeight.append(self.elevator.current_height)
         self.elevatorCurrentGoalHeight.append(self.elevator.current_goal_height)
-        self.elevatorCurrentGoalHeightAboveZero.append(self.elevator.current_goal_height_above_zero)
+        self.elevatorCurrentGoalHeightAboveZero.append(
+            self.elevator.current_goal_height_above_zero
+        )
         self.elevatorAtGoal.append(self.elevator.at_goal)
         self.elevatorErrorFromGoal.append(self.elevator.error_from_goal)
         self.elevatorAtTopLimit.append(self.elevator.at_top_limit)
@@ -253,6 +343,20 @@ class Telemetry:
         self.armAtHardlimit.append(self.arm.getForwardLimit())
         self.armDisabled.append(self.arm.getDisabled())
 
+    def getIntakeInputs(self):
+        self.intakeFrontBreakBeam.append(
+            self.intake.getBreakBeam(intakeConstants.BreakBeam.FRONT)
+        )
+        self.intakeBackBreakBeam.append(
+            self.intake.getBreakBeam(intakeConstants.BreakBeam.BACK)
+        )
+        self.intakeMotorTemperature.append(
+            self.intake.intakeMotor.getMotorTemperature()
+        )
+        self.intakeMotorCurrent.append(self.intake.intakeMotor.getOutputCurrent())
+        self.intakeMotorOutput.append(self.intake.intakeMotor.getAppliedOutput())
+        self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
+
     def runDefaultDataCollections(self):
         # if self.driverController is not None:
         #     self.getDriverControllerInputs()
@@ -266,8 +370,12 @@ class Telemetry:
         #     self.getRawSwerveInputs()
         if self.elevator is not None:
             self.getElevatorInputs()
+        if self.intake is not None:
+            self.getIntakeInputs()
         # if self.driverStation is not None:
         #     self.getDriverStationInputs()
 
-    def logAdditionalOdometry(self, odometer_value: Pose2d, log_entry_name: str) -> None:
+    def logAdditionalOdometry(
+        self, odometer_value: Pose2d, log_entry_name: str
+    ) -> None:
         getattr(self, log_entry_name).set(odometer_value)
