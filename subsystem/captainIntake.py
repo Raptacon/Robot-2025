@@ -2,7 +2,7 @@ import wpilib
 import rev
 import commands2
 
-from constants import CaptainPlanetConsts as consts
+from constants import CaptainPlanetConsts as consts, DiverCarlChute as chute_consts
 
 
 class CaptainIntake(commands2.Subsystem):
@@ -12,6 +12,9 @@ class CaptainIntake(commands2.Subsystem):
         self.intakeMotor = rev.SparkMax(
             consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
         )
+        self.chuteMotor = rev.SparkMax(
+            chute_consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
+        )
         # Front is Large Green Wheel
         self.front_breakbeam = wpilib.DigitalInput(consts.kFrontBreakBeam)
         self.back_breakbeam = wpilib.DigitalInput(consts.kBackBreakBeam)
@@ -19,6 +22,7 @@ class CaptainIntake(commands2.Subsystem):
 
     def setMotor(self, speed: float):
         self.intakeMotor.set(speed)
+        self.chuteMotor.set(speed)
 
     def updateDashboard(self, state: str):
         self.smartdashboard.putBoolean("Front 1", self.front_breakbeam.get())
@@ -82,7 +86,10 @@ class SecondIntaking(commands2.Command):
         self.intake.updateDashboard("second_intaking")
 
     def isFinished(self) -> bool:
-        return not self.intake.back_breakbeam.get()
+        return (
+            not self.intake.back_breakbeam.get()
+            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
+        )
 
 class ThirdIntaking(commands2.Command):
 
@@ -99,7 +106,9 @@ class ThirdIntaking(commands2.Command):
 
     def isFinished(self) -> bool:
         return (
-            self.intake.front_breakbeam.get() and not self.intake.back_breakbeam.get()
+            self.intake.front_breakbeam.get()
+            and not self.intake.back_breakbeam.get()
+            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
         )
 
 class Intook(commands2.Command):
@@ -115,6 +124,30 @@ class Intook(commands2.Command):
 
     def isFinished(self) -> bool:
         return True
+
+
+class BackItUp(commands2.Command):
+    """Backs the piece back up after it has been intook/intaken up the the front breakbeam"""
+
+    def __init__(self, intake: CaptainIntake) -> None:
+        super().__init__()
+        self.intake = intake
+        self.addRequirements(intake)
+
+    def initialize(self) -> None:
+        self.intake.updateDashboard("backitup")
+        self.intake.setMotor(-consts.kDefaultSpeed)
+
+    def isFinished(self) -> bool:
+        """When the piece is pulled back in the breakbeam stop
+
+        Returns:
+            bool: _description_
+        """
+        return (
+            self.intake.front_breakbeam.get()
+            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
+        )
 
 
 class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
@@ -134,6 +167,7 @@ class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
                             SecondIntaking(intake),
                             ThirdIntaking(intake),
                             Intook(intake),
+                            BackItUp(intake),
                         ),
                         # If A button released, go back to idle
                         commands2.InstantCommand(),

@@ -170,6 +170,13 @@ class DiverCarlElevatorConsts:
     kChuteHeightCm = 10.16
 
 
+class DiverCarlChute:
+    kMotorCanId = 14
+    kMotorInverted = False
+    kCurrentLimitAmps = 20
+    kDefaultSpeed = 0.3
+
+
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
