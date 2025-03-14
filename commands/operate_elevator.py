@@ -90,8 +90,7 @@ class ElevateManually(commands2.Command):
         self.elevator = elevator
         self.pivot = pivot
         self.velocity_percentaage = velocity_percentaage
-        self.addRequirements(self.elevator)
-        self.addRequirements(self.pivot)
+        self.addRequirements(self.elevator, self.pivot)
 
     def initialize(self):
         self.pivot.setArc(mc.kArmAngleReef2)
@@ -162,10 +161,3 @@ def genPivotElevatorCommand(pivot: DiverCarlChistera,
         PivotToGoal(pivot, goal_arc),
         ElevateToGoal(elevator, goal_height_cm)
     )
-
-
-def genManualPivotElevatorCommand(pivot: DiverCarlChistera,
-                            elevator: DiverCarlElevator,
-                            manual_goal_height_cm = None,
-                            manual_goal_arc = None):
-    
