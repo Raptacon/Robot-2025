@@ -214,6 +214,7 @@ class DiverCarlElevator(commands2.Subsystem):
         """
         if velocity_percentage > 0.25:
             velocity_percentage = 0.25
+            print("here")
         desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
         if desired_velocity < 0:
             desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)

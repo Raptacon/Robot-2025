@@ -236,6 +236,15 @@ class RobotSwerve:
         Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
             elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
         )
+        Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
+            ElevateManually(
+                self.elevator,
+                self.arm,
+                lambda: (
+                    wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+                )
+            )
+        )
 
 
 
