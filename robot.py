@@ -23,6 +23,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
         self.__errorLogged = False
         self.__lastError = None
+        self.__errorCatchedCount = 0
 
         # setup our scheduling period. Defaulting to 20 Hz (50 ms)
         super().__init__(period=MyRobot.kDefaultPeriod / 1000)
@@ -41,6 +42,8 @@ class MyRobot(commands2.TimedCommandRobot):
 
     def robotPeriodic(self) -> None:
         self.__callAndCatch(self.container.robotPeriodic)
+
+        wpilib.SmartDashboard.putNumber("Code Crash Count", self.__errorCatchedCount)
 
     def disabledInit(self) -> None:
         """This function is called once each time the robot enters Disabled mode."""
@@ -81,7 +84,7 @@ class MyRobot(commands2.TimedCommandRobot):
 
             #if we returned, it didnt crash so clear the last error if it was set
             if self.__errorLogged and self.__lastError is not None:
-                logging.info(f"Logged error cleared for: {str(e)}")
+                logging.info(f"Logged error cleared for: {str(self.__lastError)}")
                 self.__errorLogged = False
                 self.__lastError = None
         except Exception as e:
@@ -89,6 +92,8 @@ class MyRobot(commands2.TimedCommandRobot):
             name = inspect.currentframe().f_back.f_code.co_name
             if self.isSimulation():
                 raise e
+
+            self.__errorCatchedCount = self.__errorCatchedCount + 1
 
             if not self.__errorLogged:
                 logging.exception(f"(CRASH CATCH) {name} error: ")
