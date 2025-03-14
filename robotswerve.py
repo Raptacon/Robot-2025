@@ -216,17 +216,17 @@ class RobotSwerve:
             ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
         )
 
-        Trigger(self.mech_controller.getYButtonPressed().onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
+        Trigger(self.mech_controller.getYButtonPressed()).onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4)
         )
-        Trigger(self.mech_controller.getBButtonPressed().onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
+        Trigger(self.mech_controller.getBButtonPressed()).onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3)
         )
-        Trigger(self.mech_controller.getAButtonPressed().onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
+        Trigger(self.mech_controller.getAButtonPressed()).onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2)
         )
-        Trigger(self.mech_controller.getXButtonPressed().onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
+        Trigger(self.mech_controller.getXButtonPressed()).onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH)
         )
 
 

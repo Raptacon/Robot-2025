@@ -103,7 +103,7 @@ class PivotToGoal(commands2.Command):
     def __init__(self,
                  pivot: DiverCarlChistera,
                  goal_arc: float):
-        super.__init__()
+        super().__init__()
         self.pivot = pivot
         self.goal_arc = goal_arc
         self.addRequirements(self.pivot)
