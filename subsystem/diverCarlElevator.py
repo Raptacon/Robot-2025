@@ -102,6 +102,7 @@ class DiverCarlElevator(commands2.Subsystem):
     def resetProfilerState(self) -> None:
         """
         """
+        self.updateSensorRecordings()
         self.last_profiler_state = TrapezoidProfile.State(self.current_height_above_zero, self.motor_velocity)
 
     def validateGoalHeight(self) -> None:
@@ -128,6 +129,7 @@ class DiverCarlElevator(commands2.Subsystem):
         self.current_goal_height = height_cm
         self.current_goal_height_above_zero = self.current_goal_height - self.height_at_zero
         self.validateGoalHeight()
+        self.resetProfilerState()
 
     def getPosition(self) -> float:
         """Returns position in motor rotations"""
@@ -148,6 +150,7 @@ class DiverCarlElevator(commands2.Subsystem):
         if self.current_goal_height_above_zero > self.last_profiler_state.position:
             profiler_use = self.profilerUp
 
+
         self.last_profiler_state = profiler_use.calculate(
             self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
         )
@@ -158,11 +161,14 @@ class DiverCarlElevator(commands2.Subsystem):
             currArmArc = self._arm.getArc()
 
         currPos = self.last_profiler_state.position
+
         #if arm is near parked, max height = mc.kElevatorSafeHeight
         if currArmArc < mc.kArmSafeAngleStart:
             if currPos > mc.kElevatorSafeHeight:
                 currPos = mc.kElevatorSafeHeight
+
         #if arm is in safe zone, any height is valid
+
 
 
         self.motor_pid.setReference(
