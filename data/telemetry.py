@@ -254,20 +254,20 @@ class Telemetry:
         self.armDisabled.append(self.arm.getDisabled())
 
     def runDefaultDataCollections(self):
-        if self.driverController is not None:
-            self.getDriverControllerInputs()
-        if self.mechController is not None:
-            self.getMechControllerInputs()
+        # if self.driverController is not None:
+        #     self.getDriverControllerInputs()
+        # if self.mechController is not None:
+        #     self.getMechControllerInputs()
         if self.odometryPosition is not None:
             self.getOdometryInputs()
         if self.driveTrain and self.swerveModules:
             self.getFullSwerveState()
-        if self.swerveModules is not None:
-            self.getRawSwerveInputs()
+        # if self.swerveModules is not None:
+        #     self.getRawSwerveInputs()
         if self.elevator is not None:
             self.getElevatorInputs()
-        if self.driverStation is not None:
-            self.getDriverStationInputs()
+        # if self.driverStation is not None:
+        #     self.getDriverStationInputs()
 
     def logAdditionalOdometry(self, odometer_value: Pose2d, log_entry_name: str) -> None:
         getattr(self, log_entry_name).set(odometer_value)

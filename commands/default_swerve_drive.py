@@ -20,7 +20,8 @@ class DefaultDrive(commands2.Command):
         velocity_vector_x: Callable[[], float],
         velocity_vector_y: Callable[[], float],
         angular_velocity: Callable[[], float],
-        field: Callable[[], bool]
+        field: Callable[[], bool],
+        turbo_mode: Callable[[], bool]
     ) -> None:
         """
         Store joystick and button inputs within the object, and require the swerve drivetrain
@@ -38,6 +39,8 @@ class DefaultDrive(commands2.Command):
                 should go in CCW direction. Has domain [-1, 1]
             field: live poll. if True, the drivetrain should move in field relative mode. If False,
                 the robot should move in robot relative mode
+            turbo_mode: live poll. if True, run the swerve drive at full speed. If False, dampen
+                velocities
 
         Returns:
             None: class initialization executed upon construction
@@ -49,6 +52,7 @@ class DefaultDrive(commands2.Command):
         self.velocity_vector_y = velocity_vector_y
         self.angular_velocity = angular_velocity
         self.field = field
+        self.turbo_mode = turbo_mode
         self.addRequirements(self.drivetrain)
 
     def execute(self) -> None:
@@ -63,5 +67,6 @@ class DefaultDrive(commands2.Command):
             self.velocity_vector_x() * SwerveDriveConsts.maxTranslationMPS,
             self.velocity_vector_y() * SwerveDriveConsts.maxTranslationMPS,
             self.angular_velocity() * math.radians(SwerveDriveConsts.maxAngularDPS),
-            self.field()
+            self.field(),
+            self.turbo_mode()
         )

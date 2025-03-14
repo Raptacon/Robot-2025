@@ -22,6 +22,7 @@ class OperatorRobotConfig:
     )
     swerve_steer_pid: Tuple[float] = (0.007, 0, 0)
     swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.227)
+    swerve_velocity_dampener: float = 0.75 # scaling multiplier for angular velocity
     pathplanner_translation_pid: Tuple[float] = (10.0, 0.0, 0.0)
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
