@@ -36,16 +36,30 @@ def test_elevatorSubsystemSafety(robot : MyRobot) -> None:
     #test arm in unsafe positions
     for pos in [0,  mc.kArmSafeAngleStart*0.999]:
         simArmEncoder.setPosition(-pos)
+        simElevEncoder.setPosition(0)
         elevator.setGoalHeight(100)
-        simElevEncoder.setPosition(100)
+
 
         #arb loop count, but make sure value does not converge past safe height
-        for i in range(1000):
+        for i in range(100):
             elevator.goToGoalHeight()
             elevator.periodic()
             assert simElevMotor.getSetpoint() <= mc.kElevatorSafeHeight
             #move elevator to last position
+            print(i)
             simElevEncoder.setPosition(elevator.last_profiler_state.position)
+
+        simArmEncoder.setPosition(-mc.kArmSafeAngleStart*1.05)
+        elevator.goToGoalHeight()
+        elevator.periodic()
+        assert simElevMotor.getSetpoint() > mc.kElevatorSafeHeight
+
+        #slam the arm so we can break it. The elevator should keep moving up
+        simArmEncoder.setPosition(0)
+        elevator.goToGoalHeight()
+        elevator.periodic()
+        assert simElevMotor.getSetpoint() > mc.kElevatorSafeHeight
+
 
     #test arm in safe positions
     # note float error, adding 0.01 to start

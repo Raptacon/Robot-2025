@@ -48,6 +48,8 @@ class DiverCarlElevator(commands2.Subsystem):
         self.last_profiler_state = TrapezoidProfile.State(0, 0)
         self.updateSensorRecordings()
 
+        self.lockedMaxHeight = None
+
     def configureMotor(self) -> None:
         """
         """
@@ -122,6 +124,9 @@ class DiverCarlElevator(commands2.Subsystem):
         """ """
         self._arm = arm
 
+    def lockMaxHeight(self, maxHeight: float) -> None:
+        self.lockedMaxHeight = maxHeight
+
 
     def setGoalHeight(self, height_cm: float) -> None:
         """
@@ -130,6 +135,11 @@ class DiverCarlElevator(commands2.Subsystem):
         self.current_goal_height_above_zero = self.current_goal_height - self.height_at_zero
         self.validateGoalHeight()
         self.resetProfilerState()
+
+        #if arm starts in unsafe postion, protect it until it moves.
+        # after that then the arm is on its own.
+        if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
+            self.lockMaxHeight(mc.kElevatorSafeHeight)
 
     def getPosition(self) -> float:
         """Returns position in motor rotations"""
@@ -162,14 +172,18 @@ class DiverCarlElevator(commands2.Subsystem):
 
         currPos = self.last_profiler_state.position
 
-        #if arm is near parked, max height = mc.kElevatorSafeHeight
-        if currArmArc < mc.kArmSafeAngleStart:
-            if currPos > mc.kElevatorSafeHeight:
-                currPos = mc.kElevatorSafeHeight
-
-        #if arm is in safe zone, any height is valid
-
-
+        #if locked max height is set, keep it below max height
+        # until arm is in safe position.
+        # then unlock. It is expected that the arm won't move
+        # back to an unsafe position without another set being called
+        if self.lockedMaxHeight:
+            print(f"Locked Max Height {currArmArc} {self.lockedMaxHeight}")
+            if currArmArc > mc.kArmSafeAngleStart:
+                print("Unlocking")
+                self.lockedMaxHeight = None
+            elif currPos > self.lockedMaxHeight:
+                print("Latching")
+                currPos = self.lockedMaxHeight
 
         self.motor_pid.setReference(
             currPos,
