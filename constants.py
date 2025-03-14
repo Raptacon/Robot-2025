@@ -190,7 +190,8 @@ class CaptainPlanetConsts:
     kFrontBreakBeam = 1
     kBackBreakBeam = 0
     kDefaultSpeed = 0.15
-    kIntakeTimeout = 10
+    kIntakeTimeout = 60
+    kEjectTime = 3
 
     class BreakBeam(Enum):
         FRONT = 1  # Closest to large green wheels

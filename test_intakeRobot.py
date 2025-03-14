@@ -19,6 +19,7 @@ class MyRobot(wpilib.TimedRobot):
     def disabledInit(self):
         # commands2.CommandScheduler.getInstance().cancelAll()
         self.command_scheduler.cancelAll()
+        # self.command_scheduler.cancel(self.state_machine)
 
     def testInit(self):
         self.state_machine.schedule()
