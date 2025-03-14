@@ -191,5 +191,5 @@ class SetCaptainIntakeIdleSpeed(commands2.Command):
     def execute(self):
         self.intake.idleSpeed = self.getIdleSpeed()
     
-    def end(self):
+    def end(self, interrupted: bool):
         self.intake.idleSpeed = 0
