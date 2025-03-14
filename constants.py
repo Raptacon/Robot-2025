@@ -4,6 +4,7 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
+from enum import Enum
 
 # Third-Party Imports
 import rev
@@ -184,3 +185,17 @@ class MechConsts:
     kArmVertical = 0.259
     kArmLevel2Position = 0.153
     kElevatorSafeHeight = 5 #cm
+    kElevatorTrough = 46 #cm
+    kArmAngleTrough = 0.11
+    kElevatorReef2 = 60 #cm # THIS IS A GUESS
+    kArmAngleReef2 = 0.11
+    kElevatorReef3 = 121 #cm # THIS IS A GUESS
+    kArmAngleReef3 = 0.11
+    kElevatorReef4 = 183 #cm
+    kArmAngleReef4 = 0.15
+
+class PoseOptions(Enum):
+    REST = 0
+    REEF = 1
+    SAFE = 2
+    VERTICAL = 3
