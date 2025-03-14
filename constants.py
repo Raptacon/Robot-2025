@@ -195,6 +195,7 @@ class MechConsts:
     kArmAngleReef4 = 0.15
 
 class PoseOptions(Enum):
+    MANUAL = -1
     REST = 0
     TROUGH = 1
     REEF2 = 2

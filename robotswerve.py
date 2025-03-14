@@ -6,10 +6,11 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from constants import DiverCarlElevatorConsts
+from constants import DiverCarlElevatorConsts, PoseOptions
 from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
+import commands.operate_elevator as elevCommands
 from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup, reef_height_lookup
@@ -63,10 +64,10 @@ class RobotSwerve:
 
         # Register Named Commands
         NamedCommands.registerCommand('Raise_Place', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
-        NamedCommands.registerCommand('Raise_Place_L1', ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL3OffsetCm))
-        NamedCommands.registerCommand('Raise_Place_L2', ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL3OffsetCm))
-        NamedCommands.registerCommand('Raise_Place_L3', ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm))
-        NamedCommands.registerCommand('Raise_Place_L4', ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL3OffsetCm))
+        NamedCommands.registerCommand('Raise_Place_L1', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
+        NamedCommands.registerCommand('Raise_Place_L2', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
+        NamedCommands.registerCommand('Raise_Place_L3', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
+        NamedCommands.registerCommand('Raise_Place_L4', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
         NamedCommands.registerCommand('Coral_Intake', ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm))
 
         # Autonomous setup
@@ -192,8 +193,7 @@ class RobotSwerve:
         self.elevator.setDefaultCommand(ElevateManually(
             self.elevator,
             lambda: (
-                (-1 * wpimath.applyDeadband(self.driver_controller.getLeftTriggerAxis(), 0.2))
-                + wpimath.applyDeadband(self.driver_controller.getRightTriggerAxis(), 0.2)
+                wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
             )
         ))
 
@@ -214,6 +214,20 @@ class RobotSwerve:
         Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
             ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
         )
+
+        Trigger(self.mech_controller.getYButtonPressed().onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
+        )
+        Trigger(self.mech_controller.getBButtonPressed().onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
+        )
+        Trigger(self.mech_controller.getAButtonPressed().onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
+        )
+        Trigger(self.mech_controller.getXButtonPressed().onTrue(
+            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
+        )
+
 
     def teleopPeriodic(self):
         if self.driver_controller.getLeftBumperButtonPressed():

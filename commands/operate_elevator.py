@@ -130,7 +130,14 @@ class PivotToIncrementedGoal(commands2.Command):
     
 def genPivotElevatorCommand(pivot: DiverCarlChistera,
                             elevator: DiverCarlElevator,
-                            reef_opt: p_opt):
+                            reef_opt: p_opt = -1,
+                            manual_goal_height_cm = None,
+                            manual_goal_arc = None):
+    """
+    Takes a pivot, elevator, and reef_opt for a fixed preset.
+    If reef_opt is MANUAL (or other unrecognized value),
+        custom goal height/arc can be given.
+    """
     match reef_opt:
         case p_opt.REST:
             goal_height_cm, goal_arc = 0, 0
@@ -143,7 +150,7 @@ def genPivotElevatorCommand(pivot: DiverCarlChistera,
         case p_opt.REEF4:
             goal_height_cm, goal_arc = mc.kElevatorReef4, mc.kArmAngleReef4
         case _:
-            goal_height_cm, goal_arc = 0, 0
+            goal_height_cm, goal_arc = manual_goal_height_cm or 0, manual_goal_arc or 0
     return commands2.ParallelCommandGroup(
         PivotToGoal(pivot, goal_arc),
         ElevateToGoal(elevator, goal_height_cm)
