@@ -100,7 +100,9 @@ class ElevateManually(commands2.Command):
         return False
 
 class PivotToGoal(commands2.Command):
-    def __init__(self, pivot: DiverCarlChistera, goal_arc: float):
+    def __init__(self,
+                 pivot: DiverCarlChistera,
+                 goal_arc: float):
         super.__init__()
         self.pivot = pivot
         self.goal_arc = goal_arc
@@ -113,18 +115,22 @@ class PivotToGoal(commands2.Command):
         self.pivot.atGoal()
 
 class PivotToIncrementedGoal(commands2.Command):
-    def __init__(self, pivot: DiverCarlChistera, goal_arc_increment: float):
+    def __init__(self,
+                 pivot: DiverCarlChistera,
+                 goal_arc_increment: float):
         self.pivot = pivot
         self.goal_arc_increment = goal_arc_increment
         self.addRequirements(self.pivot)
     
     def initialize(self):
-        self.pivot.setArc(self.pivot.getSetArc()+self.goal_arc_increment)
+        self.pivot.setArc(self.pivot.getSetArc() + self.goal_arc_increment)
     
     def isFinished(self):
         self.pivot.atGoal()
     
-def genPivotElevatorCommand(pivot: DiverCarlChistera, elevator: DiverCarlElevator, reef_opt: p_opt):
+def genPivotElevatorCommand(pivot: DiverCarlChistera, 
+                            elevator: DiverCarlElevator, 
+                            reef_opt: p_opt):
     match reef_opt:
         case p_opt.REST:
             goal_height_cm, goal_arc = 0, 0

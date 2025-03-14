@@ -196,6 +196,9 @@ class MechConsts:
 
 class PoseOptions(Enum):
     REST = 0
-    REEF = 1
-    SAFE = 2
-    VERTICAL = 3
+    TROUGH = 1
+    REEF2 = 2
+    REEF3 = 3
+    REEF4 = 4
+    ALGAE2 = 5
+    ALGAE3 = 6
