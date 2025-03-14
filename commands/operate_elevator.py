@@ -93,7 +93,7 @@ class ElevateManually(commands2.Command):
         self.addRequirements(self.elevator, self.pivot)
 
     def initialize(self):
-        self.pivot.setArc(mc.kArmAngleReef2)
+        self.pivot.setArc((mc.kArmSafeAngleStart + mc.kArmSafeAngleEnd) / 2)
 
     def execute(self):
         """
