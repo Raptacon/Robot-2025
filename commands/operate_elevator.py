@@ -48,12 +48,14 @@ class ElevateToIncrementedGoal(commands2.Command):
     def __init__(
         self,
         elevator: DiverCarlElevator,
+        pivot: DiverCarlChistera,
         goal_height_increment_cm: float,
     ) -> None:
         """
         """
         super().__init__()
         self.elevator = elevator
+        self.pivot = pivot
         self.goal_height_increment_cm = goal_height_increment_cm
         self.addRequirements(self.elevator)
 
@@ -80,19 +82,26 @@ class ElevateManually(commands2.Command):
     def __init__(
         self,
         elevator: DiverCarlElevator,
+        pivot: DiverCarlChistera,
         velocity_percentaage: Callable[[], float],
     ) -> None:
         """
         """
         super().__init__()
         self.elevator = elevator
+        self.pivot = pivot
         self.velocity_percentaage = velocity_percentaage
-        self.addRequirements(self.elevator)
+        self.addRequirements(self.elevator, self.pivot)
 
     def execute(self):
         """
         """
-        self.elevator.manualControl(self.velocity_percentaage())
+        if abs(self.velocity_percentaage()) > 0.25:
+            self.pivot.setArc((mc.kArmSafeAngleStart + mc.kArmSafeAngleEnd) / 2)
+        else:
+            self.pivot.setArc(0)
+
+        self.elevator.manualControl(-1 * self.velocity_percentaage())
 
     def isFinished(self) -> bool:
         """

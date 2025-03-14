@@ -7,7 +7,7 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
-from vision import Vision
+#from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
@@ -97,7 +97,7 @@ class RobotSwerve:
         )
 
         # Vision setup
-        self.vision = Vision(self.drivetrain)
+        #self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -116,8 +116,8 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        self.vision.getCamEstimate()
-        self.vision.showTargetData()
+        #self.vision.getCamEstimate()
+        #self.vision.showTargetData()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
@@ -176,7 +176,7 @@ class RobotSwerve:
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: False
+                lambda: self.driver_controller.getLeftBumperButton()
             )
         )
 
@@ -197,6 +197,7 @@ class RobotSwerve:
 
         self.elevator.setDefaultCommand(ElevateManually(
             self.elevator,
+            self.arm,
             lambda: (
                 wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
             )
@@ -235,6 +236,15 @@ class RobotSwerve:
         Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
             elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
         )
+        Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
+            ElevateManually(
+                self.elevator,
+                self.arm,
+                lambda: (
+                    wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+                )
+            )
+        )
         self.mech_controller.rightTrigger(0.1).whileTrue(
             SetCaptainIntakeIdleSpeed(self.intake_subsystem, self.mech_controller.getRightTriggerAxis)
         )
@@ -244,7 +254,7 @@ class RobotSwerve:
 
 
     def teleopPeriodic(self):
-        if self.driver_controller.getLeftBumperButtonPressed():
+        if self.driver_controller.getLeftTriggerAxis() > 0.5:
             commands2.CommandScheduler.getInstance().cancelAll()
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)

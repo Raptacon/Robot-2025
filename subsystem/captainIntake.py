@@ -10,10 +10,10 @@ class CaptainIntake(commands2.Subsystem):
 
     def __init__(self) -> None:
         super().__init__()
-        self.intakeMotor = rev.SparkMax(
+        self.intakeMotor = rev.SparkFlex(
             consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
         )
-        self.chuteMotor = rev.SparkMax(
+        self.chuteMotor = rev.SparkFlex(
             chute_consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
         )
         # Front is Large Green Wheel
