@@ -245,7 +245,7 @@ class RobotSwerve:
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
-        wpilib.SmartDashboard.putBoolean("A Button Pressed", self.mech_controller.getRightBumperButton())
+        wpilib.SmartDashboard.putBoolean("A Button Pressed", self.mech_controller.getRightBumperButtonPressed())
         self.intake_command_scheduler.run()
 
     def testInit(self):
