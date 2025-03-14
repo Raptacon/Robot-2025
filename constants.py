@@ -199,9 +199,9 @@ class MechConsts:
     kElevatorSafeHeight = 5 #cm
     kElevatorTrough = 46 #cm
     kArmAngleTrough = 0.11
-    kElevatorReef2 = 60 #cm # THIS IS A GUESS
+    kElevatorReef2 = 68 #cm # THIS IS A GUESS
     kArmAngleReef2 = 0.11
-    kElevatorReef3 = 121 #cm # THIS IS A GUESS
+    kElevatorReef3 = 115 #cm # THIS IS A GUESS
     kArmAngleReef3 = 0.11
     kElevatorReef4 = 183 #cm
     kArmAngleReef4 = 0.15
