@@ -64,16 +64,15 @@ class Vision:
             if len(tag_distances) > 0:
                 distance_to_closest_tag = min(tag_distances)
 
-            std_dev = self.distanceToStdDev(distance_to_closest_tag)
+                std_dev = self.distanceToStdDev(distance_to_closest_tag)
 
-            self.drive.add_vision_pose_estimate(
-                camEstPoseLeft.estimatedPose.toPose2d(), camEstPoseLeft.timestampSeconds, std_dev
-            )
+                self.drive.add_vision_pose_estimate(
+                    camEstPoseLeft.estimatedPose.toPose2d(), camEstPoseLeft.timestampSeconds, std_dev
+                )
 
         bestPipelineRight = self.cam_right.getLatestResult()
         camEstPoseRight = self.camPoseEstRight.update(bestPipelineRight)
         if camEstPoseRight:
-            bestPipelineRight.pose
             robot_pose = camEstPoseRight.estimatedPose.toPose2d()
             
             tag_distances = [
@@ -86,11 +85,11 @@ class Vision:
             if len(tag_distances) > 0:
                 distance_to_closest_tag = min(tag_distances)
 
-            std_dev = self.distanceToStdDev(distance_to_closest_tag)
+                std_dev = self.distanceToStdDev(distance_to_closest_tag)
 
-            self.drive.add_vision_pose_estimate(
-                camEstPoseRight.estimatedPose.toPose2d(), camEstPoseRight.timestampSeconds, std_dev
-            )
+                self.drive.add_vision_pose_estimate(
+                    camEstPoseRight.estimatedPose.toPose2d(), camEstPoseRight.timestampSeconds, std_dev
+                )
 
     def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
         targetID = target.getFiducialId()
