@@ -217,8 +217,6 @@ class DiverCarlElevator(commands2.Subsystem):
         desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
         if desired_velocity < 0:
             desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)
-        if self.at_bottom_limit or self.at_top_limit:
-            desired_velocity = 0
         self.motor.setVoltage(self.feedforward.calculate(desired_velocity))
 
     def updateSensorRecordings(self) -> None:
