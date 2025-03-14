@@ -9,6 +9,7 @@ from enum import Enum
 # Third-Party Imports
 import rev
 
+
 #############################
 # ROBOT ###################
 #############################
@@ -169,12 +170,23 @@ class DiverCarlElevatorConsts:
     kChuteHeightCm = 10.16
 
 
+class DiverCarlChute:
+    kMotorCanId = 14
+    kMotorInverted = False
+    kCurrentLimitAmps = 20
+    kDefaultSpeed = 0.3
+
+
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 2
-    kBackBreakBeam = 3
-    kDefaultSpeed = -0.25
+    kFrontBreakBeam = 1
+    kBackBreakBeam = 0
+    kDefaultSpeed = 0.15
+    class BreakBeam(Enum):
+        FRONT = 1  # Closest to large green wheels
+        BACK = 2
+
 
 class MechConsts:
     kArmRestPosition = 0.0 # movement arc
