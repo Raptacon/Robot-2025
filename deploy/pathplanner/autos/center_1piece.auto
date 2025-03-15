@@ -19,7 +19,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4r_bp"
+            "pathName": "middle_stem"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run_Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "back_up_middle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower_Elevator"
           }
         }
       ]
