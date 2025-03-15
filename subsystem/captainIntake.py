@@ -188,7 +188,9 @@ class SetCaptainIntakeIdleSpeed(commands2.Command):
         self.getIdleSpeed = getIdleSpeed
     
     def execute(self):
+        print("reversing intakje")
         self.intake.idleSpeed = self.getIdleSpeed()
     
     def end(self, interrupted: bool):
+        print("returning to 0")
         self.intake.idleSpeed = 0
