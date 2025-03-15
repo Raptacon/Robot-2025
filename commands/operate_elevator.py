@@ -136,6 +136,18 @@ class PivotToIncrementedGoal(commands2.Command):
     
     def isFinished(self):
         self.pivot.atGoal()
+
+class PivotManually(commands2.Command):
+    def __init__(self,
+                 pivot: DiverCarlChistera,
+                 getIncrement: Callable[[],float]):
+        self.pivot = pivot
+        self.getIncrement = getIncrement
+    
+    def execute(self):
+        self.pivot.setArc(self.pivot.getArc() + self.getIncrement())
+    
+
     
 def genPivotElevatorCommand(pivot: DiverCarlChistera,
                             elevator: DiverCarlElevator,
