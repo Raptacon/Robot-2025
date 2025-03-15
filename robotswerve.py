@@ -67,11 +67,9 @@ class RobotSwerve:
         # Register Named Commands
         NamedCommands.registerCommand(
             'Raise_Place',
-            commands2.cmd.sequence(
                 elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3.5),
-                SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: 0.15).withTimeout(2)
-            )
         )
+        NamedCommands.registerCommand("Run_Intake", SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: 0.15).withTimeout(2))
         NamedCommands.registerCommand("Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH).withTimeout(3.5))
         NamedCommands.registerCommand('Raise_Place_L1', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
         NamedCommands.registerCommand('Raise_Place_L2', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))

@@ -19,6 +19,18 @@
         {
           "type": "path",
           "data": {
+            "pathName": "middle_stem"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Run_Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
             "pathName": "back_up_middle"
           }
         },
