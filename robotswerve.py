@@ -6,7 +6,7 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from constants import DiverCarlElevatorConsts, PoseOptions
+from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
 #from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
@@ -15,7 +15,7 @@ from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup, reef_height_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
-from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine
+from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine, SetCaptainIntakeIdleSpeed
 
 # Third-party imports
 import commands2
@@ -245,7 +245,12 @@ class RobotSwerve:
                 )
             )
         )
-
+        Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
+            SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: -0.35 * self.mech_controller.getRightTriggerAxis())
+        )
+        Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
+            elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
+        )
 
 
     def teleopPeriodic(self):

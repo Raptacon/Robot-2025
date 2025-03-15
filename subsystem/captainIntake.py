@@ -1,6 +1,7 @@
 import wpilib
 import rev
 import commands2
+from typing import Callable
 
 from constants import CaptainPlanetConsts as consts, DiverCarlChute as chute_consts
 
@@ -19,6 +20,7 @@ class CaptainIntake(commands2.Subsystem):
         self.front_breakbeam = wpilib.DigitalInput(consts.kFrontBreakBeam)
         self.back_breakbeam = wpilib.DigitalInput(consts.kBackBreakBeam)
         self.smartdashboard = wpilib.SmartDashboard
+        self.idleSpeed = 0
 
     def setMotor(self, speed: float):
         self.intakeMotor.set(speed)
@@ -44,10 +46,8 @@ class IdleState(commands2.Command):
         self.intake = intake
         self.addRequirements(intake)
 
-    def initialize(self) -> None:
-        self.intake.setMotor(0)
-
     def execute(self) -> None:
+        self.intake.setMotor(self.intake.idleSpeed)
         self.intake.updateDashboard("idle")
 
     def isFinished(self) -> bool:
@@ -179,3 +179,18 @@ class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
                 )
             )
         )
+
+class SetCaptainIntakeIdleSpeed(commands2.Command):
+    def __init__(self,
+                 intake: CaptainIntake,
+                 getIdleSpeed: Callable[[], float]):
+        self.intake = intake
+        self.getIdleSpeed = getIdleSpeed
+    
+    def execute(self):
+        print("reversing intakje")
+        self.intake.idleSpeed = self.getIdleSpeed()
+    
+    def end(self, interrupted: bool):
+        print("returning to 0")
+        self.intake.idleSpeed = 0
