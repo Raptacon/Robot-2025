@@ -65,7 +65,14 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
-        NamedCommands.registerCommand('Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
+        NamedCommands.registerCommand(
+            'Raise_Place',
+            commands2.cmd.sequence(
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3.5),
+                SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: 0.15).withTimeout(2)
+            )
+        )
+        NamedCommands.registerCommand("Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH).withTimeout(3.5))
         NamedCommands.registerCommand('Raise_Place_L1', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
         NamedCommands.registerCommand('Raise_Place_L2', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
         NamedCommands.registerCommand('Raise_Place_L3', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
@@ -131,6 +138,8 @@ class RobotSwerve:
         pass
 
     def autonomousInit(self):
+        self.intake_state_machine.schedule()
+
         self.auto_command = self.auto_chooser.getSelected()
         if self.auto_command:
             self.auto_command.schedule()
@@ -141,6 +150,8 @@ class RobotSwerve:
         pass
 
     def teleopInit(self):
+        self.intake_state_machine.schedule()
+
         self.table.putNumber("pressedKey", -1)
         self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
                      1: commands2.cmd.print_("Key 1 pressed"),
@@ -158,8 +169,6 @@ class RobotSwerve:
                      13: commands2.cmd.print_("Key 13 pressed"),
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
-
-        self.intake_state_machine.schedule()
 
         if self.auto_command:
             self.auto_command.cancel()

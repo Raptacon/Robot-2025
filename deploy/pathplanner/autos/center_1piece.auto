@@ -19,7 +19,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "4r_bp"
+            "pathName": "back_up_middle"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower_Elevator"
           }
         }
       ]
