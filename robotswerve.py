@@ -253,7 +253,7 @@ class RobotSwerve:
             )
         )
         Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
-            SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: -0.35 * self.mech_controller.getRightTriggerAxis())
+            SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: -0.25 * self.mech_controller.getRightTriggerAxis())
         )
         Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
             elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
