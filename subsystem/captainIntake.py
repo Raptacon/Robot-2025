@@ -186,7 +186,6 @@ class SetCaptainIntakeIdleSpeed(commands2.Command):
                  getIdleSpeed: Callable[[], float]):
         self.intake = intake
         self.getIdleSpeed = getIdleSpeed
-        self.addRequirements(self.intake)
     
     def execute(self):
         self.intake.idleSpeed = self.getIdleSpeed()
