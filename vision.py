@@ -36,7 +36,7 @@ class Vision:
         self.camPoseEstRight = PhotonPoseEstimator(
             self.field_layout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            self.cam_left,
+            self.cam_right,
             Transform3d(
                 Translation3d(
                     *OperatorRobotConfig.robot_Cam_Translation_Right
@@ -74,7 +74,7 @@ class Vision:
         camEstPoseRight = self.camPoseEstRight.update(bestPipelineRight)
         if camEstPoseRight:
             robot_pose = camEstPoseRight.estimatedPose.toPose2d()
-            
+
             tag_distances = [
                 PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                 for targ in bestPipelineRight.getTargets()
@@ -93,7 +93,7 @@ class Vision:
 
     def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
         if target == None:
-            targetID, targetYaw, targetPitch, targetAmbiguity == (None, None, None, None)
+            targetID, targetYaw, targetPitch, targetAmbiguity == (0, 0, 0, 0)
         else:
             targetID = target.getFiducialId()
             targetYaw = target.getYaw()
