@@ -48,6 +48,8 @@ class DiverCarlElevator(commands2.Subsystem):
         self.last_profiler_state = TrapezoidProfile.State(0, 0)
         self.updateSensorRecordings()
 
+        self.lockedMaxHeight = None
+
     def configureMotor(self) -> None:
         """
         """
@@ -102,6 +104,7 @@ class DiverCarlElevator(commands2.Subsystem):
     def resetProfilerState(self) -> None:
         """
         """
+        self.updateSensorRecordings()
         self.last_profiler_state = TrapezoidProfile.State(self.current_height_above_zero, self.motor_velocity)
 
     def validateGoalHeight(self) -> None:
@@ -121,6 +124,9 @@ class DiverCarlElevator(commands2.Subsystem):
         """ """
         self._arm = arm
 
+    def lockMaxHeight(self, maxHeight: float) -> None:
+        self.lockedMaxHeight = maxHeight
+
 
     def setGoalHeight(self, height_cm: float) -> None:
         """
@@ -128,6 +134,12 @@ class DiverCarlElevator(commands2.Subsystem):
         self.current_goal_height = height_cm
         self.current_goal_height_above_zero = self.current_goal_height - self.height_at_zero
         self.validateGoalHeight()
+        self.resetProfilerState()
+
+        #if arm starts in unsafe postion, protect it until it moves.
+        # after that then the arm is on its own.
+        if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
+            self.lockMaxHeight(mc.kElevatorSafeHeight)
 
     def getPosition(self) -> float:
         """Returns position in motor rotations"""
@@ -136,9 +148,15 @@ class DiverCarlElevator(commands2.Subsystem):
     def incrementGoalHeight(self, height_increment_cm: float) -> None:
         """
         """
+        self.resetProfilerState()
         self.current_goal_height = self.current_goal_height + height_increment_cm
         self.current_goal_height_above_zero = self.current_goal_height_above_zero + height_increment_cm
         self.validateGoalHeight()
+
+        #if arm starts in unsafe postion, protect it until it moves.
+        # after that then the arm is on its own.
+        if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
+            self.lockMaxHeight(mc.kElevatorSafeHeight)
 
     def goToGoalHeight(self) -> None:
         """
@@ -147,6 +165,7 @@ class DiverCarlElevator(commands2.Subsystem):
         profiler_use = self.profilerDown
         if self.current_goal_height_above_zero > self.last_profiler_state.position:
             profiler_use = self.profilerUp
+
 
         self.last_profiler_state = profiler_use.calculate(
             self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
@@ -158,12 +177,19 @@ class DiverCarlElevator(commands2.Subsystem):
             currArmArc = self._arm.getArc()
 
         currPos = self.last_profiler_state.position
-        #if arm is near parked, max height = mc.kElevatorSafeHeight
-        if currArmArc < mc.kArmSafeAngleStart:
-            if currPos > mc.kElevatorSafeHeight:
-                currPos = mc.kElevatorSafeHeight
-        #if arm is in safe zone, any height is valid
 
+        #if locked max height is set, keep it below max height
+        # until arm is in safe position.
+        # then unlock. It is expected that the arm won't move
+        # back to an unsafe position without another set being called
+        if self.lockedMaxHeight:
+            print(f"Locked Max Height {currArmArc} {self.lockedMaxHeight}")
+            if currArmArc > mc.kArmSafeAngleStart:
+                print("Unlocking")
+                self.lockedMaxHeight = None
+            elif currPos > self.lockedMaxHeight:
+                print("Latching")
+                currPos = self.lockedMaxHeight
 
         self.motor_pid.setReference(
             currPos,
@@ -186,11 +212,11 @@ class DiverCarlElevator(commands2.Subsystem):
     def manualControl(self, velocity_percentage: float) -> None:
         """
         """
+        if velocity_percentage > 0.25:
+            velocity_percentage = 0.25
         desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
         if desired_velocity < 0:
             desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)
-        if self.at_bottom_limit or self.at_top_limit:
-            desired_velocity = 0
         self.motor.setVoltage(self.feedforward.calculate(desired_velocity))
 
     def updateSensorRecordings(self) -> None:

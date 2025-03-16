@@ -22,15 +22,24 @@ class MyRobot(wpilib.TimedRobot):
         wpilib.SmartDashboard.putNumber("Elevator Cm", 0.0)
         wpilib.SmartDashboard.putNumber("Arm Arc", 0.0)
         wpilib.SmartDashboard.putBoolean("set", False)
+        self.timer = wpilib.Timer()
+        self.timer.start()
 
     def testPeriodic(self):
         if wpilib.SmartDashboard.getBoolean("set", False):
             print("Updating setpoints")
-            self.elevator.setGoalHeight(wpilib.SmartDashboard.getNumber("Elevator Cm", 0.0))
-            self.arm.setArc(wpilib.SmartDashboard.getNumber("Arm Arc", 0.0))
+            armArc = wpilib.SmartDashboard.getNumber("Arm Arc", 0.0)
+            elevatorCm = wpilib.SmartDashboard.getNumber("Elevator Cm", 0.0)
+            print(f"Setting arm to {armArc} and elevator to {elevatorCm}")
+            self.elevator.setGoalHeight(elevatorCm)
+            self.arm.setArc(armArc)
+            self.elevator.resetProfilerState()
             wpilib.SmartDashboard.putBoolean("set", False)
 
-        #run preiodics to make the system move
-        self.elevator.goToGoalHeight()
-        self.elevator.periodic()
-        self.arm.periodic()
+
+        if(self.timer.advanceIfElapsed(0.020)):
+            #run preiodics to make the system move
+            if not self.elevator.at_goal:
+                self.elevator.goToGoalHeight()
+            self.elevator.periodic()
+            self.arm.periodic()

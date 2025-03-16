@@ -10,13 +10,13 @@
   "autoFolders": [
     "Autos2025_Blue"
   ],
-  "defaultMaxVel": 1.5,
-  "defaultMaxAccel": 2.0,
+  "defaultMaxVel": 0.75,
+  "defaultMaxAccel": 1.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 74.088,
-  "robotMOI": 6.883,
+  "robotMass": 63.956,
+  "robotMOI": 5.94175290870316,
   "robotTrackwidth": 0.546,
   "driveWheelRadius": 0.050165,
   "driveGearing": 6.75,

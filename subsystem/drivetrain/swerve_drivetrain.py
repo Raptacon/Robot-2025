@@ -148,7 +148,8 @@ class SwerveDrivetrain(Subsystem):
         velocity_vector_x: float,
         velocity_vector_y: float,
         angular_velocity: float,
-        field_relative: bool = True
+        field_relative: bool = True,
+        turbo_mode: bool = False
     ) -> None:
         """
         Operate the swerve drive according to three given component velocities. These velocities
@@ -166,16 +167,27 @@ class SwerveDrivetrain(Subsystem):
         Returns:
             None: individual swerve modules are given new goal states to transition to in-place
         """
+        # Turn down speed for better driver usage
+        dampener_use = OperatorRobotConfig.swerve_velocity_dampener
+        if turbo_mode:
+            dampener_use = 1.0
+        dampened_angular_velocity = dampener_use * angular_velocity
+        dampened_velocity_vector_x = dampener_use * velocity_vector_x
+        dampened_velocity_vector_y = dampener_use * velocity_vector_y
+
         if field_relative:
             field_invert = 1
             if self.flip_to_red_alliance():
                 field_invert = -1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_pose().rotation()
+                field_invert * dampened_velocity_vector_x, field_invert * dampened_velocity_vector_y,
+                dampened_angular_velocity, self.current_pose().rotation()
             )
         else:
-            chassis_speeds = ChassisSpeeds(velocity_vector_x, velocity_vector_y, angular_velocity)
+            chassis_speeds = ChassisSpeeds(
+                dampened_velocity_vector_x, dampened_velocity_vector_y, dampened_angular_velocity
+            )
 
         self.set_states_from_speeds(chassis_speeds)
 

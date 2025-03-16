@@ -4,9 +4,11 @@ Collection of numeric constants that define physical properties of the robot
 
 # Native imports
 import math
+from enum import Enum
 
 # Third-Party Imports
 import rev
+
 
 #############################
 # ROBOT ###################
@@ -14,9 +16,9 @@ import rev
 
 
 class RobotConstants:
-    massKG: float = 63.5029
+    massKG: float = 63.9565
     #MOI: Moment of inertia, kg*m^2
-    MOI: float = 3.48411719573017
+    MOI: float = 5.94175290870316
 
 
 #############################
@@ -102,13 +104,13 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 
     wheelDiameter: float = 0.10033  # in meters
     # COf: coefficient, force/force (no units)
-    wheelCOF: float = 1.0
+    wheelCOF: float = 1.08
     driveGearRatio: float = 6.75
     steerGearRatio: float = 150 / 7
 
     # position: meters per rotation
     # velocity: meters per second
-    drivePositionConversionFactor: float = (math.pi * wheelDiameter) / (
+    drivePositionConversionFactor: float = (wheelCOF * (math.pi * wheelDiameter)) / (
         driveGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation
     )
     driveVelocityConversionFactor: float = drivePositionConversionFactor / 60.0
@@ -131,7 +133,7 @@ class DiverCarlChisteraConsts():
                 "reverse": False,
                 "reverseType": rev.LimitSwitchConfig.Type.kNormallyOpen}
 
-    kPidf0 = (0.3, 0.001, 0.0, 0, rev.ClosedLoopSlot.kSlot0) # P I D F Slot
+    kPidf0 = (0.3, 0.001 , 0, 0, rev.ClosedLoopSlot.kSlot0) # P I D F Slot
     kMaxOutRange0 = (-0.25, 0.7, rev.ClosedLoopSlot.kSlot0) # Min Max Slot
 
 
@@ -142,11 +144,11 @@ class DiverCarlElevatorConsts:
     kRotationsToMaxHeight = 101
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
-    kTrapezoidProfileUp = (135, 150)  # Max Vel (cm/s) Max Accel (cm/s^2)
-    kTrapezoidProfileDown = (35, 37.5)
+    kTrapezoidProfileUp = (135 * 1.2, 150 * 1.2)  # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (40, 37.5/2.5)
     kFeedforward = (0, 0.28, 0.1, 0)  # kS kG kV kA
     kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0)  # P I D Slot
-    kMaxOutRange0 = (-1, 1, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
+    kMaxOutRange0 = (-0.35, 1.0, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
     kSoftLimits = {
         "forward": True,
         "forwardLimit": 178,
@@ -168,19 +170,49 @@ class DiverCarlElevatorConsts:
     kChuteHeightCm = 10.16
 
 
+class DiverCarlChute:
+    kMotorCanId = 14
+    kMotorInverted = False
+    kCurrentLimitAmps = 20
+    kDefaultSpeed = 0.3
+
+
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 2
-    kBackBreakBeam = 3
-    kDefaultSpeed = -0.25
+    kFrontBreakBeam = 1
+    kBackBreakBeam = 0
+    kDefaultSpeed = 0.15
+    class BreakBeam(Enum):
+        FRONT = 1  # Closest to large green wheels
+        BACK = 2
+
 
 class MechConsts:
     kArmRestPosition = 0.0 # movement arc
     kArmRestPosTol = 0.02 # % of movement arc
     kArmSafPosTol = 0.02 # % of movement arc
-    kArmSafeAngleStart = 0.105 # movement arc
+    kArmSafeAngleStart = 0.085 # movement arc
     kArmSafeAngleEnd = 0.13 # movement arc
     kArmVertical = 0.259
     kArmLevel2Position = 0.153
+    kArmAngleIncrement = 0.1
     kElevatorSafeHeight = 5 #cm
+    kElevatorTrough = 46 #cm
+    kArmAngleTrough = 0.11
+    kElevatorReef2 = 68 #cm # THIS IS A GUESS
+    kArmAngleReef2 = 0.11
+    kElevatorReef3 = 115 #cm # THIS IS A GUESS
+    kArmAngleReef3 = 0.11
+    kElevatorReef4 = 183 #cm
+    kArmAngleReef4 = 0.15
+
+class PoseOptions(Enum):
+    MANUAL = -1
+    REST = 0
+    TROUGH = 1
+    REEF2 = 2
+    REEF3 = 3
+    REEF4 = 4
+    ALGAE2 = 5
+    ALGAE3 = 6
