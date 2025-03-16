@@ -7,7 +7,7 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
-#from vision import Vision
+from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
@@ -102,7 +102,10 @@ class RobotSwerve:
         )
 
         # Vision setup
-        #self.vision = Vision(self.drivetrain)
+        try:
+            self.vision = Vision(self.drivetrain)
+        except Exception:
+            self.vision = None
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -121,8 +124,9 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        #self.vision.getCamEstimate()
-        #self.vision.showTargetData()
+        if self.vision:
+            self.vision.getCamEstimate()
+            self.vision.showTargetData()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)

@@ -92,25 +92,28 @@ class Vision:
                 )
 
     def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
-        targetID = target.getFiducialId()
-        targetYaw = target.getYaw()
-        targetPitch = target.getPitch()
-        targetAmbiguity = target.getPoseAmbiguity()
+        if target == None:
+            targetID, targetYaw, targetPitch, targetAmbiguity == (None, None, None, None)
+        else:
+            targetID = target.getFiducialId()
+            targetYaw = target.getYaw()
+            targetPitch = target.getPitch()
+            targetAmbiguity = target.getPoseAmbiguity()
         return targetID, targetYaw, targetPitch, targetAmbiguity
-    
+
     def showTargetData(self, target : Optional[PhotonTrackedTarget] = None):
         if target == None:
             target = self.cam_left.getLatestResult().getBestTarget()
 
-        if(not self.cam_left.getLatestResult().hasTargets() or self.cam_left.getLatestResult() == None):
-            return
+            if target == None:
+                return
 
-        targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
+            targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
 
-        SmartDashboard.putNumber("Target ID", targetID)
-        SmartDashboard.putNumber("Target Yaw", targetYaw)
-        SmartDashboard.putNumber("Target Pitch", targetPitch)
-        SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
+            SmartDashboard.putNumber("Target ID", targetID)
+            SmartDashboard.putNumber("Target Yaw", targetYaw)
+            SmartDashboard.putNumber("Target Pitch", targetPitch)
+            SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
         std_dev = 3
