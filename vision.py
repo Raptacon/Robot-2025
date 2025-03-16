@@ -47,7 +47,6 @@ class Vision:
             )
         )
 
-
     def getCamEstimate(self):
         bestPipelineLeft = self.cam_left.getLatestResult()
         camEstPoseLeft = self.camPoseEstLeft.update(bestPipelineLeft)

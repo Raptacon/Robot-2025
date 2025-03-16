@@ -125,8 +125,11 @@ class RobotSwerve:
         self.intake_command_scheduler.run()
 
         if self.vision:
-            self.vision.getCamEstimate()
-            self.vision.showTargetData()
+            try:
+                self.vision.getCamEstimate()
+                self.vision.showTargetData()
+            except Exception:
+                print("Unable to retrive vision pose estimtes")
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
