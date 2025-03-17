@@ -1,11 +1,9 @@
-from typing import Optional, Tuple
+from typing import Callable, Optional, Tuple
 
 from wpilib import SmartDashboard
 from wpimath.geometry import Transform3d, Rotation3d, Translation3d
 from photonlibpy import PhotonCamera, PhotonPoseEstimator, PoseStrategy
-from photonlibpy.targeting import PhotonPipelineResult
-from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
-from photonUtils import PhotonUtils
+from photonlibpy.targeting import PhotonPipelineResult, PhotonTrackedTarget
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 
 from config import OperatorRobotConfig
@@ -91,9 +89,9 @@ class Vision:
                                 camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, stdDev
                             )
 
-    def getCamEstimates(self, specificTagId: int | None = None) -> None:
-        self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft, specificTagId=specificTagId)
-        self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight, specificTagId=specificTagId)
+    def getCamEstimates(self, specificTagId: Optional[Callable[[], int]] = None) -> None:
+        self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft, specificTagId=specificTagId())
+        self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight, specificTagId=specificTagId())
 
     def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
         if target == None:

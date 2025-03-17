@@ -106,6 +106,7 @@ class RobotSwerve:
             self.vision = Vision(self.drivetrain)
         except Exception:
             self.vision = None
+        self.alignmentTagId = None
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -126,7 +127,7 @@ class RobotSwerve:
 
         if not (self.vision == None):
             try:
-                self.vision.getCamEstimates()
+                self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
                 self.vision.showTargetData()
             except Exception:
                 print("Unable to retrive vision pose estimtes")
@@ -196,16 +197,43 @@ class RobotSwerve:
 
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                    {}
-                ).get("pose", None)))
+                commands2.cmd.parallel(
+                    commands2.InstantCommand(
+                        lambda: self.setAlignmentTag(
+                            reef_position_lookup
+                            .get(
+                                (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                                {}
+                            )
+                            .get("tag", None)
+                        )
+                    ),
+                    commands2.DeferredCommand(
+                        lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                            {}
+                        ).get("pose", None)
+                        )
+                    )
+                ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
             ),
              "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                    {}
-                ).get("pose", None)))
+                commands2.cmd.parallel(
+                    commands2.InstantCommand(
+                        lambda: self.setAlignmentTag(
+                            reef_position_lookup
+                            .get(
+                                (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                                {}
+                            )
+                            .get("tag", None)
+                        )
+                    ),
+                    commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                        {}
+                    ).get("pose", None)))
+                ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
              ),
         }
 
@@ -315,3 +343,8 @@ class RobotSwerve:
         """
         """
         return True
+
+    def setAlignmentTag(self, alignmentTagId: int | None) -> None:
+        """
+        """
+        self.alignmentTagId = alignmentTagId
