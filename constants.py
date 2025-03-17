@@ -16,9 +16,9 @@ import rev
 
 
 class RobotConstants:
-    massKG: float = 63.5029
+    massKG: float = 63.9565
     # MOI: Moment of inertia, kg*m^2
-    MOI: float = 3.48411719573017
+    MOI: float = 5.94175290870316
 
 
 #############################
@@ -104,13 +104,13 @@ class SwerveModuleMk4iL2Consts(SwerveModuleMk4iConsts):
 
     wheelDiameter: float = 0.10033  # in meters
     # COf: coefficient, force/force (no units)
-    wheelCOF: float = 1.0
+    wheelCOF: float = 1.08
     driveGearRatio: float = 6.75
     steerGearRatio: float = 150 / 7
 
     # position: meters per rotation
     # velocity: meters per second
-    drivePositionConversionFactor: float = (math.pi * wheelDiameter) / (
+    drivePositionConversionFactor: float = (wheelCOF * (math.pi * wheelDiameter)) / (
         driveGearRatio * SwerveModuleMk4iConsts.kTicksPerRotation
     )
     driveVelocityConversionFactor: float = drivePositionConversionFactor / 60.0
@@ -151,8 +151,8 @@ class DiverCarlElevatorConsts:
     kRotationsToMaxHeight = 101
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
-    kTrapezoidProfileUp = (135, 150)  # Max Vel (cm/s) Max Accel (cm/s^2)
-    kTrapezoidProfileDown = (35 * 0.8, 37.5 / 3.3)
+    kTrapezoidProfileUp = (135 * 1.2, 150 * 1.2)  # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (40, 37.5 / 2.5)
     kFeedforward = (0, 0.28, 0.1, 0)  # kS kG kV kA
     kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0)  # P I D Slot
     kMaxOutRange0 = (-0.35, 1.0, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
@@ -206,12 +206,13 @@ class MechConsts:
     kArmSafeAngleEnd = 0.13  # movement arc
     kArmVertical = 0.259
     kArmLevel2Position = 0.153
+    kArmAngleIncrement = 0.1
     kElevatorSafeHeight = 5  # cm
     kElevatorTrough = 46  # cm
     kArmAngleTrough = 0.11
-    kElevatorReef2 = 60  # cm # THIS IS A GUESS
+    kElevatorReef2 = 68  # cm # THIS IS A GUESS
     kArmAngleReef2 = 0.11
-    kElevatorReef3 = 121  # cm # THIS IS A GUESS
+    kElevatorReef3 = 115  # cm # THIS IS A GUESS
     kArmAngleReef3 = 0.11
     kElevatorReef4 = 183  # cm
     kArmAngleReef4 = 0.15

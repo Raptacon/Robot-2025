@@ -6,8 +6,8 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from constants import DiverCarlElevatorConsts, PoseOptions
-from vision import Vision
+from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
+#from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
@@ -15,7 +15,7 @@ from commands.operate_elevator import ElevateManually, ElevateToGoal
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup, reef_height_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
-from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine
+from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine, SetCaptainIntakeIdleSpeed
 
 # Third-party imports
 import commands2
@@ -68,40 +68,16 @@ class RobotSwerve:
 
         # Register Named Commands
         NamedCommands.registerCommand(
-            "Raise_Place",
-            ElevateToGoal(
-                self.elevator,
-                reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm,
-            ),
+            'Raise_Place',
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3.5),
         )
-        NamedCommands.registerCommand(
-            "Raise_Place_L1",
-            elevCommands.genPivotElevatorCommand(
-                self.arm, self.elevator, PoseOptions.TROUGH
-            ),
-        )
-        NamedCommands.registerCommand(
-            "Raise_Place_L2",
-            elevCommands.genPivotElevatorCommand(
-                self.arm, self.elevator, PoseOptions.REEF2
-            ),
-        )
-        NamedCommands.registerCommand(
-            "Raise_Place_L3",
-            elevCommands.genPivotElevatorCommand(
-                self.arm, self.elevator, PoseOptions.REEF3
-            ),
-        )
-        NamedCommands.registerCommand(
-            "Raise_Place_L4",
-            elevCommands.genPivotElevatorCommand(
-                self.arm, self.elevator, PoseOptions.REEF4
-            ),
-        )
-        NamedCommands.registerCommand(
-            "Coral_Intake",
-            ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm),
-        )
+        NamedCommands.registerCommand("Run_Intake", SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: 0.15).withTimeout(2))
+        NamedCommands.registerCommand("Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH).withTimeout(3.5))
+        NamedCommands.registerCommand('Raise_Place_L1', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
+        NamedCommands.registerCommand('Raise_Place_L2', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
+        NamedCommands.registerCommand('Raise_Place_L3', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
+        NamedCommands.registerCommand('Raise_Place_L4', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
+        NamedCommands.registerCommand('Coral_Intake', ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm))
 
         # Autonomous setup
         self.auto_command = None
@@ -135,7 +111,7 @@ class RobotSwerve:
         )
 
         # Vision setup
-        self.vision = Vision(self.drivetrain)
+        #self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -157,8 +133,8 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        self.vision.getCamEstimate()
-        self.vision.showTargetData()
+        #self.vision.getCamEstimate()
+        #self.vision.showTargetData()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(
@@ -174,6 +150,8 @@ class RobotSwerve:
         pass
 
     def autonomousInit(self):
+        self.intake_state_machine.schedule()
+
         self.auto_command = self.auto_chooser.getSelected()
         if self.auto_command:
             self.auto_command.schedule()
@@ -186,6 +164,8 @@ class RobotSwerve:
         pass
 
     def teleopInit(self):
+        self.intake_state_machine.schedule()
+
         self.table.putNumber("pressedKey", -1)
         self.keys = {
             0: commands2.cmd.print_("Key 0 pressed"),
@@ -205,8 +185,6 @@ class RobotSwerve:
             14: commands2.cmd.print_("Key 14 pressed"),
             -1: commands2.cmd.print_("No key pressed"),
         }
-
-        self.intake_state_machine.schedule()
 
         if self.auto_command:
             self.auto_command.cancel()
@@ -229,7 +207,7 @@ class RobotSwerve:
                     -1 * self.driver_controller.getRightX(), 0.1
                 ),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: False,
+                lambda: self.driver_controller.getLeftBumperButton()
             )
         )
 
@@ -270,10 +248,11 @@ class RobotSwerve:
             ),
         }
 
-        self.elevator.setDefaultCommand(
-            ElevateManually(
-                self.elevator,
-                lambda: (wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)),
+        self.elevator.setDefaultCommand(ElevateManually(
+            self.elevator,
+            self.arm,
+            lambda: (
+                wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
             )
         )
 
@@ -340,9 +319,25 @@ class RobotSwerve:
                 self.arm, self.elevator, PoseOptions.REST
             )
         )
+        Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
+            ElevateManually(
+                self.elevator,
+                self.arm,
+                lambda: (
+                    wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+                )
+            )
+        )
+        Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
+            SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: -0.25 * self.mech_controller.getRightTriggerAxis())
+        )
+        Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
+            elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
+        )
+
 
     def teleopPeriodic(self):
-        if self.driver_controller.getLeftBumperButtonPressed():
+        if self.driver_controller.getLeftTriggerAxis() > 0.5:
             commands2.CommandScheduler.getInstance().cancelAll()
         self.keyPressed = self.table.getNumber("pressedKey", -1)
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)

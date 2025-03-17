@@ -172,6 +172,8 @@ class SwerveDrivetrain(Subsystem):
         if turbo_mode:
             dampener_use = 1.0
         dampened_angular_velocity = dampener_use * angular_velocity
+        dampened_velocity_vector_x = dampener_use * velocity_vector_x
+        dampened_velocity_vector_y = dampener_use * velocity_vector_y
 
         if field_relative:
             field_invert = 1
@@ -179,10 +181,13 @@ class SwerveDrivetrain(Subsystem):
                 field_invert = -1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                field_invert * velocity_vector_x, field_invert * velocity_vector_y, dampened_angular_velocity, self.current_pose().rotation()
+                field_invert * dampened_velocity_vector_x, field_invert * dampened_velocity_vector_y,
+                dampened_angular_velocity, self.current_pose().rotation()
             )
         else:
-            chassis_speeds = ChassisSpeeds(velocity_vector_x, velocity_vector_y, dampened_angular_velocity)
+            chassis_speeds = ChassisSpeeds(
+                dampened_velocity_vector_x, dampened_velocity_vector_y, dampened_angular_velocity
+            )
 
         self.set_states_from_speeds(chassis_speeds)
 

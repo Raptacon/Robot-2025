@@ -1,6 +1,7 @@
 import wpilib
 import rev
 import commands2
+from typing import Callable
 
 from constants import CaptainPlanetConsts as consts, DiverCarlChute as chute_consts
 
@@ -9,10 +10,10 @@ class CaptainIntake(commands2.Subsystem):
 
     def __init__(self) -> None:
         super().__init__()
-        self.intakeMotor = rev.SparkMax(
+        self.intakeMotor = rev.SparkFlex(
             consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
         )
-        self.chuteMotor = rev.SparkMax(
+        self.chuteMotor = rev.SparkFlex(
             chute_consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
         )
         # Front is Large Green Wheel
@@ -21,6 +22,7 @@ class CaptainIntake(commands2.Subsystem):
         self.smartdashboard = wpilib.SmartDashboard
         self.intake_in_progress = False
         self.ready_to_eject = False
+        self.idleSpeed = 0
 
     def setMotor(self, speed: float):
 
@@ -51,16 +53,15 @@ class IdleState(commands2.Command):
         self.addRequirements(intake)
 
     def initialize(self) -> None:
-        self.intake.setMotor(0)
         self.intake_in_progress = False
 
     def execute(self) -> None:
-        # Idle speed command initialze with idle speed from Rayl
-        # self.intake.idleSpeed from captn intake
         self.intake.updateDashboard("idle")
+        self.intake.setMotor(self.intake.idleSpeed)
 
     def isFinished(self) -> bool:
         return self.intake.smartdashboard.getBoolean("A Button Pressed", False)
+
 
 class FirstIntaking(commands2.Command):
 
@@ -78,6 +79,7 @@ class FirstIntaking(commands2.Command):
     def isFinished(self) -> bool:
         return not self.intake.front_breakbeam.get()
 
+
 class SecondIntaking(commands2.Command):
 
     def __init__(self, intake: CaptainIntake) -> None:
@@ -93,6 +95,7 @@ class SecondIntaking(commands2.Command):
 
     def isFinished(self) -> bool:
         return not self.intake.back_breakbeam.get()
+
 
 class ThirdIntaking(commands2.Command):
 
@@ -112,6 +115,7 @@ class ThirdIntaking(commands2.Command):
             self.intake.front_breakbeam.get() and not self.intake.back_breakbeam.get()
         )
 
+
 class Intook(commands2.Command):
 
     def __init__(self, intake: CaptainIntake) -> None:
@@ -125,6 +129,7 @@ class Intook(commands2.Command):
 
     def isFinished(self) -> bool:
         return True
+
 
 class BackItUp(commands2.Command):
     """Backs the piece back up after it has been intook/intaken up the the front breakbeam"""
@@ -216,3 +221,17 @@ class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
                 )
             )
         )
+
+
+class SetCaptainIntakeIdleSpeed(commands2.Command):
+    def __init__(self, intake: CaptainIntake, getIdleSpeed: Callable[[], float]):
+        self.intake = intake
+        self.getIdleSpeed = getIdleSpeed
+
+    def execute(self):
+        print("reversing intakje")
+        self.intake.idleSpeed = self.getIdleSpeed()
+
+    def end(self, interrupted: bool):
+        print("returning to 0")
+        self.intake.idleSpeed = 0
