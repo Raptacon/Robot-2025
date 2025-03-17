@@ -124,9 +124,9 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        if self.vision:
+        if not (self.vision == None):
             try:
-                self.vision.getCamEstimate()
+                self.vision.getCamEstimates()
                 self.vision.showTargetData()
             except Exception:
                 print("Unable to retrive vision pose estimtes")

@@ -7,8 +7,10 @@ from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from photonUtils import PhotonUtils
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from config import OperatorRobotConfig
+from lookups.reef_positions import reef_position_lookup
+from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+
 
 class Vision:
     def __init__(
@@ -20,6 +22,8 @@ class Vision:
         self.cam_right = PhotonCamera(right_cam_name)
         self.drive = driveTrain
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeWelded)
+        self.reef_tag_ids = {positions["tag"] for positions in reef_position_lookup.values()}
+
         self.camPoseEstLeft = PhotonPoseEstimator(
             self.field_layout,
             PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
@@ -47,48 +51,35 @@ class Vision:
             )
         )
 
-    def getCamEstimate(self):
-        bestPipelineLeft = self.cam_left.getLatestResult()
-        camEstPoseLeft = self.camPoseEstLeft.update(bestPipelineLeft)
-        if camEstPoseLeft:
-            robot_pose = camEstPoseLeft.estimatedPose.toPose2d()
+    def getSingleCamEstimate(self, camera: PhotonCamera, poseEstimator: PhotonPoseEstimator) -> None:
+        if not ((camera == None) or (poseEstimator == None)):
+            unreadPipelines = camera.getAllUnreadResults()
+            if len(unreadPipelines) > 0:
+                bestPipeline = unreadPipelines[-1]
+                camEstPose = poseEstimator.update(bestPipeline)
 
-            tag_distances = [
-                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
-                for targ in bestPipelineLeft.getTargets()
-                if targ is not None and targ.getPoseAmbiguity() < 0.1
-            ]
+                if camEstPose:
+                    robotPose = camEstPose.estimatedPose.toPose2d()
 
-            distance_to_closest_tag = None
-            if len(tag_distances) > 0:
-                distance_to_closest_tag = min(tag_distances)
+                    tagDistances = [
+                        PhotonUtils.getDistanceToPose(robotPose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
+                        for targ in bestPipeline.getTargets()
+                        if (targ is not None) and (targ.getPoseAmbiguity() < 0.1) and (targ.getFiducialId() in self.reef_tag_ids)
+                    ]
 
-                std_dev = self.distanceToStdDev(distance_to_closest_tag)
+                    distanceToClosestTag = None
+                    if len(tagDistances) > 0:
+                        distanceToClosestTag = min(tagDistances)
 
-                self.drive.add_vision_pose_estimate(
-                    camEstPoseLeft.estimatedPose.toPose2d(), camEstPoseLeft.timestampSeconds, std_dev
-                )
+                        stdDev = self.distanceToStdDev(distanceToClosestTag)
 
-        bestPipelineRight = self.cam_right.getLatestResult()
-        camEstPoseRight = self.camPoseEstRight.update(bestPipelineRight)
-        if camEstPoseRight:
-            robot_pose = camEstPoseRight.estimatedPose.toPose2d()
+                        self.drive.add_vision_pose_estimate(
+                            camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, stdDev
+                        )
 
-            tag_distances = [
-                PhotonUtils.getDistanceToPose(robot_pose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
-                for targ in bestPipelineRight.getTargets()
-                if targ is not None and targ.getPoseAmbiguity() < 0.1
-            ]
-
-            distance_to_closest_tag = None
-            if len(tag_distances) > 0:
-                distance_to_closest_tag = min(tag_distances)
-
-                std_dev = self.distanceToStdDev(distance_to_closest_tag)
-
-                self.drive.add_vision_pose_estimate(
-                    camEstPoseRight.estimatedPose.toPose2d(), camEstPoseRight.timestampSeconds, std_dev
-                )
+    def getCamEstimates(self) -> None:
+        self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft)
+        self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight)
 
     def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
         if target == None:
