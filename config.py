@@ -22,16 +22,18 @@ class OperatorRobotConfig:
     )
     swerve_steer_pid: Tuple[float] = (0.007, 0, 0)
     swerve_drive_pid: Tuple[float] = (0.1, 0, 0.1, 0.227)
-    swerve_velocity_dampener: float = 0.75 # scaling multiplier for angular velocity
+    swerve_velocity_dampener: float = 0.75 # default scaling multiplier for velocity
     pathplanner_translation_pid: Tuple[float] = (10.0, 0.0, 0.0)
     pathplanner_rotation_pid: Tuple[float] = (5.0, 0.0, 0.0)
 
-    #TODO Get the actual values from our robot
-    robot_Cam_Translation_Left: Tuple[float] = (0.15291697084, 0.3063875, 0.365125) #0.219075
+    robot_Cam_Translation_Left: Tuple[float] = (0.15291697084, 0.3063875, 0.365125)
     robot_Cam_Translation_Right: Tuple[float] = (0.15291697084, -0.3063875, 0.365125)
     robot_Cam_Rotation_Degress_Left: Tuple[float] = (0.0, 0.0, 0.0)
     robot_Cam_Rotation_Degress_Right: Tuple[float] = (0.0, 0.0, 0.0)
 
+    vision_default_std_dev: float = 3.0 # pose estimator sigma to use if no distance is available
+    vision_distance_threshold_m: float = 2.0 # meters; how far away a tag can be before its data is discarded
+    vision_ambiguity_threshold: float = 0.1 # the max ambiguity score a tag estimate can have before its data is discarded
     vision_std_dev_basis: float = 1.1
     vision_std_dev_scale_factor: float = 1
     # First three elements are PID, last two elements are trapezoidal profile

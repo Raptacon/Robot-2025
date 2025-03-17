@@ -64,10 +64,13 @@ class Vision:
                     tagDistances = [
                         PhotonUtils.getDistanceToPose(robotPose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
                         for targ in bestPipeline.getTargets()
-                        if (targ is not None) and (targ.getPoseAmbiguity() < 0.1) and (targ.getFiducialId() in self.reef_tag_ids)
+                        if (
+                            (targ is not None)
+                            and (targ.getPoseAmbiguity() < OperatorRobotConfig.vision_ambiguity_threshold)
+                            and (targ.getFiducialId() in self.reef_tag_ids)
+                        )
                     ]
 
-                    distanceToClosestTag = None
                     if len(tagDistances) > 0:
                         distanceToClosestTag = min(tagDistances)
 
@@ -81,7 +84,7 @@ class Vision:
         self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft)
         self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight)
 
-    def getTargetData(self, target : PhotonTrackedTarget) -> tuple[float, float, float, float]:
+    def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
         if target == None:
             targetID, targetYaw, targetPitch, targetAmbiguity == (0, 0, 0, 0)
         else:
@@ -91,7 +94,7 @@ class Vision:
             targetAmbiguity = target.getPoseAmbiguity()
         return targetID, targetYaw, targetPitch, targetAmbiguity
 
-    def showTargetData(self, target : Optional[PhotonTrackedTarget] = None):
+    def showTargetData(self, target: Optional[PhotonTrackedTarget] = None):
         if target == None:
             target = self.cam_left.getLatestResult().getBestTarget()
 
@@ -106,9 +109,9 @@ class Vision:
             SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
-        std_dev = 3
+        std_dev = OperatorRobotConfig.vision_default_std_dev
         if distance:
-            if distance > 2:
+            if distance > OperatorRobotConfig.vision_distance_threshold_m:
                 # Ignore vision if too far away from tag
                 std_dev = 10000
             else:
