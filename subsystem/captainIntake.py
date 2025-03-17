@@ -20,16 +20,22 @@ class CaptainIntake(commands2.Subsystem):
         self.front_breakbeam = wpilib.DigitalInput(consts.kFrontBreakBeam)
         self.back_breakbeam = wpilib.DigitalInput(consts.kBackBreakBeam)
         self.smartdashboard = wpilib.SmartDashboard
+        self.intake_in_progress = False
+        self.ready_to_eject = False
         self.idleSpeed = 0
 
     def setMotor(self, speed: float):
+
         self.intakeMotor.set(speed)
         self.chuteMotor.set(speed)
 
     def updateDashboard(self, state: str):
-        self.smartdashboard.putBoolean("Front 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Back 2", self.back_breakbeam.get())
-        self.smartdashboard.putString("Intake State", state)
+        # Should be called in periodic
+        # Should also be run
+        self.smartdashboard.putBoolean("Intake/Front 1", self.front_breakbeam.get())
+        self.smartdashboard.putBoolean("Intake/Back 0", self.back_breakbeam.get())
+        self.smartdashboard.putBoolean("Intake/In Progress", self.intake_in_progress)
+        self.smartdashboard.putString("Intake/State", state)
 
     def getBreakBeam(self, position: consts.BreakBeam) -> bool:
         if position == consts.BreakBeam.FRONT:
@@ -46,12 +52,16 @@ class IdleState(commands2.Command):
         self.intake = intake
         self.addRequirements(intake)
 
+    def initialize(self) -> None:
+        self.intake_in_progress = False
+
     def execute(self) -> None:
-        self.intake.setMotor(self.intake.idleSpeed)
         self.intake.updateDashboard("idle")
+        self.intake.setMotor(self.intake.idleSpeed)
 
     def isFinished(self) -> bool:
         return self.intake.smartdashboard.getBoolean("A Button Pressed", False)
+
 
 class FirstIntaking(commands2.Command):
 
@@ -67,10 +77,8 @@ class FirstIntaking(commands2.Command):
         self.intake.updateDashboard("first_intaking")
 
     def isFinished(self) -> bool:
-        return (
-            not self.intake.front_breakbeam.get()
-            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
-        )
+        return not self.intake.front_breakbeam.get()
+
 
 class SecondIntaking(commands2.Command):
 
@@ -86,10 +94,8 @@ class SecondIntaking(commands2.Command):
         self.intake.updateDashboard("second_intaking")
 
     def isFinished(self) -> bool:
-        return (
-            not self.intake.back_breakbeam.get()
-            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
-        )
+        return not self.intake.back_breakbeam.get()
+
 
 class ThirdIntaking(commands2.Command):
 
@@ -106,10 +112,9 @@ class ThirdIntaking(commands2.Command):
 
     def isFinished(self) -> bool:
         return (
-            self.intake.front_breakbeam.get()
-            and not self.intake.back_breakbeam.get()
-            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
+            self.intake.front_breakbeam.get() and not self.intake.back_breakbeam.get()
         )
+
 
 class Intook(commands2.Command):
 
@@ -139,15 +144,55 @@ class BackItUp(commands2.Command):
         self.intake.setMotor(-consts.kDefaultSpeed)
 
     def isFinished(self) -> bool:
-        """When the piece is pulled back in the breakbeam stop
+        if self.intake.front_breakbeam.get():
+            self.intake.ready_to_eject = True
+            return True
+        return False
+
+
+class ReadyToEject(commands2.Command):
+    """We're in this state if we've properly taken a piece in and are ready to eject it"""
+
+    def __init__(self, intake: CaptainIntake) -> None:
+        super().__init__()
+        self.intake = intake
+        self.addRequirements(intake)
+
+    def initialize(self) -> None:
+        self.intake.updateDashboard("readytoeject")
+
+    def isFinished(self) -> bool:
+        """When the button is pressed (again) eject
 
         Returns:
             bool: _description_
         """
-        return (
-            self.intake.front_breakbeam.get()
-            or not self.intake.smartdashboard.getBoolean("A Button Pressed", False)
+        # If we're not ready to eject (becasue we didn't correctly load, immediately abort)
+        return not self.intake.ready_to_eject or self.intake.smartdashboard.getBoolean(
+            "A Button Pressed", False
         )
+
+
+class Eject(commands2.ParallelRaceGroup):
+    """Eject the piece"""
+
+    def __init__(self, intake: CaptainIntake) -> None:
+        super().__init__(
+            commands2.RunCommand(lambda: intake.setMotor(consts.kDefaultSpeed), intake),
+            commands2.WaitCommand(consts.kEjectTime),
+        )
+        self.intake = intake
+        self.addRequirements(intake)
+
+    def initialize(self) -> None:
+        self.intake.updateDashboard("eject")
+
+    def isFinished(self) -> bool:
+        return True
+
+    def end(self, interrupted: bool):
+        self.intake.setMotor(0)
+        self.intake.ready_to_eject = False
 
 
 class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
@@ -159,9 +204,8 @@ class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
             commands2.RepeatCommand(
                 commands2.SequentialCommandGroup(
                     IdleState(intake),
-                    # If A button is released, go back to idle
-                    commands2.ConditionalCommand(
-                        # If A button still pressed, continue sequence
+                    # Wrap the sequence in a ParallelRaceGroup with a timeout
+                    commands2.ParallelRaceGroup(
                         commands2.SequentialCommandGroup(
                             FirstIntaking(intake),
                             SecondIntaking(intake),
@@ -169,28 +213,25 @@ class CaptainIntakeStateMachine(commands2.SequentialCommandGroup):
                             Intook(intake),
                             BackItUp(intake),
                         ),
-                        # If A button released, go back to idle
-                        commands2.InstantCommand(),
-                        # Condition: A button still pressed
-                        lambda: intake.smartdashboard.getBoolean(
-                            "A Button Pressed", False
-                        ),
+                        # timeout will make the state machine go back to idle
+                        commands2.WaitCommand(consts.kIntakeTimeout),
                     ),
+                    ReadyToEject(intake),
+                    Eject(intake),
                 )
             )
         )
 
+
 class SetCaptainIntakeIdleSpeed(commands2.Command):
-    def __init__(self,
-                 intake: CaptainIntake,
-                 getIdleSpeed: Callable[[], float]):
+    def __init__(self, intake: CaptainIntake, getIdleSpeed: Callable[[], float]):
         self.intake = intake
         self.getIdleSpeed = getIdleSpeed
-    
+
     def execute(self):
         print("reversing intakje")
         self.intake.idleSpeed = self.getIdleSpeed()
-    
+
     def end(self, interrupted: bool):
         print("returning to 0")
         self.intake.idleSpeed = 0

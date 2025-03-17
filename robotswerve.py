@@ -7,7 +7,7 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
-#from vision import Vision
+# from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
@@ -84,13 +84,20 @@ class RobotSwerve:
 
         self.teleop_stem_paths = {
             start_location: PathPlannerPath.fromPathFile(start_location)
-            for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)] + [f"Stem_Reef_N{n}" for n in range(1, 7)]
+            for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)]
+            + [f"Stem_Reef_N{n}" for n in range(1, 7)]
         }
 
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
-            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, self.elevator, wpilib.DriverStation)
+            self.telemetry = Telemetry(
+                self.driver_controller,
+                self.mech_controller,
+                self.drivetrain,
+                self.elevator,
+                wpilib.DriverStation,
+            )
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
         wpilib.SmartDashboard.putString("Git Branch", self.getDeployInfo("git-branch"))
@@ -102,16 +109,19 @@ class RobotSwerve:
         )
 
         # Vision setup
-        #self.vision = Vision(self.drivetrain)
+        # self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
         Trigger(is_disabled()).debounce(3).onTrue(
             commands2.cmd.runOnce(
                 self.drivetrain.set_motor_stop_modes(
-                    to_drive=True, to_break=True, all_motor_override=True, burn_flash=True
+                    to_drive=True,
+                    to_break=True,
+                    all_motor_override=True,
+                    burn_flash=True,
                 ),
-                self.drivetrain
+                self.drivetrain,
             )
         )
 
@@ -121,11 +131,13 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        #self.vision.getCamEstimate()
-        #self.vision.showTargetData()
+        # self.vision.getCamEstimate()
+        # self.vision.showTargetData()
 
     def disabledInit(self):
-        self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
+        self.drivetrain.set_motor_stop_modes(
+            to_drive=True, to_break=True, all_motor_override=True, burn_flash=False
+        )
         self.drivetrain.stop_driving()
 
         self.elevator.motor.set(0)
@@ -142,7 +154,9 @@ class RobotSwerve:
         if self.auto_command:
             self.auto_command.schedule()
         else:
-            self.drivetrain.reset_pose_estimator(self.drivetrain.get_default_starting_pose())
+            self.drivetrain.reset_pose_estimator(
+                self.drivetrain.get_default_starting_pose()
+            )
 
     def autonomousPeriodic(self):
         pass
@@ -151,22 +165,24 @@ class RobotSwerve:
         self.intake_state_machine.schedule()
 
         self.table.putNumber("pressedKey", -1)
-        self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
-                     1: commands2.cmd.print_("Key 1 pressed"),
-                     2: commands2.cmd.print_("Key 2 pressed"),
-                     3: commands2.cmd.print_("Key 3 pressed"),
-                     4: commands2.cmd.print_("Key 4 pressed"),
-                     5: commands2.cmd.print_("Key 5 pressed"),
-                     6: commands2.cmd.print_("Key 6 pressed"),
-                     7: commands2.cmd.print_("Key 7 pressed"),
-                     8: commands2.cmd.print_("Key 8 pressed"),
-                     9: commands2.cmd.print_("Key 9 pressed"),
-                     10: commands2.cmd.print_("Key 10 pressed"),
-                     11: commands2.cmd.print_("Key 11 pressed"),
-                     12: commands2.cmd.print_("Key 12 pressed"),
-                     13: commands2.cmd.print_("Key 13 pressed"),
-                     14: commands2.cmd.print_("Key 14 pressed"),
-                     -1: commands2.cmd.print_("No key pressed"),}
+        self.keys = {
+            0: commands2.cmd.print_("Key 0 pressed"),
+            1: commands2.cmd.print_("Key 1 pressed"),
+            2: commands2.cmd.print_("Key 2 pressed"),
+            3: commands2.cmd.print_("Key 3 pressed"),
+            4: commands2.cmd.print_("Key 4 pressed"),
+            5: commands2.cmd.print_("Key 5 pressed"),
+            6: commands2.cmd.print_("Key 6 pressed"),
+            7: commands2.cmd.print_("Key 7 pressed"),
+            8: commands2.cmd.print_("Key 8 pressed"),
+            9: commands2.cmd.print_("Key 9 pressed"),
+            10: commands2.cmd.print_("Key 10 pressed"),
+            11: commands2.cmd.print_("Key 11 pressed"),
+            12: commands2.cmd.print_("Key 12 pressed"),
+            13: commands2.cmd.print_("Key 13 pressed"),
+            14: commands2.cmd.print_("Key 14 pressed"),
+            -1: commands2.cmd.print_("No key pressed"),
+        }
 
         if self.auto_command:
             self.auto_command.cancel()
@@ -179,69 +195,127 @@ class RobotSwerve:
         self.drivetrain.setDefaultCommand(
             DefaultDrive(
                 self.drivetrain,
-                lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftY(), 0.06),
-                lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
-                lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
+                lambda: wpimath.applyDeadband(
+                    -1 * self.driver_controller.getLeftY(), 0.06
+                ),
+                lambda: wpimath.applyDeadband(
+                    -1 * self.driver_controller.getLeftX(), 0.06
+                ),
+                lambda: wpimath.applyDeadband(
+                    -1 * self.driver_controller.getRightX(), 0.1
+                ),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: self.driver_controller.getLeftBumperButton()
+                lambda: self.driver_controller.getLeftBumperButton(),
             )
         )
 
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                    {}
-                ).get("pose", None)))
+                commands2.DeferredCommand(
+                    lambda: pathplanToPose(
+                        lambda: reef_position_lookup.get(
+                            (
+                                self.alliance,
+                                getCurrentReefZone(
+                                    self.alliance, self.drivetrain.current_pose
+                                ),
+                                "l",
+                            ),
+                            {},
+                        ).get("pose", None)
+                    )
+                )
             ),
-             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                    {}
-                ).get("pose", None)))
-             ),
+            "right_reef_align": Trigger(
+                self.driver_controller.getBButtonPressed
+            ).onTrue(
+                commands2.DeferredCommand(
+                    lambda: pathplanToPose(
+                        lambda: reef_position_lookup.get(
+                            (
+                                self.alliance,
+                                getCurrentReefZone(
+                                    self.alliance, self.drivetrain.current_pose
+                                ),
+                                "r",
+                            ),
+                            {},
+                        ).get("pose", None)
+                    )
+                )
+            ),
         }
 
-        self.elevator.setDefaultCommand(ElevateManually(
-            self.elevator,
-            self.arm,
-            lambda: (
-                wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+        self.elevator.setDefaultCommand(
+            ElevateManually(
+                self.elevator,
+                self.arm,
+                lambda: (wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)),
             )
-        ))
+        )
 
         wpilib.SmartDashboard.putNumber("key_press", -1)
 
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL1OffsetCm)
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 1).and_(
+            self.isArmSafe
+        ).onTrue(
+            ElevateToGoal(
+                self.elevator,
+                reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL1OffsetCm,
+            )
         )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 2).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL2OffsetCm)
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 2).and_(
+            self.isArmSafe
+        ).onTrue(
+            ElevateToGoal(
+                self.elevator,
+                reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL2OffsetCm,
+            )
         )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 3).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm)
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 3).and_(
+            self.isArmSafe
+        ).onTrue(
+            ElevateToGoal(
+                self.elevator,
+                reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm,
+            )
         )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 4).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL4OffsetCm)
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 4).and_(
+            self.isArmSafe
+        ).onTrue(
+            ElevateToGoal(
+                self.elevator,
+                reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL4OffsetCm,
+            )
         )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
-        )
+        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 5).and_(
+            self.isArmSafe
+        ).onTrue(ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm))
 
         Trigger(self.mech_controller.getYButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4)
+            elevCommands.genPivotElevatorCommand(
+                self.arm, self.elevator, PoseOptions.REEF4
+            )
         )
         Trigger(self.mech_controller.getBButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3)
+            elevCommands.genPivotElevatorCommand(
+                self.arm, self.elevator, PoseOptions.REEF3
+            )
         )
         Trigger(self.mech_controller.getAButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2)
+            elevCommands.genPivotElevatorCommand(
+                self.arm, self.elevator, PoseOptions.REEF2
+            )
         )
         Trigger(self.mech_controller.getXButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH)
+            elevCommands.genPivotElevatorCommand(
+                self.arm, self.elevator, PoseOptions.TROUGH
+            )
         )
         Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
+            elevCommands.genPivotElevatorCommand(
+                self.arm, self.elevator, PoseOptions.REST
+            )
         )
         Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
             ElevateManually(
@@ -259,7 +333,6 @@ class RobotSwerve:
             elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
         )
 
-
     def teleopPeriodic(self):
         if self.driver_controller.getLeftTriggerAxis() > 0.5:
             commands2.CommandScheduler.getInstance().cancelAll()
@@ -267,7 +340,9 @@ class RobotSwerve:
         self.heartbeat = self.table.getNumber("Stream Deck Heartbeat", 0)
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
-        wpilib.SmartDashboard.putBoolean("A Button Pressed", self.mech_controller.getRightBumperButton())
+        wpilib.SmartDashboard.putBoolean(
+            "A Button Pressed", self.mech_controller.getRightBumperButton()
+        )
         self.intake_command_scheduler.run()
 
     def testInit(self):
@@ -288,7 +363,7 @@ class RobotSwerve:
         """
         json_object = None
         home = str(Path.home()) + os.path.sep
-        releaseFile = home + 'py' + os.path.sep + "deploy.json"
+        releaseFile = home + "py" + os.path.sep + "deploy.json"
         try:
             # Read from ~/deploy.json
             with open(releaseFile, "r") as openfile:
@@ -305,6 +380,5 @@ class RobotSwerve:
             return "bad json in deploy file check for unescaped "
 
     def isArmSafe(self) -> bool:
-        """
-        """
+        """ """
         return True
