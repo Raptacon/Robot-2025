@@ -7,7 +7,7 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
-#from vision import Vision
+# from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
@@ -28,12 +28,10 @@ from pathplannerlib.path import PathPlannerPath
 from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 from subsystem.diverCarlChistera import DiverCarlChistera as Arm
 
-
 class RobotSwerve:
     """
     Container to hold the main robot code
     """
-
     # forward declare critical types for editors
     drivetrain: SwerveDrivetrain
     elevator: Elevator
@@ -111,7 +109,7 @@ class RobotSwerve:
         )
 
         # Vision setup
-        #self.vision = Vision(self.drivetrain)
+        # self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -133,8 +131,8 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        #self.vision.getCamEstimate()
-        #self.vision.showTargetData()
+        # self.vision.getCamEstimate()
+        # self.vision.showTargetData()
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(
@@ -207,7 +205,7 @@ class RobotSwerve:
                     -1 * self.driver_controller.getRightX(), 0.1
                 ),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: self.driver_controller.getLeftBumperButton()
+                lambda: self.driver_controller.getLeftBumperButton(),
             )
         )
 
@@ -248,11 +246,11 @@ class RobotSwerve:
             ),
         }
 
-        self.elevator.setDefaultCommand(ElevateManually(
-            self.elevator,
-            self.arm,
-            lambda: (
-                wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+        self.elevator.setDefaultCommand(
+            ElevateManually(
+                self.elevator,
+                self.arm,
+                lambda: (wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)),
             )
         )
 
@@ -334,7 +332,6 @@ class RobotSwerve:
         Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
             elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
         )
-
 
     def teleopPeriodic(self):
         if self.driver_controller.getLeftTriggerAxis() > 0.5:
