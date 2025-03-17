@@ -3,6 +3,7 @@ from typing import Optional, Tuple
 from wpilib import SmartDashboard
 from wpimath.geometry import Transform3d, Rotation3d, Translation3d
 from photonlibpy import PhotonCamera, PhotonPoseEstimator, PoseStrategy
+from photonlibpy.targeting import PhotonPipelineResult
 from photonlibpy.targeting.photonTrackedTarget import PhotonTrackedTarget
 from photonUtils import PhotonUtils
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
@@ -51,38 +52,48 @@ class Vision:
             )
         )
 
-    def getSingleCamEstimate(self, camera: PhotonCamera, poseEstimator: PhotonPoseEstimator) -> None:
+    def getSingleCamEstimate(self, camera: PhotonCamera, poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None) -> None:
+        validTagIds = self.reef_tag_ids
+        if specificTagId != None:
+            validTagIds = {specificTagId}
+
         if not ((camera == None) or (poseEstimator == None)):
             unreadPipelines = camera.getAllUnreadResults()
             if len(unreadPipelines) > 0:
                 bestPipeline = unreadPipelines[-1]
-                camEstPose = poseEstimator.update(bestPipeline)
+                targetsKeep = [
+                    target
+                    for target in bestPipeline.getTargets()
+                    if (
+                        (target is not None)
+                        and (target.getFiducialId() in validTagIds)
+                        and (target.getPoseAmbiguity() < OperatorRobotConfig.vision_ambiguity_threshold)
+                        and (target.getBestCameraToTarget().translation().norm() < OperatorRobotConfig.vision_distance_threshold_m)
+                    )
+                ]
 
-                if camEstPose:
-                    robotPose = camEstPose.estimatedPose.toPose2d()
+                if len(targetsKeep) > 0:
+                    filteredPipeline = PhotonPipelineResult(
+                        bestPipeline.ntReceiveTimestampMicros, targetsKeep, bestPipeline.metadata
+                    )
+                    camEstPose = poseEstimator.update(filteredPipeline)
 
-                    tagDistances = [
-                        PhotonUtils.getDistanceToPose(robotPose, self.field_layout.getTagPose(targ.getFiducialId()).toPose2d())
-                        for targ in bestPipeline.getTargets()
-                        if (
-                            (targ is not None)
-                            and (targ.getPoseAmbiguity() < OperatorRobotConfig.vision_ambiguity_threshold)
-                            and (targ.getFiducialId() in self.reef_tag_ids)
-                        )
-                    ]
+                    if camEstPose:
+                        targetDistances = [
+                            target.getBestCameraToTarget().translation().norm() for target in filteredPipeline.getTargets()
+                        ]
 
-                    if len(tagDistances) > 0:
-                        distanceToClosestTag = min(tagDistances)
+                        if len(targetDistances) > 0:
+                            distanceToClosestTarget = min(targetDistances)
+                            stdDev = self.distanceToStdDev(distanceToClosestTarget)
 
-                        stdDev = self.distanceToStdDev(distanceToClosestTag)
+                            self.drive.add_vision_pose_estimate(
+                                camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, stdDev
+                            )
 
-                        self.drive.add_vision_pose_estimate(
-                            camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, stdDev
-                        )
-
-    def getCamEstimates(self) -> None:
-        self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft)
-        self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight)
+    def getCamEstimates(self, specificTagId: int | None = None) -> None:
+        self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft, specificTagId=specificTagId)
+        self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight, specificTagId=specificTagId)
 
     def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
         if target == None:
