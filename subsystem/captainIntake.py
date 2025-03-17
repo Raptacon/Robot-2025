@@ -28,6 +28,8 @@ class CaptainIntake(commands2.Subsystem):
         self.chuteMotor.set(speed)
 
     def updateDashboard(self, state: str):
+        # Should be called in periodic
+        # Should also be run
         self.smartdashboard.putBoolean("Intake/Front 1", self.front_breakbeam.get())
         self.smartdashboard.putBoolean("Intake/Back 0", self.back_breakbeam.get())
         self.smartdashboard.putBoolean("Intake/In Progress", self.intake_in_progress)
