@@ -39,10 +39,12 @@ class Vision:
         self.cameraPipelineResults = [[] for _ in range(len(self.cameras))] # avoid memory copy
         self.cameraPoseEstimates = [None] * len(self.cameras)
 
-    def getSingleCamPipelineResult(self, camera: PhotonCamera, cameraIndex: int) -> None:
+    def getSingleCamPipelineResult(self, camera: PhotonCamera, cameraIndex: int) -> List[PhotonPipelineResult]:
+        latestPipelineResults = []
         unreadResults = camera.getAllUnreadResults()
         if unreadResults is not None:
-            self.cameraPipelineResults[cameraIndex] = unreadResults
+            latestPipelineResults = unreadResults
+        return latestPipelineResults
 
     def getSingleCamEstimate(
         self, unreadCameraPipelines: List[PhotonPipelineResult], poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None
@@ -87,8 +89,9 @@ class Vision:
 
     def getCamEstimates(self, specificTagId: Optional[Callable[[], int]] = None) -> None:
         for i, camera, cameraPoseEstimator in zip(range(len(self.cameras)), self.cameras, self.cameraPoseEstimators):
-            self.getSingleCamPipelineResult(camera, i)
-            poseEstimate = self.getSingleCamEstimate(self.cameraPipelineResults[i], cameraPoseEstimator, specificTagId=specificTagId())
+            latestPipelineResults = self.getSingleCamPipelineResult(camera, i)
+            self.cameraPipelineResults[i] = latestPipelineResults
+            poseEstimate = self.getSingleCamEstimate(latestPipelineResults, cameraPoseEstimator, specificTagId=specificTagId())
             self.cameraPoseEstimates[i] = poseEstimate
 
     def getTargetDataForPrint(self, target: PhotonTrackedTarget) -> Tuple[float]:
