@@ -108,12 +108,12 @@ class Vision:
                 if target is None:
                     return
 
-                targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
+        targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
 
-                SmartDashboard.putNumber("Target ID", targetID)
-                SmartDashboard.putNumber("Target Yaw", targetYaw)
-                SmartDashboard.putNumber("Target Pitch", targetPitch)
-                SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
+        SmartDashboard.putNumber("Target ID", targetID)
+        SmartDashboard.putNumber("Target Yaw", targetYaw)
+        SmartDashboard.putNumber("Target Pitch", targetPitch)
+        SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
         std_dev = OperatorRobotConfig.vision_default_std_dev
