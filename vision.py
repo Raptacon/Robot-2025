@@ -107,6 +107,8 @@ class Vision:
 
                 if target is None:
                     return
+            else:
+                return
 
         targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
 
