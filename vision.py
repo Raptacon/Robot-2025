@@ -89,7 +89,10 @@ class Vision:
             poseEstimate = self.getSingleCamEstimate(self.cameraPipelineResults[i], cameraPoseEstimator, specificTagId=specificTagId())
             self.cameraPoseEstimates[i] = poseEstimate
 
-    def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
+    def getTargetDataForPrint(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
+        """
+        Only use this method to retrieve values for print statements
+        """
         if target is None:
             targetID, targetYaw, targetPitch, targetAmbiguity = (0, 0, 0, 0)
         else:
@@ -110,7 +113,7 @@ class Vision:
             else:
                 return
 
-        targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
+        targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetDataForPrint(target)
 
         SmartDashboard.putNumber("Target ID", targetID)
         SmartDashboard.putNumber("Target Yaw", targetYaw)
