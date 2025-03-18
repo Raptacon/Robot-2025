@@ -88,7 +88,7 @@ class Vision:
 
     def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
         if target is None:
-            targetID, targetYaw, targetPitch, targetAmbiguity == (0, 0, 0, 0)
+            targetID, targetYaw, targetPitch, targetAmbiguity = (0, 0, 0, 0)
         else:
             targetID = target.getFiducialId()
             targetYaw = target.getYaw()
