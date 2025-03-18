@@ -43,7 +43,7 @@ class Vision:
     ) -> Pose2d | None:
         poseEstimate = None
         validTagIds = self.reef_tag_ids
-        if specificTagId != None:
+        if specificTagId is not None:
             validTagIds = {specificTagId}
 
         if not ((camera is None) or (poseEstimator is None)):
