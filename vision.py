@@ -1,4 +1,4 @@
-from typing import Callable, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 from wpilib import SmartDashboard
 from wpimath.geometry import Pose2d, Transform3d, Rotation3d, Translation3d
@@ -36,54 +36,57 @@ class Vision:
             )
         ]
 
+        self.cameraPipelineResults = [[] for _ in range(len(self.cameras))] # avoid memory copy
         self.cameraPoseEstimates = [None] * len(self.cameras)
 
+    def getSingleCamPipelineResult(self, camera: PhotonCamera, cameraIndex: int) -> None:
+        self.cameraPipelineResults[cameraIndex] = camera.getAllUnreadResults()
+
     def getSingleCamEstimate(
-        self, camera: PhotonCamera, poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None
+        self, unreadCameraPipelines: List[PhotonPipelineResult], poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None
     ) -> Pose2d | None:
         poseEstimate = None
         validTagIds = self.reef_tag_ids
         if specificTagId is not None:
             validTagIds = {specificTagId}
 
-        if not ((camera is None) or (poseEstimator is None)):
-            unreadPipelines = camera.getAllUnreadResults()
-            if len(unreadPipelines) > 0:
-                bestPipeline = unreadPipelines[-1]
-                targetsKeep = [
-                    target
-                    for target in bestPipeline.getTargets()
-                    if (
-                        (target is not None)
-                        and (target.getFiducialId() in validTagIds)
-                        and (target.getPoseAmbiguity() < OperatorRobotConfig.vision_ambiguity_threshold)
-                        and (target.getBestCameraToTarget().translation().norm() < OperatorRobotConfig.vision_distance_threshold_m)
-                    )
-                ]
+        if not ((len(unreadCameraPipelines) == 0) or (poseEstimator is None)):
+            bestPipeline = unreadCameraPipelines[-1]
+            targetsKeep = [
+                target
+                for target in bestPipeline.getTargets()
+                if (
+                    (target is not None)
+                    and (target.getFiducialId() in validTagIds)
+                    and (target.getPoseAmbiguity() < OperatorRobotConfig.vision_ambiguity_threshold)
+                    and (target.getBestCameraToTarget().translation().norm() < OperatorRobotConfig.vision_distance_threshold_m)
+                )
+            ]
 
-                if len(targetsKeep) > 0:
-                    filteredPipeline = PhotonPipelineResult(
-                        bestPipeline.ntReceiveTimestampMicros, targetsKeep, bestPipeline.metadata
-                    )
-                    camEstPose = poseEstimator.update(filteredPipeline)
+            if len(targetsKeep) > 0:
+                filteredPipeline = PhotonPipelineResult(
+                    bestPipeline.ntReceiveTimestampMicros, targetsKeep, bestPipeline.metadata
+                )
+                camEstPose = poseEstimator.update(filteredPipeline)
 
-                    if camEstPose:
-                        targetDistances = [
-                            target.getBestCameraToTarget().translation().norm() for target in filteredPipeline.getTargets()
-                        ]
+                if camEstPose:
+                    targetDistances = [
+                        target.getBestCameraToTarget().translation().norm() for target in filteredPipeline.getTargets()
+                    ]
 
-                        if len(targetDistances) > 0:
-                            distanceToClosestTarget = min(targetDistances)
-                            stdDev = self.distanceToStdDev(distanceToClosestTarget)
-                            poseEstimate = camEstPose.estimatedPose.toPose2d()
-                            self.drive.add_vision_pose_estimate(
-                                poseEstimate, camEstPose.timestampSeconds, stdDev
-                            )
+                    if len(targetDistances) > 0:
+                        distanceToClosestTarget = min(targetDistances)
+                        stdDev = self.distanceToStdDev(distanceToClosestTarget)
+                        poseEstimate = camEstPose.estimatedPose.toPose2d()
+                        self.drive.add_vision_pose_estimate(
+                            poseEstimate, camEstPose.timestampSeconds, stdDev
+                        )
         return poseEstimate
 
     def getCamEstimates(self, specificTagId: Optional[Callable[[], int]] = None) -> None:
         for i, camera, cameraPoseEstimator in zip(range(len(self.cameras)), self.cameras, self.cameraPoseEstimators):
-            poseEstimate = self.getSingleCamEstimate(camera, cameraPoseEstimator, specificTagId=specificTagId())
+            self.getSingleCamPipelineResult(camera, i)
+            poseEstimate = self.getSingleCamEstimate(self.cameraPipelineResults[i], cameraPoseEstimator, specificTagId=specificTagId())
             self.cameraPoseEstimates[i] = poseEstimate
 
     def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
@@ -98,9 +101,9 @@ class Vision:
 
     def showTargetData(self, target: Optional[PhotonTrackedTarget] = None):
         if target is None:
-            pipelineResults = self.cameras[0].getAllUnreadResults()
-            if len(pipelineResults) > 0:
-                target = pipelineResults[-1].getBestTarget()
+            somePipelineResults = self.cameraPipelineResults[0]
+            if len(somePipelineResults) > 0:
+                target = somePipelineResults[0].getBestTarget()
 
                 if target is None:
                     return
