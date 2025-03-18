@@ -108,10 +108,8 @@ class Vision:
             if len(somePipelineResults) > 0:
                 target = somePipelineResults[0].getBestTarget()
 
-                if target is None:
-                    return
-            else:
-                return
+        if target is None:
+            return
 
         targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetDataForPrint(target)
 
