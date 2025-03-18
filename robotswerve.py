@@ -133,7 +133,7 @@ class RobotSwerve:
                 self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
                 self.vision.showTargetData()
             except Exception:
-                print("Unable to retrive vision pose estimtes")
+                print("Unable to retrieve vision pose estimates")
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
