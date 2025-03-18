@@ -89,7 +89,7 @@ class Vision:
             poseEstimate = self.getSingleCamEstimate(self.cameraPipelineResults[i], cameraPoseEstimator, specificTagId=specificTagId())
             self.cameraPoseEstimates[i] = poseEstimate
 
-    def getTargetDataForPrint(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
+    def getTargetDataForPrint(self, target: PhotonTrackedTarget) -> Tuple[float]:
         """
         Only use this method to retrieve values for print statements
         """
