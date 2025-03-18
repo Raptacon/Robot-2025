@@ -55,6 +55,13 @@ class RobotSwerve:
         self.intake_state_machine = CaptainIntakeStateMachine(self.intake_subsystem)
         self.intake_command_scheduler = commands2.CommandScheduler.getInstance()
 
+        # Vision setup
+        try:
+            self.vision = Vision(self.drivetrain)
+        except Exception:
+            self.vision = None
+        self.alignmentTagId = None
+
         # Initialize timer
         self.timer = wpilib.Timer()
         self.timer.start()
@@ -90,7 +97,10 @@ class RobotSwerve:
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
-            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, self.elevator, wpilib.DriverStation)
+            self.telemetry = Telemetry(
+                driverController=self.driver_controller, mechController=self.mech_controller, driveTrain=self.drivetrain,
+                elevator=self.elevator, driverStation=wpilib.DriverStation, vision=self.vision
+            )
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
         wpilib.SmartDashboard.putString("Git Branch", self.getDeployInfo("git-branch"))
@@ -100,13 +110,6 @@ class RobotSwerve:
         wpilib.SmartDashboard.putString(
             "Deploy User", self.getDeployInfo("deploy-user")
         )
-
-        # Vision setup
-        try:
-            self.vision = Vision(self.drivetrain)
-        except Exception:
-            self.vision = None
-        self.alignmentTagId = None
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches

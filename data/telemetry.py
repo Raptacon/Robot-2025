@@ -4,6 +4,7 @@ from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.diverCarlElevator import DiverCarlElevator
 from subsystem.diverCarlChistera import DiverCarlChistera
 from subsystem.captainIntake import CaptainIntake
+from vision import Vision
 
 from constants import CaptainPlanetConsts as intakeConstants
 
@@ -34,7 +35,6 @@ telemetryButtonEntries = [
     ["DPad", IntegerLogEntry, "button/dpad"],
 ]
 
-
 telemetryOdometryEntries = [
     ["robotPose", "robotpose"],
     ["targetPose", "targetpose"],
@@ -57,17 +57,6 @@ for i in range(len(OperatorRobotConfig.swerve_module_channels)):
     )
 
 elevatorEntries = [
-    # self.current_height_above_zero = self.encoder.getPosition()
-    # self.current_height = self.height_at_zero + self.current_height_above_zero
-    # self.current_goal_height = self.height_at_zero
-    # self.current_goal_height_above_zero = 0
-    # self.at_goal = self.checkIfAtGoalHeight()
-    # self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
-    # self.at_top_limit = self.motor.getForwardLimitSwitch().get()
-    # self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
-    # self.motor_current = self.motor.getOutputCurrent()
-    # self.motor_output = self.motor.getAppliedOutput()
-    # self.motor_velocity = self.encoder.getVelocity()
     ["elevatorCurrentHeightAboveZero", FloatLogEntry, "/positions"],
     ["elevatorCurrentHeight", FloatLogEntry, "/positions"],
     ["elevatorCurrentGoalHeight", FloatLogEntry, "/positions"],
@@ -107,6 +96,11 @@ intakeEntries = [
     ["intakeMotorVelocity", FloatLogEntry, "/output"],
 ]
 
+visionEntries = [
+    ["cameraLeftPose", "cameraleftpose"],
+    ["cameraRightPose", "camerarightpose"],
+]
+
 
 class Telemetry:
 
@@ -119,6 +113,7 @@ class Telemetry:
         driverStation: wpilib.DriverStation = None,
         arm: DiverCarlChistera = None,
         intake: CaptainIntake = None,
+        vision: Vision = None
     ):
         self.driverController = driverController
         self.mechController = mechController
@@ -129,6 +124,7 @@ class Telemetry:
         self.driverStation = driverStation
         self.arm = arm
         self.intake = intake
+        self.vision = vision
 
         self.networkTable = NetworkTableInstance.getDefault()
         for entryname, logname in telemetryOdometryEntries:
@@ -161,6 +157,14 @@ class Telemetry:
                         "swervedrivetrain/" + logname, entrytype
                     ).publish(),
                 )
+        for entryname, logname in telemetryOdometryEntries:
+            setattr(
+                self,
+                entryname,
+                self.networkTable.getStructTopic(
+                    "vision/" + logname, Pose2d
+                ).publish(),
+            )
 
         self.datalog = wpilib.DataLogManager.getLog()
         for entryname, entrytype, logname in telemetryButtonEntries:
@@ -357,6 +361,10 @@ class Telemetry:
         self.intakeMotorOutput.append(self.intake.intakeMotor.getAppliedOutput())
         self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
 
+    def getVisionInputs(self):
+        self.cameraLeftPose.set(self.vision.cameraPoseEstimates[0])
+        self.cameraRightPose.set(self.vision.cameraPoseEstimates[1])
+
     def runDefaultDataCollections(self):
         # if self.driverController is not None:
         #     self.getDriverControllerInputs()
@@ -372,6 +380,8 @@ class Telemetry:
             self.getElevatorInputs()
         if self.intake is not None:
             self.getIntakeInputs()
+        if self.vision is not None:
+            self.getVisionInputs()
         # if self.driverStation is not None:
         #     self.getDriverStationInputs()
 

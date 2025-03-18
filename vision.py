@@ -1,7 +1,7 @@
 from typing import Callable, Optional, Tuple
 
 from wpilib import SmartDashboard
-from wpimath.geometry import Transform3d, Rotation3d, Translation3d
+from wpimath.geometry import Pose2d, Transform3d, Rotation3d, Translation3d
 from photonlibpy import PhotonCamera, PhotonPoseEstimator, PoseStrategy
 from photonlibpy.targeting import PhotonPipelineResult, PhotonTrackedTarget
 from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
@@ -17,45 +17,40 @@ class Vision:
         left_cam_name: str = "Blue_Port_Left_Side",
         right_cam_name: str = "Side_Port_Right_Side"
     ):
-        self.cam_left = PhotonCamera(left_cam_name)
-        self.cam_right = PhotonCamera(right_cam_name)
+        self.cameras = [PhotonCamera(left_cam_name), PhotonCamera(right_cam_name)]
+        #self.cam_left = PhotonCamera(left_cam_name)
+        #self.cam_right = PhotonCamera(right_cam_name)
         self.drive = driveTrain
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeWelded)
         self.reef_tag_ids = {positions["tag"] for positions in reef_position_lookup.values()}
 
-        self.camPoseEstLeft = PhotonPoseEstimator(
-            self.field_layout,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            self.cam_left,
-            Transform3d(
-                Translation3d(
-                    *OperatorRobotConfig.robot_Cam_Translation_Left
-                ),
-                Rotation3d.fromDegrees(
-                    *OperatorRobotConfig.robot_Cam_Rotation_Degress_Left
-                )
+        # self.camPoseEstLeft = self.camPoseEstRight = 
+        self.cameraPoseEstimators = [
+            PhotonPoseEstimator(
+                self.field_layout,
+                PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                camera,
+                Transform3d(Translation3d(*camToRobotTranslation), Rotation3d.fromDegrees(*camToRobotRotation))
             )
-        )
-        self.camPoseEstRight = PhotonPoseEstimator(
-            self.field_layout,
-            PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
-            self.cam_right,
-            Transform3d(
-                Translation3d(
-                    *OperatorRobotConfig.robot_Cam_Translation_Right
-                ),
-                Rotation3d.fromDegrees(
-                    *OperatorRobotConfig.robot_Cam_Rotation_Degress_Right
-                )
+            for camera, camToRobotTranslation, camToRobotRotation in zip(
+                self.cameras, [
+                    (OperatorRobotConfig.robot_Cam_Translation_Left, OperatorRobotConfig.robot_Cam_Rotation_Degress_Left),
+                    (OperatorRobotConfig.robot_Cam_Translation_Right, OperatorRobotConfig.robot_Cam_Rotation_Degress_Right)
+                ]
             )
-        )
+        ]
 
-    def getSingleCamEstimate(self, camera: PhotonCamera, poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None) -> None:
+        self.cameraPoseEstimates = [None] * len(self.cameras)
+
+    def getSingleCamEstimate(
+        self, camera: PhotonCamera, poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None
+    ) -> Pose2d | None:
+        poseEstimate = None
         validTagIds = self.reef_tag_ids
         if specificTagId != None:
             validTagIds = {specificTagId}
 
-        if not ((camera == None) or (poseEstimator == None)):
+        if not ((camera is None) or (poseEstimator is None)):
             unreadPipelines = camera.getAllUnreadResults()
             if len(unreadPipelines) > 0:
                 bestPipeline = unreadPipelines[-1]
@@ -84,17 +79,19 @@ class Vision:
                         if len(targetDistances) > 0:
                             distanceToClosestTarget = min(targetDistances)
                             stdDev = self.distanceToStdDev(distanceToClosestTarget)
-
+                            poseEstimate = camEstPose.estimatedPose.toPose2d()
                             self.drive.add_vision_pose_estimate(
-                                camEstPose.estimatedPose.toPose2d(), camEstPose.timestampSeconds, stdDev
+                                poseEstimate, camEstPose.timestampSeconds, stdDev
                             )
+        return poseEstimate
 
     def getCamEstimates(self, specificTagId: Optional[Callable[[], int]] = None) -> None:
-        self.getSingleCamEstimate(self.cam_left, self.camPoseEstLeft, specificTagId=specificTagId())
-        self.getSingleCamEstimate(self.cam_right, self.camPoseEstRight, specificTagId=specificTagId())
+        for i, camera, cameraPoseEstimator in enumerate(zip(self.cameras, self.cameraPoseEstimators)):
+            poseEstimate = self.getSingleCamEstimate(camera, cameraPoseEstimator, specificTagId=specificTagId())
+            self.cameraPoseEstimates[i] = poseEstimate
 
     def getTargetData(self, target: PhotonTrackedTarget) -> tuple[float, float, float, float]:
-        if target == None:
+        if target is None:
             targetID, targetYaw, targetPitch, targetAmbiguity == (0, 0, 0, 0)
         else:
             targetID = target.getFiducialId()
@@ -104,18 +101,20 @@ class Vision:
         return targetID, targetYaw, targetPitch, targetAmbiguity
 
     def showTargetData(self, target: Optional[PhotonTrackedTarget] = None):
-        if target == None:
-            target = self.cam_left.getLatestResult().getBestTarget()
+        if target is None:
+            pipelineResults = self.cameras[0].getAllUnreadResults()
+            if len(pipelineResults) > 0:
+                target = pipelineResults[-1].getBestTarget()
 
-            if target == None:
-                return
+                if target is None:
+                    return
 
-            targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
+                targetID, targetYaw, targetPitch, targetAmbiguity = self.getTargetData(target)
 
-            SmartDashboard.putNumber("Target ID", targetID)
-            SmartDashboard.putNumber("Target Yaw", targetYaw)
-            SmartDashboard.putNumber("Target Pitch", targetPitch)
-            SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
+                SmartDashboard.putNumber("Target ID", targetID)
+                SmartDashboard.putNumber("Target Yaw", targetYaw)
+                SmartDashboard.putNumber("Target Pitch", targetPitch)
+                SmartDashboard.putNumber("Target Ambiguity", targetAmbiguity)
 
     def distanceToStdDev(self, distance: float | None) -> Tuple[float]:
         std_dev = OperatorRobotConfig.vision_default_std_dev
