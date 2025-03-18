@@ -31,8 +31,8 @@ class Vision:
             )
             for camera, camToRobotTranslation, camToRobotRotation in zip(
                 self.cameras,
-                [OperatorRobotConfig.robot_Cam_Translation_Left, OperatorRobotConfig.robot_Cam_Rotation_Degress_Left],
-                [OperatorRobotConfig.robot_Cam_Translation_Right, OperatorRobotConfig.robot_Cam_Rotation_Degress_Right]
+                [OperatorRobotConfig.robot_Cam_Translation_Left, OperatorRobotConfig.robot_Cam_Translation_Right],
+                [OperatorRobotConfig.robot_Cam_Rotation_Degress_Left, OperatorRobotConfig.robot_Cam_Rotation_Degress_Right]
             )
         ]
 
