@@ -40,7 +40,9 @@ class Vision:
         self.cameraPoseEstimates = [None] * len(self.cameras)
 
     def getSingleCamPipelineResult(self, camera: PhotonCamera, cameraIndex: int) -> None:
-        self.cameraPipelineResults[cameraIndex] = camera.getAllUnreadResults()
+        unreadResults = camera.getAllUnreadResults()
+        if unreadResults is not None:
+            self.cameraPipelineResults[cameraIndex] = unreadResults
 
     def getSingleCamEstimate(
         self, unreadCameraPipelines: List[PhotonPipelineResult], poseEstimator: PhotonPoseEstimator, specificTagId: int | None = None
