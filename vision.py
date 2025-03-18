@@ -18,13 +18,10 @@ class Vision:
         right_cam_name: str = "Side_Port_Right_Side"
     ):
         self.cameras = [PhotonCamera(left_cam_name), PhotonCamera(right_cam_name)]
-        #self.cam_left = PhotonCamera(left_cam_name)
-        #self.cam_right = PhotonCamera(right_cam_name)
         self.drive = driveTrain
         self.field_layout = AprilTagFieldLayout.loadField(AprilTagField.k2025ReefscapeWelded)
         self.reef_tag_ids = {positions["tag"] for positions in reef_position_lookup.values()}
 
-        # self.camPoseEstLeft = self.camPoseEstRight = 
         self.cameraPoseEstimators = [
             PhotonPoseEstimator(
                 self.field_layout,
@@ -33,10 +30,9 @@ class Vision:
                 Transform3d(Translation3d(*camToRobotTranslation), Rotation3d.fromDegrees(*camToRobotRotation))
             )
             for camera, camToRobotTranslation, camToRobotRotation in zip(
-                self.cameras, [
-                    (OperatorRobotConfig.robot_Cam_Translation_Left, OperatorRobotConfig.robot_Cam_Rotation_Degress_Left),
-                    (OperatorRobotConfig.robot_Cam_Translation_Right, OperatorRobotConfig.robot_Cam_Rotation_Degress_Right)
-                ]
+                self.cameras,
+                [OperatorRobotConfig.robot_Cam_Translation_Left, OperatorRobotConfig.robot_Cam_Rotation_Degress_Left],
+                [OperatorRobotConfig.robot_Cam_Translation_Right, OperatorRobotConfig.robot_Cam_Rotation_Degress_Right]
             )
         ]
 
@@ -86,7 +82,7 @@ class Vision:
         return poseEstimate
 
     def getCamEstimates(self, specificTagId: Optional[Callable[[], int]] = None) -> None:
-        for i, camera, cameraPoseEstimator in enumerate(zip(self.cameras, self.cameraPoseEstimators)):
+        for i, camera, cameraPoseEstimator in zip(range(len(self.cameras)), self.cameras, self.cameraPoseEstimators):
             poseEstimate = self.getSingleCamEstimate(camera, cameraPoseEstimator, specificTagId=specificTagId())
             self.cameraPoseEstimates[i] = poseEstimate
 

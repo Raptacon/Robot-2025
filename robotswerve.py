@@ -128,7 +128,7 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        if not (self.vision == None):
+        if self.vision is not None:
             try:
                 self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
                 self.vision.showTargetData()

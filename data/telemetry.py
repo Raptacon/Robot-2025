@@ -157,7 +157,7 @@ class Telemetry:
                         "swervedrivetrain/" + logname, entrytype
                     ).publish(),
                 )
-        for entryname, logname in telemetryOdometryEntries:
+        for entryname, logname in visionEntries:
             setattr(
                 self,
                 entryname,
@@ -362,8 +362,10 @@ class Telemetry:
         self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
 
     def getVisionInputs(self):
-        self.cameraLeftPose.set(self.vision.cameraPoseEstimates[0])
-        self.cameraRightPose.set(self.vision.cameraPoseEstimates[1])
+        if self.vision.cameraPoseEstimates[0]:
+            self.cameraLeftPose.set(self.vision.cameraPoseEstimates[0])
+        if self.vision.cameraPoseEstimates[1]:
+            self.cameraRightPose.set(self.vision.cameraPoseEstimates[1])
 
     def runDefaultDataCollections(self):
         # if self.driverController is not None:
