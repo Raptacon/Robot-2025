@@ -198,128 +198,134 @@ class Telemetry:
         """
         Records data for buttons and axis inputs for the first controller
         """
-        self.driverAButton.append(self.driverController.getAButton())  # bool
-        self.driverBButton.append(self.driverController.getBButton())  # bool
-        self.driverXButton.append(self.driverController.getXButton())  # bool
-        self.driverYButton.append(self.driverController.getYButton())  # bool
-        self.driverBackButton.append(
-            self.driverController.getBackButton()
-        )  # left side , bool
-        self.driverStartButton.append(
-            self.driverController.getStartButton()
-        )  # right side , bool
-        self.driverLeftBumper.append(self.driverController.getLeftBumper())  # bool
-        self.driverRightBumper.append(self.driverController.getRightBumper())  # bool
-        self.driverLeftStickButton.append(
-            self.driverController.getLeftStickButton()
-        )  # bool
-        self.driverRightStickButton.append(
-            self.driverController.getRightStickButton()
-        )  # bool
-        self.driverLeftTrigger.append(
-            self.driverController.getLeftTriggerAxis()
-        )  # float 0-1
-        self.driverRightTrigger.append(
-            self.driverController.getRightTriggerAxis()
-        )  # float 0-1
-        self.driverJoystickLeftY.append(self.driverController.getLeftY())  # float -1-1
-        self.driverJoystickLeftX.append(self.driverController.getLeftX())  # float -1-1
-        self.driverJoystickRightY.append(
-            self.driverController.getRightY()
-        )  # float -1-1
-        self.driverJoystickRightX.append(
-            self.driverController.getRightX()
-        )  # float -1-1
-        self.driverDPad.append(self.driverController.getPOV())  # ints
+        if self.driverController is not None:
+            self.driverAButton.append(self.driverController.getAButton())  # bool
+            self.driverBButton.append(self.driverController.getBButton())  # bool
+            self.driverXButton.append(self.driverController.getXButton())  # bool
+            self.driverYButton.append(self.driverController.getYButton())  # bool
+            self.driverBackButton.append(
+                self.driverController.getBackButton()
+            )  # left side , bool
+            self.driverStartButton.append(
+                self.driverController.getStartButton()
+            )  # right side , bool
+            self.driverLeftBumper.append(self.driverController.getLeftBumper())  # bool
+            self.driverRightBumper.append(self.driverController.getRightBumper())  # bool
+            self.driverLeftStickButton.append(
+                self.driverController.getLeftStickButton()
+            )  # bool
+            self.driverRightStickButton.append(
+                self.driverController.getRightStickButton()
+            )  # bool
+            self.driverLeftTrigger.append(
+                self.driverController.getLeftTriggerAxis()
+            )  # float 0-1
+            self.driverRightTrigger.append(
+                self.driverController.getRightTriggerAxis()
+            )  # float 0-1
+            self.driverJoystickLeftY.append(self.driverController.getLeftY())  # float -1-1
+            self.driverJoystickLeftX.append(self.driverController.getLeftX())  # float -1-1
+            self.driverJoystickRightY.append(
+                self.driverController.getRightY()
+            )  # float -1-1
+            self.driverJoystickRightX.append(
+                self.driverController.getRightX()
+            )  # float -1-1
+            self.driverDPad.append(self.driverController.getPOV())  # ints
 
     def getMechControllerInputs(self):
         """
         Records data for buttons and axis inputs for the second controller
         """
-        self.mechAButton.append(self.mechController.getAButton())  # bool
-        self.mechBButton.append(self.mechController.getBButton())  # bool
-        self.mechXButton.append(self.mechController.getXButton())  # bool
-        self.mechYButton.append(self.mechController.getYButton())  # bool
-        self.mechBackButton.append(
-            self.mechController.getBackButton()
-        )  # left side , bool
-        self.mechStartButton.append(
-            self.mechController.getStartButton()
-        )  # right side , bool
-        self.mechLeftBumper.append(self.mechController.getLeftBumper())  # bool
-        self.mechRightBumper.append(self.mechController.getRightBumper())  # bool
-        self.mechLeftStickButton.append(
-            self.mechController.getLeftStickButton()
-        )  # bool
-        self.mechRightStickButton.append(
-            self.mechController.getRightStickButton()
-        )  # bool
-        self.mechLeftTrigger.append(
-            self.mechController.getLeftTriggerAxis()
-        )  # float 0-1
-        self.mechRightTrigger.append(
-            self.mechController.getRightTriggerAxis()
-        )  # float 0-1
-        self.mechJoystickLeftY.append(self.mechController.getLeftY())  # float -1-1
-        self.mechJoystickLeftX.append(self.mechController.getLeftX())  # float -1-1
-        self.mechJoystickRightY.append(self.mechController.getRightY())  # float -1-1
-        self.mechJoystickRightX.append(self.mechController.getRightX())  # float -1-1
-        self.mechDPad.append(self.mechController.getPOV())  # ints
+        if self.mechController is not None:
+            self.mechAButton.append(self.mechController.getAButton())  # bool
+            self.mechBButton.append(self.mechController.getBButton())  # bool
+            self.mechXButton.append(self.mechController.getXButton())  # bool
+            self.mechYButton.append(self.mechController.getYButton())  # bool
+            self.mechBackButton.append(
+                self.mechController.getBackButton()
+            )  # left side , bool
+            self.mechStartButton.append(
+                self.mechController.getStartButton()
+            )  # right side , bool
+            self.mechLeftBumper.append(self.mechController.getLeftBumper())  # bool
+            self.mechRightBumper.append(self.mechController.getRightBumper())  # bool
+            self.mechLeftStickButton.append(
+                self.mechController.getLeftStickButton()
+            )  # bool
+            self.mechRightStickButton.append(
+                self.mechController.getRightStickButton()
+            )  # bool
+            self.mechLeftTrigger.append(
+                self.mechController.getLeftTriggerAxis()
+            )  # float 0-1
+            self.mechRightTrigger.append(
+                self.mechController.getRightTriggerAxis()
+            )  # float 0-1
+            self.mechJoystickLeftY.append(self.mechController.getLeftY())  # float -1-1
+            self.mechJoystickLeftX.append(self.mechController.getLeftX())  # float -1-1
+            self.mechJoystickRightY.append(self.mechController.getRightY())  # float -1-1
+            self.mechJoystickRightX.append(self.mechController.getRightX())  # float -1-1
+            self.mechDPad.append(self.mechController.getPOV())  # ints
 
     def getOdometryInputs(self):
         """
         Records the data for the positions of the bot in a field,
         Gives the x position, y position and rotation
         """
-        pose = self.odometryPosition.getEstimatedPosition()
-        self.robotPose.set(pose)
+        if self.odometryPosition is not None:
+            pose = self.odometryPosition.getEstimatedPosition()
+            self.robotPose.set(pose)
 
     def getFullSwerveState(self):
         """
         Retrieves values reflecting the current state of the swerve drive
         """
-        self.moduleStates.set(
-            [swerveModule.current_state() for swerveModule in self.swerveModules]
-        )
-        self.drivetrainVelocity.set(self.driveTrain.current_robot_relative_speed())
-        self.drivetrainRotation.set(self.driveTrain.current_yaw())
+        if self.driveTrain and self.swerveModules:
+            self.moduleStates.set(
+                [swerveModule.current_state() for swerveModule in self.swerveModules]
+            )
+            self.drivetrainVelocity.set(self.driveTrain.current_robot_relative_speed())
+            self.drivetrainRotation.set(self.driveTrain.current_yaw())
 
     def getRawSwerveInputs(self):
         """
         Gets the inputs for some swerve drive train inputs
         it get the steer angle, the drive percent and the velocity
         """
-        for i, swerveModule in enumerate(self.swerveModules):
-            getattr(self, f"steerDegree{i + 1}").append(
-                swerveModule.current_raw_absolute_steer_position()
-            )
-            getattr(self, f"drivePercent{i + 1}").append(
-                swerveModule.drive_motor.getAppliedOutput()
-            )
-            getattr(self, f"moduleVelocity{i + 1}").append(
-                swerveModule.current_state().speed
-            )
+        if self.swerveModules is not None:
+            for i, swerveModule in enumerate(self.swerveModules):
+                getattr(self, f"steerDegree{i + 1}").append(
+                    swerveModule.current_raw_absolute_steer_position()
+                )
+                getattr(self, f"drivePercent{i + 1}").append(
+                    swerveModule.drive_motor.getAppliedOutput()
+                )
+                getattr(self, f"moduleVelocity{i + 1}").append(
+                    swerveModule.current_state().speed
+                )
 
     def getElevatorInputs(self):
         """
         Retrieves values reflecting the current state of the elevator and information about
         the goal position of the elevator
         """
-        self.elevatorCurrentHeightAboveZero.append(
-            self.elevator.current_height_above_zero
-        )
-        self.elevatorCurrentHeight.append(self.elevator.current_height)
-        self.elevatorCurrentGoalHeight.append(self.elevator.current_goal_height)
-        self.elevatorCurrentGoalHeightAboveZero.append(
-            self.elevator.current_goal_height_above_zero
-        )
-        self.elevatorAtGoal.append(self.elevator.at_goal)
-        self.elevatorErrorFromGoal.append(self.elevator.error_from_goal)
-        self.elevatorAtTopLimit.append(self.elevator.at_top_limit)
-        self.elevatorAtBottomLimit.append(self.elevator.at_bottom_limit)
-        self.elevatorMotorCurrent.append(self.elevator.motor_current)
-        self.elevatorMotorOutput.append(self.elevator.motor_output)
-        self.elevatorMotorVelocity.append(self.elevator.motor_velocity)
+        if self.elevator is not None:
+            self.elevatorCurrentHeightAboveZero.append(
+                self.elevator.current_height_above_zero
+            )
+            self.elevatorCurrentHeight.append(self.elevator.current_height)
+            self.elevatorCurrentGoalHeight.append(self.elevator.current_goal_height)
+            self.elevatorCurrentGoalHeightAboveZero.append(
+                self.elevator.current_goal_height_above_zero
+            )
+            self.elevatorAtGoal.append(self.elevator.at_goal)
+            self.elevatorErrorFromGoal.append(self.elevator.error_from_goal)
+            self.elevatorAtTopLimit.append(self.elevator.at_top_limit)
+            self.elevatorAtBottomLimit.append(self.elevator.at_bottom_limit)
+            self.elevatorMotorCurrent.append(self.elevator.motor_current)
+            self.elevatorMotorOutput.append(self.elevator.motor_output)
+            self.elevatorMotorVelocity.append(self.elevator.motor_velocity)
 
     def getDriverStationInputs(self):
         """
@@ -327,16 +333,17 @@ class Telemetry:
         the things being: Alliance color and what mode it is in and
         if it is enabled
         """
-        alliance = "No Alliance"
-        if self.driverStation.getAlliance() == wpilib.DriverStation.Alliance.kBlue:
-            alliance = "Blue"
-        if self.driverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed:
-            alliance = "Red"
-        self.alliance.append(alliance)
-        self.autonomous.append(self.driverStation.isAutonomous())
-        self.teleop.append(self.driverStation.isTeleop())
-        self.test.append(self.driverStation.isTest())
-        self.enabled.append(self.driverStation.isEnabled())
+        if self.driverStation is not None:
+            alliance = "No Alliance"
+            if self.driverStation.getAlliance() == wpilib.DriverStation.Alliance.kBlue:
+                alliance = "Blue"
+            if self.driverStation.getAlliance() == wpilib.DriverStation.Alliance.kRed:
+                alliance = "Red"
+            self.alliance.append(alliance)
+            self.autonomous.append(self.driverStation.isAutonomous())
+            self.teleop.append(self.driverStation.isTeleop())
+            self.test.append(self.driverStation.isTest())
+            self.enabled.append(self.driverStation.isEnabled())
 
     def getArmInputs(self):
         self.armPositionArc.append(self.arm.getArc())
@@ -348,44 +355,37 @@ class Telemetry:
         self.armDisabled.append(self.arm.getDisabled())
 
     def getIntakeInputs(self):
-        self.intakeFrontBreakBeam.append(
-            self.intake.getBreakBeam(intakeConstants.BreakBeam.FRONT)
-        )
-        self.intakeBackBreakBeam.append(
-            self.intake.getBreakBeam(intakeConstants.BreakBeam.BACK)
-        )
-        self.intakeMotorTemperature.append(
-            self.intake.intakeMotor.getMotorTemperature()
-        )
-        self.intakeMotorCurrent.append(self.intake.intakeMotor.getOutputCurrent())
-        self.intakeMotorOutput.append(self.intake.intakeMotor.getAppliedOutput())
-        self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
+        if self.intake is not None:
+            self.intakeFrontBreakBeam.append(
+                self.intake.getBreakBeam(intakeConstants.BreakBeam.FRONT)
+            )
+            self.intakeBackBreakBeam.append(
+                self.intake.getBreakBeam(intakeConstants.BreakBeam.BACK)
+            )
+            self.intakeMotorTemperature.append(
+                self.intake.intakeMotor.getMotorTemperature()
+            )
+            self.intakeMotorCurrent.append(self.intake.intakeMotor.getOutputCurrent())
+            self.intakeMotorOutput.append(self.intake.intakeMotor.getAppliedOutput())
+            self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
 
     def getVisionInputs(self):
-        if self.vision.cameraPoseEstimates[0]:
-            self.cameraLeftPose.set(self.vision.cameraPoseEstimates[0])
-        if self.vision.cameraPoseEstimates[1]:
-            self.cameraRightPose.set(self.vision.cameraPoseEstimates[1])
+        if self.vision is not None:
+            if self.vision.cameraPoseEstimates[0]:
+                self.cameraLeftPose.set(self.vision.cameraPoseEstimates[0])
+            if self.vision.cameraPoseEstimates[1]:
+                self.cameraRightPose.set(self.vision.cameraPoseEstimates[1])
 
     def runDefaultDataCollections(self):
-        # if self.driverController is not None:
-        #     self.getDriverControllerInputs()
-        # if self.mechController is not None:
-        #     self.getMechControllerInputs()
-        if self.odometryPosition is not None:
-            self.getOdometryInputs()
-        if self.driveTrain and self.swerveModules:
-            self.getFullSwerveState()
-        # if self.swerveModules is not None:
-        #     self.getRawSwerveInputs()
-        if self.elevator is not None:
-            self.getElevatorInputs()
-        if self.intake is not None:
-            self.getIntakeInputs()
-        if self.vision is not None:
-            self.getVisionInputs()
-        # if self.driverStation is not None:
-        #     self.getDriverStationInputs()
+        self.getDriverControllerInputs()
+        self.getMechControllerInputs()
+        self.getOdometryInputs()
+        self.getFullSwerveState()
+        self.getRawSwerveInputs()
+        self.getElevatorInputs()
+        self.getIntakeInputs()
+        self.getVisionInputs()
+        self.getDriverStationInputs()
 
     def logAdditionalOdometry(
         self, odometer_value: Pose2d, log_entry_name: str

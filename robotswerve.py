@@ -99,8 +99,7 @@ class RobotSwerve:
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
             self.telemetry = Telemetry(
-                driverController=self.driver_controller, mechController=self.mech_controller, driveTrain=self.drivetrain,
-                elevator=self.elevator, driverStation=wpilib.DriverStation, vision=self.vision
+                driveTrain=self.drivetrain, elevator=self.elevator, vision=self.vision
             )
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
