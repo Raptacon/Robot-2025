@@ -7,7 +7,7 @@ from typing import Callable
 # Internal imports
 from data.telemetry import Telemetry
 from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
-#from vision import Vision
+from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
@@ -55,6 +55,15 @@ class RobotSwerve:
         self.intake_state_machine = CaptainIntakeStateMachine(self.intake_subsystem)
         self.intake_command_scheduler = commands2.CommandScheduler.getInstance()
 
+        # Vision setup
+        try:
+            self.vision = Vision(self.drivetrain)
+        except Exception:
+            self.vision = None
+            wpilib.reportError("Unable to load vision class", printTrace=True)
+        self.alignmentTagId = None
+        self.caughtPeriodicVisionError = False
+
         # Initialize timer
         self.timer = wpilib.Timer()
         self.timer.start()
@@ -90,7 +99,9 @@ class RobotSwerve:
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
-            self.telemetry = Telemetry(self.driver_controller, self.mech_controller, self.drivetrain, self.elevator, wpilib.DriverStation)
+            self.telemetry = Telemetry(
+                driveTrain=self.drivetrain, elevator=self.elevator, vision=self.vision
+            )
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
         wpilib.SmartDashboard.putString("Git Branch", self.getDeployInfo("git-branch"))
@@ -100,9 +111,6 @@ class RobotSwerve:
         wpilib.SmartDashboard.putString(
             "Deploy User", self.getDeployInfo("deploy-user")
         )
-
-        # Vision setup
-        #self.vision = Vision(self.drivetrain)
 
         # Update drivetrain motor idle modes 3 seconds after the robot has been disabled.
         # to_break should be False at competitions where the robot is turned off between matches
@@ -121,8 +129,14 @@ class RobotSwerve:
 
         self.intake_command_scheduler.run()
 
-        #self.vision.getCamEstimate()
-        #self.vision.showTargetData()
+        if self.vision is not None:
+            try:
+                self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
+                self.vision.showTargetData()
+            except Exception:
+                if not self.caughtPeriodicVisionError:
+                    self.caughtPeriodicVisionError = True
+                    wpilib.reportError("Retrieval of vision info failed in periodic", printTrace=True)
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
@@ -189,16 +203,43 @@ class RobotSwerve:
 
         self.teleop_auto_triggers = {
             "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                    {}
-                ).get("pose", None)))
+                commands2.cmd.parallel(
+                    commands2.InstantCommand(
+                        lambda: self.setAlignmentTag(
+                            reef_position_lookup
+                            .get(
+                                (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                                {}
+                            )
+                            .get("tag", None)
+                        )
+                    ),
+                    commands2.DeferredCommand(
+                        lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                            {}
+                        ).get("pose", None)
+                        )
+                    )
+                ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
             ),
              "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
-                commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                    {}
-                ).get("pose", None)))
+                commands2.cmd.parallel(
+                    commands2.InstantCommand(
+                        lambda: self.setAlignmentTag(
+                            reef_position_lookup
+                            .get(
+                                (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                                {}
+                            )
+                            .get("tag", None)
+                        )
+                    ),
+                    commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                        {}
+                    ).get("pose", None)))
+                ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
              ),
         }
 
@@ -308,3 +349,8 @@ class RobotSwerve:
         """
         """
         return True
+
+    def setAlignmentTag(self, alignmentTagId: int | None) -> None:
+        """
+        """
+        self.alignmentTagId = alignmentTagId
