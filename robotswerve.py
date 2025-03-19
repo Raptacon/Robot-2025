@@ -58,8 +58,9 @@ class RobotSwerve:
         # Vision setup
         try:
             self.vision = Vision(self.drivetrain)
-        except Exception:
+        except Exception as e:
             self.vision = None
+            wpilib.reportError("Unable to load vision class", printTrace=True)
         self.alignmentTagId = None
 
         # Initialize timer
