@@ -58,7 +58,7 @@ class RobotSwerve:
         # Vision setup
         try:
             self.vision = Vision(self.drivetrain)
-        except Exception as e:
+        except Exception:
             self.vision = None
             wpilib.reportError("Unable to load vision class", printTrace=True)
         self.alignmentTagId = None
@@ -133,7 +133,7 @@ class RobotSwerve:
             try:
                 self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
                 self.vision.showTargetData()
-            except Exception as e:
+            except Exception:
                 if not self.caughtPeriodicVisionError:
                     self.caughtPeriodicVisionError = True
                     wpilib.reportError("Retrieval of vision info failed in periodic", printTrace=True)
