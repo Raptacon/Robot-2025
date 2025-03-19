@@ -62,6 +62,7 @@ class RobotSwerve:
             self.vision = None
             wpilib.reportError("Unable to load vision class", printTrace=True)
         self.alignmentTagId = None
+        self.caughtPeriodicVisionError = False
 
         # Initialize timer
         self.timer = wpilib.Timer()
@@ -132,8 +133,10 @@ class RobotSwerve:
             try:
                 self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
                 self.vision.showTargetData()
-            except Exception:
-                print("Unable to retrieve vision pose estimates")
+            except Exception as e:
+                if not self.caughtPeriodicVisionError:
+                    self.caughtPeriodicVisionError = True
+                    wpilib.reportError("Retrieval of vision info failed in periodic", printTrace=True)
 
     def disabledInit(self):
         self.drivetrain.set_motor_stop_modes(to_drive=True, to_break=True, all_motor_override=True, burn_flash=False)
