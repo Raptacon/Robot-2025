@@ -149,7 +149,8 @@ class SwerveDrivetrain(Subsystem):
         velocity_vector_y: float,
         angular_velocity: float,
         field_relative: bool = True,
-        turbo_mode: bool = False
+        turbo_mode: bool = False,
+        slow_mode: bool = False
     ) -> None:
         """
         Operate the swerve drive according to three given component velocities. These velocities
@@ -169,11 +170,19 @@ class SwerveDrivetrain(Subsystem):
         """
         # Turn down speed for better driver usage
         dampener_use = OperatorRobotConfig.swerve_velocity_dampener
+        dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (
+            dampener_use, dampener_use, dampener_use
+        )
         if turbo_mode:
-            dampener_use = 1.0
-        dampened_angular_velocity = dampener_use * angular_velocity
-        dampened_velocity_vector_x = dampener_use * velocity_vector_x
-        dampened_velocity_vector_y = dampener_use * velocity_vector_y
+            dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (1.0, 1.0, 1.0)
+        if slow_mode:
+            dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (
+                dampener_use, dampener_use, 0.55
+            )
+
+        dampened_velocity_vector_x = dampener_use_velocity_x * velocity_vector_x
+        dampened_velocity_vector_y = dampener_use_velocity_y * velocity_vector_y
+        dampened_angular_velocity = dampener_use_angular * angular_velocity
 
         if field_relative:
             field_invert = 1
