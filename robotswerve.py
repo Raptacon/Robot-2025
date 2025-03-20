@@ -6,15 +6,15 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
+from constants import PoseOptions, MechConsts
 from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
 import commands.operate_intake as IntakeCommands
-from commands.operate_elevator import ElevateManually, ElevateToGoal
+from commands.operate_elevator import ElevateManually
 from lookups.utils import getCurrentReefZone
-from lookups.reef_positions import reef_position_lookup, reef_height_lookup
+from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.captainIntake import CaptainIntake
 

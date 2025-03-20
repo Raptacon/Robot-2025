@@ -1,13 +1,13 @@
 import wpilib
 import rev
 import commands2
-from typing import Callable
 
 from constants import CaptainPlanetConsts as intakeConsts, DiverCarlChuteConsts as chuteConsts
 
 
 class CaptainIntake(commands2.Subsystem):
-
+    """
+    """
     def __init__(self) -> None:
         super().__init__()
         self.intakeMotor = rev.SparkFlex(
@@ -59,7 +59,9 @@ class CaptainIntake(commands2.Subsystem):
             motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters, rev.SparkBase.PersistMode.kPersistParameters
         )
 
-    def setMotor(self, speed: float, reverse: bool = False, manualControl: bool = False):
+    def setMotor(self, speed: float, reverse: bool = False, manualControl: bool = False) -> None:
+        """
+        """
         speedUse = speed
         if reverse:
             speedUse = -1 * speed
@@ -68,9 +70,13 @@ class CaptainIntake(commands2.Subsystem):
         self.intakeMotor.set(speedUse)
         self.chuteMotor.set(speedUse)
 
-    def updateSensorRecordings(self):
+    def updateSensorRecordings(self) -> None:
+        """
+        """
         self.frontBeamBroken = not self.frontBreakbeam.get()
         self.backBeamBroken = not self.frontBreakbeam.get()
 
     def periodic(self) -> None:
+        """
+        """
         self.updateSensorRecordings()

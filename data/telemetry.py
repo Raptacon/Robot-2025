@@ -6,8 +6,6 @@ from subsystem.diverCarlChistera import DiverCarlChistera
 from subsystem.captainIntake import CaptainIntake
 from vision import Vision
 
-from constants import CaptainPlanetConsts as intakeConstants
-
 # Third-party imports
 import wpilib
 from ntcore import NetworkTableInstance
