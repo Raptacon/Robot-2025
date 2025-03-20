@@ -8,7 +8,7 @@ from typing import Callable
 from data.telemetry import Telemetry
 from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
 from vision import Vision
-from commands.auto.pathplan_to_pose import pathplanToPose
+from commands.auto.pathplan_to_path import pathplanToPath
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
 from commands.operate_elevator import ElevateManually, ElevateToGoal
@@ -220,10 +220,14 @@ class RobotSwerve:
                         )
                     ),
                     commands2.DeferredCommand(
-                        lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
-                            {}
-                        ).get("pose", None)
+                        lambda: pathplanToPath(
+                            lambda: self.teleop_stem_paths.get(
+                                reef_position_lookup.get(
+                                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                                    {}
+                                ).get("pose", None),
+                                None
+                            )
                         )
                     )
                 ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
@@ -240,10 +244,17 @@ class RobotSwerve:
                             .get("tag", None)
                         )
                     ),
-                    commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                        {}
-                    ).get("pose", None)))
+                    commands2.DeferredCommand(
+                        lambda: pathplanToPath(
+                            lambda: self.teleop_stem_paths.get(
+                                reef_position_lookup.get(
+                                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                                    {}
+                                ).get("pose", None),
+                                None
+                            )
+                        )
+                    )
                 ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
              ),
         }

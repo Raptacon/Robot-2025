@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 5.3048863636363635,
-        "y": 5.4958096590909085
+        "x": 5.43314999822386,
+        "y": 5.70738761389263
       },
       "prevControl": null,
       "nextControl": {
-        "x": 5.1798863636363635,
-        "y": 5.279303308144798
+        "x": 5.30814999822386,
+        "y": 5.49088126294652
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.09141415297311,
-        "y": 5.14347961784057
+        "x": 5.091,
+        "y": 5.143
       },
       "prevControl": {
-        "x": 5.283002761943407,
-        "y": 5.47532082272857
+        "x": 5.282588608970297,
+        "y": 5.4748412048879995
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "reef_stem_paths",
   "idealStartingState": {
-    "velocity": 1.0,
+    "velocity": 2.5,
     "rotation": -119.99999999999999
   },
   "useDefaultConstraints": false
