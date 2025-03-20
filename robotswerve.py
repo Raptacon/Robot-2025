@@ -225,7 +225,7 @@ class RobotSwerve:
                                 reef_position_lookup.get(
                                     (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
                                     {}
-                                ).get("pose", None),
+                                ).get("path", None),
                                 None
                             )
                         )
@@ -250,7 +250,7 @@ class RobotSwerve:
                                 reef_position_lookup.get(
                                     (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
                                     {}
-                                ).get("pose", None),
+                                ).get("path", None),
                                 None
                             )
                         )
