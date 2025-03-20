@@ -1,6 +1,7 @@
 import wpilib
-import wpilib.interfaces
-from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine
+import wpimath
+from subsystem.captainIntake import CaptainIntake
+import commands.operate_intake as IntakeCommands
 import commands2
 
 class MyRobot(wpilib.TimedRobot):
@@ -11,18 +12,31 @@ class MyRobot(wpilib.TimedRobot):
     def robotInit(self):
         """Robot initialization function"""
         self.intake = CaptainIntake()
-        self.state_machine = CaptainIntakeStateMachine(self.intake)
-        self.command_scheduler = commands2.CommandScheduler.getInstance()
 
         self.driver_controller = wpilib.XboxController(0)
+        self.mech_controller = wpilib.XboxController(1)
 
     def disabledInit(self):
-        # commands2.CommandScheduler.getInstance().cancelAll()
-        self.command_scheduler.cancelAll()
+        commands2.CommandScheduler.getInstance().cancelAll()
 
     def testInit(self):
-        self.state_machine.schedule()
+        commands2.CommandScheduler.getInstance().cancelAll()
+        commands2.cmd.sequence(
+            IntakeCommands.IntakeToFront(self.intake, holdDurationSeconds=0.1, reverse=False),
+            commands2.cmd.waitSeconds(1),
+            IntakeCommands.IntakeToBack(self.intake, holdDurationSeconds=0.1, reverse=True),
+            commands2.cmd.waitSeconds(1),
+            IntakeCommands.IntakeToFrontOnly(self.intake),
+            commands2.cmd.waitSeconds(0.5),
+            IntakeCommands.generateIntakeMaintainHold(self.intake),
+            commands2.cmd.waitSeconds(1),
+            IntakeCommands.generateIntakeFrontForwardHold(self.intake),
+            commands2.cmd.waitSeconds(1)
+        ).schedule()
+        self.intake.setDefaultCommand(IntakeCommands.IntakeManually(
+            lambda: wpimath.applyDeadband(self.mech_controller.getRightTriggerAxis(), 0.1),
+            self.intake
+        ))
 
     def testPeriodic(self):
-        wpilib.SmartDashboard.putBoolean("A Button Pressed", self.driver_controller.getAButton())
-        self.command_scheduler.run()
+        pass
