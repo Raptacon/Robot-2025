@@ -42,6 +42,8 @@ class RobotSwerve:
         # networktables setup
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.table = self.inst.getTable("Stream_Deck")
+        self.field = wpilib.Field2d()
+        wpilib.SmartDashboard.putData("Field", self.field)
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
@@ -123,6 +125,8 @@ class RobotSwerve:
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDefaultDataCollections()
 
+        self.field.setRobotPose(self.drivetrain.current_pose())
+
         if self.vision is not None:
             try:
                 self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
@@ -185,7 +189,8 @@ class RobotSwerve:
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: self.driver_controller.getLeftBumperButton()
+                lambda: self.driver_controller.getLeftBumperButton(),
+                lambda: self.driver_controller.getRightTriggerAxis() > 0.5
             )
         )
 
