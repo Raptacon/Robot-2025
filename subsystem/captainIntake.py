@@ -74,7 +74,7 @@ class CaptainIntake(commands2.Subsystem):
         """
         """
         self.frontBeamBroken = not self.frontBreakbeam.get()
-        self.backBeamBroken = not self.frontBreakbeam.get()
+        self.backBeamBroken = not self.backBreakbeam.get()
 
     def periodic(self) -> None:
         """
