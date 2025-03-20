@@ -32,7 +32,7 @@ class OperatorRobotConfig:
     robot_Cam_Rotation_Degress_Right: Tuple[float] = (0.0, 0.0, 0.0)
 
     vision_default_std_dev: float = 3.0 # pose estimator sigma to use if no distance is available
-    vision_distance_threshold_m: float = 1.5 # meters; how far away a tag can be before its data is discarded
+    vision_distance_threshold_m: float = 1.0 # meters; how far away a tag can be before its data is discarded
     vision_ambiguity_threshold: float = 0.1 # the max ambiguity score a tag estimate can have before its data is discarded
     vision_std_dev_basis: float = 1.1
     vision_std_dev_scale_factor: float = 1
