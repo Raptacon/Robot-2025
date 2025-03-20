@@ -93,7 +93,7 @@ intakeEntries = [
     ["intakeBackBreakBeam", BooleanLogEntry, "/breakbeams"],
     ["intakeMotorCurrent", FloatLogEntry, "/output"],
     ["intakeMotorOutput", FloatLogEntry, "/output"],
-    ["intakeMotorVelocity", FloatLogEntry, "/output"],
+    ["intakeMotorTemperature", FloatLogEntry, "/output"],
 ]
 
 visionEntries = [
@@ -357,17 +357,16 @@ class Telemetry:
     def getIntakeInputs(self):
         if self.intake is not None:
             self.intakeFrontBreakBeam.append(
-                self.intake.getBreakBeam(intakeConstants.BreakBeam.FRONT)
+                self.intake.frontBeamBroken
             )
             self.intakeBackBreakBeam.append(
-                self.intake.getBreakBeam(intakeConstants.BreakBeam.BACK)
+                self.intake.backBeamBroken
             )
             self.intakeMotorTemperature.append(
                 self.intake.intakeMotor.getMotorTemperature()
             )
             self.intakeMotorCurrent.append(self.intake.intakeMotor.getOutputCurrent())
             self.intakeMotorOutput.append(self.intake.intakeMotor.getAppliedOutput())
-            self.intakeMotorVelocity.append(self.intake.intakeMotor.getVelocity())
 
     def getVisionInputs(self):
         if self.vision is not None:

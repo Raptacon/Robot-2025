@@ -170,7 +170,7 @@ class DiverCarlElevatorConsts:
     kChuteHeightCm = 10.16
 
 
-class DiverCarlChute:
+class DiverCarlChuteConsts:
     kMotorCanId = 14
     kMotorInverted = False
     kCurrentLimitAmps = 20
@@ -180,12 +180,15 @@ class DiverCarlChute:
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 1
-    kBackBreakBeam = 0
-    kDefaultSpeed = 0.15
-    class BreakBeam(Enum):
-        FRONT = 1  # Closest to large green wheels
-        BACK = 2
+    kCurrentLimitAmps = 20
+    kFrontBreakBeam = 0
+    kBackBreakBeam = 1
+    kDefaultSpeed = 0.2
+    kOperatorDampener = 0.25
+    class BreakBeamActionOptions(Enum):
+        DONOTHING = 1
+        TOFRONT = 2
+        TOBACK = 3
 
 
 class MechConsts:
