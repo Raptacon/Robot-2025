@@ -24,6 +24,8 @@ class MyRobot(wpilib.TimedRobot):
         commands2.cmd.sequence(
             IntakeCommands.IntakeToFront(self.intake, holdDurationSeconds=0.1, reverse=False),
             commands2.cmd.waitSeconds(1),
+            IntakeCommands.IntakeToFrontOnly(self.intake),
+            commands2.cmd.waitSeconds(0.5),
             IntakeCommands.IntakeToBack(self.intake, holdDurationSeconds=0.1, reverse=True),
             commands2.cmd.waitSeconds(1),
             IntakeCommands.IntakeToFrontOnly(self.intake),
