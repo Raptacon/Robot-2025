@@ -128,7 +128,7 @@ class IntakeReleasePiece(commands2.Command):
     def execute(self) -> None:
         """
         """
-        self.intake.setMotor(intakeConsts.kDefaultSpeed, manualControl=False)
+        self.intake.setMotor(intakeConsts.kDefaultSpeed, reverse=False, manualControl=False)
         if (not self.intake.frontBeamBroken) and (not self.beamOpenedInExecution):
             self.beamOpenedInExecution = True
             self.timer.restart()
