@@ -255,6 +255,9 @@ class RobotSwerve:
                 wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
             )
         ))
+        self.intake_subsystem.setDefaultCommand(
+            SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: -0.25 * self.mech_controller.getRightTriggerAxis())
+        )
 
         wpilib.SmartDashboard.putNumber("key_press", -1)
 
