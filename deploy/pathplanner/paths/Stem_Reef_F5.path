@@ -47,7 +47,7 @@
   "reversed": false,
   "folder": "reef_stem_paths",
   "idealStartingState": {
-    "velocity": 1.0,
+    "velocity": 2.5,
     "rotation": 119.99999999999999
   },
   "useDefaultConstraints": false
