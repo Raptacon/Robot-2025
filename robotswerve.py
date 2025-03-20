@@ -41,6 +41,8 @@ class RobotSwerve:
         # networktables setup
         self.inst = ntcore.NetworkTableInstance.getDefault()
         self.table = self.inst.getTable("Stream_Deck")
+        self.field = wpilib.Field2d()
+        wpilib.SmartDashboard.putData("Field", self.field)
 
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
@@ -126,6 +128,8 @@ class RobotSwerve:
     def robotPeriodic(self):
         if self.enableTelemetry and self.telemetry:
             self.telemetry.runDefaultDataCollections()
+
+        self.field.setRobotPose(self.drivetrain.current_pose())
 
         self.intake_command_scheduler.run()
 
