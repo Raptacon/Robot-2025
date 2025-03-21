@@ -11,33 +11,72 @@
           }
         },
         {
+          "type": "sequential",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise_Place"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score_Piece"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Lower_Elevator"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "6r_2f"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "Raise_Place"
+            "name": "Chute_to_Intake"
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "6r_2f"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise_Place"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "2f_8r"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral_Intake"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2f_8r"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Raise_Place"
+            "name": "Score_Piece"
           }
         }
       ]

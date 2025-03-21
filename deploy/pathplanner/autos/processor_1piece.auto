@@ -7,13 +7,37 @@
         {
           "type": "path",
           "data": {
-            "pathName": "rs_6r"
+            "pathName": "rs_processor_stem"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Raise_Place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "processor_stem"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score_Piece"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "processor_backup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower_Elevator"
           }
         }
       ]

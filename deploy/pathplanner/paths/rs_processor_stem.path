@@ -4,28 +4,28 @@
     {
       "anchor": {
         "x": 7.15,
-        "y": 7.575
+        "y": 0.485
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.821911088265632,
-        "y": 6.691124550227224
+        "x": 6.235388513513514,
+        "y": 1.0703547297297291
       },
       "isLocked": false,
-      "linkedName": "Blue_Start"
+      "linkedName": "rs"
     },
     {
       "anchor": {
-        "x": 5.75905664211329,
-        "y": 4.0632460518161
+        "x": 4.946641791044776,
+        "y": 2.629664179104477
       },
       "prevControl": {
-        "x": 5.940182517758998,
-        "y": 4.477417562072278
+        "x": 5.520046063605879,
+        "y": 1.788277017637151
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "3r"
+      "linkedName": "processor_stem"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 119.99999999999999
   },
   "reversed": false,
   "folder": "Paths2025_Blue",

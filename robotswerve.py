@@ -6,16 +6,17 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from constants import DiverCarlElevatorConsts, PoseOptions, MechConsts
+from constants import PoseOptions, MechConsts
 from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
 import commands.operate_elevator as elevCommands
-from commands.operate_elevator import ElevateManually, ElevateToGoal
+import commands.operate_intake as IntakeCommands
+from commands.operate_elevator import ElevateManually
 from lookups.utils import getCurrentReefZone
-from lookups.reef_positions import reef_position_lookup, reef_height_lookup
+from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
-from subsystem.captainIntake import CaptainIntake, CaptainIntakeStateMachine, SetCaptainIntakeIdleSpeed
+from subsystem.captainIntake import CaptainIntake
 
 # Third-party imports
 import commands2
@@ -54,8 +55,6 @@ class RobotSwerve:
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
 
         self.intake_subsystem = CaptainIntake()
-        self.intake_state_machine = CaptainIntakeStateMachine(self.intake_subsystem)
-        self.intake_command_scheduler = commands2.CommandScheduler.getInstance()
 
         # Vision setup
         try:
@@ -76,17 +75,19 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
+        NamedCommands.registerCommand("Chute_to_Intake", IntakeCommands.IntakeToFront(self.intake_subsystem, 0.0, reverse=False))
         NamedCommands.registerCommand(
-            'Raise_Place',
-                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3.5),
+            'Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3),
         )
-        NamedCommands.registerCommand("Run_Intake", SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: 0.15).withTimeout(2))
-        NamedCommands.registerCommand("Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH).withTimeout(3.5))
-        NamedCommands.registerCommand('Raise_Place_L1', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH))
-        NamedCommands.registerCommand('Raise_Place_L2', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2))
-        NamedCommands.registerCommand('Raise_Place_L3', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3))
-        NamedCommands.registerCommand('Raise_Place_L4', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4))
-        NamedCommands.registerCommand('Coral_Intake', ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm))
+        NamedCommands.registerCommand(
+            "Score_Piece", commands2.DeferredCommand(
+                lambda: IntakeCommands.IntakeReleasePiece(self.intake_subsystem, 0.1).withTimeout(1.5),
+                self.intake_subsystem
+            )
+        )
+        NamedCommands.registerCommand(
+            "Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST).withTimeout(5)
+        )
 
         # Autonomous setup
         self.auto_command = None
@@ -102,7 +103,7 @@ class RobotSwerve:
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
         if self.enableTelemetry:
             self.telemetry = Telemetry(
-                driveTrain=self.drivetrain, elevator=self.elevator, vision=self.vision
+                driveTrain=self.drivetrain, elevator=self.elevator, vision=self.vision, intake=self.intake_subsystem
             )
 
         wpilib.SmartDashboard.putString("Robot Version", self.getDeployInfo("git-hash"))
@@ -131,8 +132,6 @@ class RobotSwerve:
 
         self.field.setRobotPose(self.drivetrain.current_pose())
 
-        self.intake_command_scheduler.run()
-
         if self.vision is not None:
             try:
                 self.vision.getCamEstimates(specificTagId=lambda: self.alignmentTagId)
@@ -148,14 +147,10 @@ class RobotSwerve:
 
         self.elevator.motor.set(0)
 
-        self.intake_command_scheduler.cancelAll()
-
     def disabledPeriodic(self):
         pass
 
     def autonomousInit(self):
-        self.intake_state_machine.schedule()
-
         self.auto_command = self.auto_chooser.getSelected()
         if self.auto_command:
             self.auto_command.schedule()
@@ -166,8 +161,6 @@ class RobotSwerve:
         pass
 
     def teleopInit(self):
-        self.intake_state_machine.schedule()
-
         self.table.putNumber("pressedKey", -1)
         self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
                      1: commands2.cmd.print_("Key 1 pressed"),
@@ -255,24 +248,32 @@ class RobotSwerve:
                 wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
             )
         ))
+        # Allow manual override of elevator movement by operator, even if a setpoint command is active
+        Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
+            ElevateManually(
+                self.elevator,
+                self.arm,
+                lambda: (
+                    wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+                )
+            )
+        )
 
-        wpilib.SmartDashboard.putNumber("key_press", -1)
+        self.intake_subsystem.setDefaultCommand(IntakeCommands.IntakeManually(
+            lambda: int(self.mech_controller.getRightBumperButton()),
+            self.intake_subsystem
+        ))
+        # Allow manual override of intake movement by operator, even if moving based on breakbeams
+        Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
+            IntakeCommands.IntakeManually(
+                lambda: wpimath.applyDeadband(-1 * self.mech_controller.getRightTriggerAxis(), 0.1),
+                self.intake_subsystem
+            )
+        )
+        Trigger(lambda: self.mech_controller.getRightBumperButton()).whileTrue(
+            IntakeCommands.IntakeManually(lambda: 1, self.intake_subsystem)
+        )
 
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 1).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L1"] + DiverCarlElevatorConsts.kL1OffsetCm)
-        )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 2).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L2"] + DiverCarlElevatorConsts.kL2OffsetCm)
-        )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 3).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L3"] + DiverCarlElevatorConsts.kL3OffsetCm)
-        )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 4).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, reef_height_lookup["L4"] + DiverCarlElevatorConsts.kL4OffsetCm)
-        )
-        Trigger(lambda: wpilib.SmartDashboard.getNumber("key_press", -1) == 5).and_(self.isArmSafe).onTrue(
-            ElevateToGoal(self.elevator, DiverCarlElevatorConsts.kChuteHeightCm)
-        )
 
         Trigger(self.mech_controller.getYButtonPressed).onTrue(
             elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4)
@@ -289,22 +290,10 @@ class RobotSwerve:
         Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
             elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
         )
-        Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
-            ElevateManually(
-                self.elevator,
-                self.arm,
-                lambda: (
-                    wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
-                )
-            )
-        )
-        Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
-            SetCaptainIntakeIdleSpeed(self.intake_subsystem, lambda: -0.25 * self.mech_controller.getRightTriggerAxis())
-        )
+
         Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
             elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
         )
-
 
     def teleopPeriodic(self):
         if self.driver_controller.getLeftTriggerAxis() > 0.5:
@@ -314,7 +303,6 @@ class RobotSwerve:
         wpilib.SmartDashboard.putNumber("Stream Deck Life", self.heartbeat)
 
         wpilib.SmartDashboard.putBoolean("A Button Pressed", self.mech_controller.getRightBumperButton())
-        self.intake_command_scheduler.run()
 
     def testInit(self):
         commands2.CommandScheduler.getInstance().cancelAll()

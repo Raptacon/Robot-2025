@@ -144,8 +144,8 @@ class DiverCarlElevatorConsts:
     kRotationsToMaxHeight = 101
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
-    kTrapezoidProfileUp = (135 * 1.2, 150 * 1.2)  # Max Vel (cm/s) Max Accel (cm/s^2)
-    kTrapezoidProfileDown = (40, 37.5/2.5)
+    kTrapezoidProfileUp = (135 * 1.25, 150 * 1.25)  # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (75, 37.5)
     kFeedforward = (0, 0.28, 0.1, 0)  # kS kG kV kA
     kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0)  # P I D Slot
     kMaxOutRange0 = (-0.35, 1.0, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
@@ -170,22 +170,26 @@ class DiverCarlElevatorConsts:
     kChuteHeightCm = 10.16
 
 
-class DiverCarlChute:
+class DiverCarlChuteConsts:
     kMotorCanId = 14
-    kMotorInverted = False
-    kCurrentLimitAmps = 20
-    kDefaultSpeed = 0.3
+    kMotorInverted = True
+    kCurrentLimitAmps = 50
+    kDefaultSpeed = 0.5
+    kOperatorDampener = 0.15
 
 
 class CaptainPlanetConsts:
     kMotorCanId = 13
     kMotorInverted = False
-    kFrontBreakBeam = 1
-    kBackBreakBeam = 0
+    kCurrentLimitAmps = 30
+    kFrontBreakBeam = 0
+    kBackBreakBeam = 1
     kDefaultSpeed = 0.15
-    class BreakBeam(Enum):
-        FRONT = 1  # Closest to large green wheels
-        BACK = 2
+    kOperatorDampener = 0.15
+    class BreakBeamActionOptions(Enum):
+        DONOTHING = 1
+        TOFRONT = 2
+        TOBACK = 3
 
 
 class MechConsts:

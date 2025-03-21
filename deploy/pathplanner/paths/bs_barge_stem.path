@@ -8,24 +8,24 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.821911088265632,
-        "y": 6.691124550227224
+        "x": 6.255152027027027,
+        "y": 7.108108108108107
       },
       "isLocked": false,
       "linkedName": "Blue_Start"
     },
     {
       "anchor": {
-        "x": 5.75905664211329,
-        "y": 4.0632460518161
+        "x": 5.16528409090909,
+        "y": 5.27643465909091
       },
       "prevControl": {
-        "x": 5.940182517758998,
-        "y": 4.477417562072278
+        "x": 5.64718074874679,
+        "y": 6.302296257466556
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "3r"
+      "linkedName": "barge_stem"
     }
   ],
   "rotationTargets": [],
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -119.99999999999999
   },
   "reversed": false,
   "folder": "Paths2025_Blue",
