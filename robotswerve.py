@@ -271,10 +271,7 @@ class RobotSwerve:
             )
         )
         Trigger(lambda: self.mech_controller.getRightBumperButton()).whileTrue(
-            IntakeCommands.IntakeManually(
-                lambda: 1,
-                self.intake_subsystem
-            )
+            IntakeCommands.IntakeManually(lambda: 1, self.intake_subsystem)
         )
         # Run automatic coral holding when driver is not requesting piece movement
         (

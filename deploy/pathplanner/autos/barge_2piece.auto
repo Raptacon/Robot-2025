@@ -11,15 +11,41 @@
           }
         },
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "Raise_Place"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise_Place"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score_Piece"
+                }
+              }
+            ]
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "1r_1f"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Lower_Elevator"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "1r_1f"
+                }
+              }
+            ]
           }
         },
         {
@@ -29,15 +55,28 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "1f_11r"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise_Place"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "1f_11r"
+                }
+              }
+            ]
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Raise_Place"
+            "name": "Score_Piece"
           }
         }
       ]

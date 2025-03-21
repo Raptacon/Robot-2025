@@ -11,9 +11,22 @@
           }
         },
         {
-          "type": "named",
+          "type": "sequential",
           "data": {
-            "name": "Raise_Place"
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Raise_Place"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Score_Piece"
+                }
+              }
+            ]
           }
         }
       ]
