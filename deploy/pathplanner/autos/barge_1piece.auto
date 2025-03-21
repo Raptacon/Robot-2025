@@ -5,28 +5,39 @@
     "data": {
       "commands": [
         {
-          "type": "parallel",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "bs_1r"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Raise_Place"
-                }
-              }
-            ]
+            "pathName": "bs_barge_stem"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise_Place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "barge_stem"
           }
         },
         {
           "type": "named",
           "data": {
             "name": "Score_Piece"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "barge_backup"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower_Elevator"
           }
         }
       ]
