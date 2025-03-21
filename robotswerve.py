@@ -75,13 +75,18 @@ class RobotSwerve:
         self.mech_controller = wpilib.XboxController(1)
 
         # Register Named Commands
-        NamedCommands.registerCommand("Chute_to_Intake", IntakeCommands.IntakeToFront(self.intake_subsystem, 0.15, reverse=False))
+        NamedCommands.registerCommand("Chute_to_Intake", IntakeCommands.IntakeToFront(self.intake_subsystem, 0.0, reverse=False))
         NamedCommands.registerCommand(
-            'Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3.5),
+            'Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3),
         )
-        NamedCommands.registerCommand("Score_Piece", IntakeCommands.IntakeReleasePiece(self.intake_subsystem, 0.1).withTimeout(1))
         NamedCommands.registerCommand(
-            "Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST).withTimeout(3.5)
+            "Score_Piece", commands2.DeferredCommand(
+                lambda: IntakeCommands.IntakeReleasePiece(self.intake_subsystem, 0.1).withTimeout(1.5),
+                self.intake_subsystem
+            )
+        )
+        NamedCommands.registerCommand(
+            "Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST).withTimeout(5)
         )
 
         # Autonomous setup
@@ -255,13 +260,19 @@ class RobotSwerve:
         )
 
         self.intake_subsystem.setDefaultCommand(IntakeCommands.IntakeManually(
-            lambda: wpimath.applyDeadband(self.mech_controller.getRightTriggerAxis(), 0.1),
+            lambda: int(self.mech_controller.getRightBumperButton()),
             self.intake_subsystem
         ))
         # Allow manual override of intake movement by operator, even if moving based on breakbeams
         Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
             IntakeCommands.IntakeManually(
-                lambda: wpimath.applyDeadband(self.mech_controller.getRightTriggerAxis(), 0.1),
+                lambda: wpimath.applyDeadband(-1 * self.mech_controller.getRightTriggerAxis(), 0.1),
+                self.intake_subsystem
+            )
+        )
+        Trigger(lambda: self.mech_controller.getRightBumperButton()).whileTrue(
+            IntakeCommands.IntakeManually(
+                lambda: 1,
                 self.intake_subsystem
             )
         )
@@ -269,8 +280,12 @@ class RobotSwerve:
         (
             Trigger(lambda: self.mech_controller.getRightTriggerAxis() <= 0.1)
             .and_(lambda: self.intake_subsystem.backBeamBroken or self.intake_subsystem.frontBeamBroken)
-            .whileTrue(
-                IntakeCommands.generateIntakeMaintainHold(self.intake_subsystem)
+            .and_(lambda: not self.mech_controller.getRightBumperButton())
+            .onTrue(
+                commands2.DeferredCommand(
+                    lambda: IntakeCommands.generateIntakeMaintainHold(self.intake_subsystem),
+                    self.intake_subsystem
+                )
             )
         )
 
