@@ -5,28 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "bs_1r"
-          }
-        },
-        {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "Raise_Place"
+                  "pathName": "bs_1r"
                 }
               },
               {
                 "type": "named",
                 "data": {
-                  "name": "Score_Piece"
+                  "name": "Raise_Place"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score_Piece"
           }
         }
       ]
