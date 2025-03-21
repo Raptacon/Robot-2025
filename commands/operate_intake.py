@@ -34,9 +34,11 @@ class IntakeToFront(commands2.Command):
         self.intake = intake
         self.holdDurationSeconds = holdDurationSeconds
         self.reverse = reverse
+        self.addRequirements(self.intake)
+
+    def initialize(self):
         self.beamBrokenInExecution = False
         self.timer = Timer()
-        self.addRequirements(self.intake)
 
     def execute(self) -> None:
         """
@@ -67,9 +69,11 @@ class IntakeToBack(commands2.Command):
         self.intake = intake
         self.holdDurationSeconds = holdDurationSeconds
         self.reverse = reverse
+        self.addRequirements(self.intake)
+
+    def initialize(self):
         self.beamBrokenInExecution = False
         self.timer = Timer()
-        self.addRequirements(self.intake)
 
     def execute(self) -> None:
         """
@@ -121,9 +125,11 @@ class IntakeReleasePiece(commands2.Command):
         super().__init__()
         self.intake = intake
         self.postBeamDuration = postBeamDuration
+        self.addRequirements(self.intake)
+
+    def initialize(self):
         self.beamOpenedInExecution = False
         self.timer = Timer()
-        self.addRequirements(self.intake)
 
     def execute(self) -> None:
         """
@@ -161,7 +167,7 @@ def generateIntakeMaintainHold(intake: CaptainIntake) -> commands2.Command:
             intakeConsts.BreakBeamActionOptions.TOBACK: IntakeToBack(intake, holdDurationSeconds=0.0, reverse=True),
             intakeConsts.BreakBeamActionOptions.TOFRONT: IntakeToFront(intake, holdDurationSeconds=0.0, reverse=False)
         },
-        determineHoldAction
+        lambda: determineHoldAction(intake)
     )
 
 
