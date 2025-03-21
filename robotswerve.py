@@ -273,18 +273,7 @@ class RobotSwerve:
         Trigger(lambda: self.mech_controller.getRightBumperButton()).whileTrue(
             IntakeCommands.IntakeManually(lambda: 1, self.intake_subsystem)
         )
-        # Run automatic coral holding when driver is not requesting piece movement
-        (
-            Trigger(lambda: self.mech_controller.getRightTriggerAxis() <= 0.1)
-            .and_(lambda: self.intake_subsystem.backBeamBroken or self.intake_subsystem.frontBeamBroken)
-            .and_(lambda: not self.mech_controller.getRightBumperButton())
-            .onTrue(
-                commands2.DeferredCommand(
-                    lambda: IntakeCommands.generateIntakeMaintainHold(self.intake_subsystem),
-                    self.intake_subsystem
-                )
-            )
-        )
+
 
         Trigger(self.mech_controller.getYButtonPressed).onTrue(
             elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4)
