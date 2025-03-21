@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 7.15,
-        "y": 7.575
+        "x": 7.269289772727273,
+        "y": 6.203792613636363
       },
       "prevControl": null,
       "nextControl": {
-        "x": 6.2778590425531915,
-        "y": 7.145578457446808
+        "x": 6.397148815280464,
+        "y": 5.774371071083171
       },
       "isLocked": false,
       "linkedName": "Blue_Start"
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.5,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 1.5,
+    "maxAcceleration": 1.25,
     "maxAngularVelocity": 360.0,
     "maxAngularAcceleration": 360.0,
     "nominalVoltage": 12.0,

@@ -5,13 +5,7 @@
     "data": {
       "commands": [
         {
-          "type": "path",
-          "data": {
-            "pathName": "bs_1r"
-          }
-        },
-        {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
               {
@@ -21,12 +15,18 @@
                 }
               },
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "Score_Piece"
+                  "pathName": "bs_1r"
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score_Piece"
           }
         },
         {
@@ -77,6 +77,12 @@
           "type": "named",
           "data": {
             "name": "Score_Piece"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "11r_backup"
           }
         }
       ]

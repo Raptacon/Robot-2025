@@ -10,8 +10,8 @@
   "autoFolders": [
     "Autos2025_Blue"
   ],
-  "defaultMaxVel": 2.5,
-  "defaultMaxAccel": 2.0,
+  "defaultMaxVel": 1.5,
+  "defaultMaxAccel": 1.25,
   "defaultMaxAngVel": 360.0,
   "defaultMaxAngAccel": 360.0,
   "defaultNominalVoltage": 12.0,
