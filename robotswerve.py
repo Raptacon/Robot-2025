@@ -86,7 +86,7 @@ class RobotSwerve:
             )
         )
         NamedCommands.registerCommand(
-            "Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST).withTimeout(5)
+            "Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST).withTimeout(15)
         )
 
         # Autonomous setup
