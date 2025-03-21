@@ -55,26 +55,31 @@ class CaptainIntake(commands2.Subsystem):
         )
 
         # Apply the configuration and burn to the SparkFlex's flash memory
-        self.intakeMotor.configure(
+        self.chuteMotor.configure(
             motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters, rev.SparkBase.PersistMode.kPersistParameters
         )
 
     def setMotor(self, speed: float, reverse: bool = False, manualControl: bool = False) -> None:
         """
         """
-        speedUse = speed
+        speedUseIntake = speed
+        speedUseChute = speed
         if reverse:
-            speedUse = -1 * speed
+            speedUseIntake = -1 * speedUseIntake
+            speedUseChute = -1 * speedUseChute
         if manualControl:
-            speedUse = speedUse * intakeConsts.kOperatorDampener
-        self.intakeMotor.set(speedUse)
-        self.chuteMotor.set(speedUse)
+            speedUseIntake = speedUseIntake * intakeConsts.kOperatorDampener
+            speedUseChute = speedUseChute * chuteConsts.kOperatorDampener
+        self.intakeMotor.set(speedUseIntake)
+        self.chuteMotor.set(speedUseChute)
 
     def updateSensorRecordings(self) -> None:
         """
         """
         self.frontBeamBroken = not self.frontBreakbeam.get()
         self.backBeamBroken = not self.backBreakbeam.get()
+        wpilib.SmartDashboard.putBoolean("Front broken", self.frontBeamBroken)
+        wpilib.SmartDashboard.putBoolean("Back broken", self.backBeamBroken)
 
     def periodic(self) -> None:
         """
