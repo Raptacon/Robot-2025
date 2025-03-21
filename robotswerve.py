@@ -77,7 +77,7 @@ class RobotSwerve:
         # Register Named Commands
         NamedCommands.registerCommand("Chute_to_Intake", IntakeCommands.IntakeToFront(self.intake_subsystem, 0.0, reverse=False))
         NamedCommands.registerCommand(
-            'Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3),
+            'Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4, auto=True).withTimeout(3),
         )
         NamedCommands.registerCommand(
             "Score_Piece", commands2.DeferredCommand(

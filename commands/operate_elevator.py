@@ -17,12 +17,14 @@ class ElevateToGoal(commands2.Command):
         self,
         elevator: DiverCarlElevator,
         goal_height_cm: float,
+        auto: bool = False
     ) -> None:
         """
         """
         super().__init__()
         self.elevator = elevator
         self.goal_height_cm = goal_height_cm
+        self.auto = auto
         self.addRequirements(self.elevator)
 
     def initialize(self):
@@ -34,7 +36,7 @@ class ElevateToGoal(commands2.Command):
     def execute(self):
         """
         """
-        self.elevator.goToGoalHeight()
+        self.elevator.goToGoalHeight(auto=self.auto)
 
     def isFinished(self) -> bool:
         """
@@ -153,7 +155,8 @@ def genPivotElevatorCommand(pivot: DiverCarlChistera,
                             elevator: DiverCarlElevator,
                             reef_opt: p_opt = -1,
                             manual_goal_height_cm = None,
-                            manual_goal_arc = None):
+                            manual_goal_arc = None,
+                            auto: bool = False):
     """
     Takes a pivot, elevator, and reef_opt for a fixed preset.
     If reef_opt is MANUAL (or other unrecognized value),
@@ -174,5 +177,5 @@ def genPivotElevatorCommand(pivot: DiverCarlChistera,
             goal_height_cm, goal_arc = manual_goal_height_cm or 0, manual_goal_arc or 0
     return commands2.ParallelCommandGroup(
         PivotToGoal(pivot, goal_arc),
-        ElevateToGoal(elevator, goal_height_cm)
+        ElevateToGoal(elevator, goal_height_cm, auto=auto)
     )

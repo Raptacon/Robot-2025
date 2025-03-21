@@ -36,6 +36,7 @@ class DiverCarlElevator(commands2.Subsystem):
         self.motor_pid = self.motor.getClosedLoopController()
         self.profilerUp = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileUp))
         self.profilerDown = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileDown))
+        self.profilerUpAuto = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileUpAuto))
         self.feedforward = ElevatorFeedforward(*c.kFeedforward, self.update_period)
 
         # Configure motor
@@ -158,14 +159,16 @@ class DiverCarlElevator(commands2.Subsystem):
         if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
             self.lockMaxHeight(mc.kElevatorSafeHeight)
 
-    def goToGoalHeight(self) -> None:
+    def goToGoalHeight(self, auto: bool = False) -> None:
         """
         Sets the height of the elevator goal in centimeters from the ground.
         """
         profiler_use = self.profilerDown
         if self.current_goal_height_above_zero > self.last_profiler_state.position:
-            profiler_use = self.profilerUp
-
+            if auto:
+                profiler_use = self.profilerUpAuto
+            else:
+                profiler_use = self.profilerUp
 
         self.last_profiler_state = profiler_use.calculate(
             self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
