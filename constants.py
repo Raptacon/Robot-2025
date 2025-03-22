@@ -144,8 +144,8 @@ class DiverCarlElevatorConsts:
     kRotationsToMaxHeight = 101
     kHeightAtZeroCm = 10.16
     kMotorInverted = False
-    kTrapezoidProfileUp = (135 * 1.25, 150 * 1.25)  # Max Vel (cm/s) Max Accel (cm/s^2)
-    kTrapezoidProfileDown = (75, 37.5)
+    kTrapezoidProfileUp = (300, 350)  # Max Vel (cm/s) Max Accel (cm/s^2)
+    kTrapezoidProfileDown = (115, 57)
     kFeedforward = (0, 0.28, 0.1, 0)  # kS kG kV kA
     kPid0 = (0.05, 0, 0, rev.ClosedLoopSlot.kSlot0)  # P I D Slot
     kMaxOutRange0 = (-0.35, 1.0, rev.ClosedLoopSlot.kSlot0)  # Min Max Slot
