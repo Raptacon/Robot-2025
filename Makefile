@@ -35,11 +35,11 @@ lint: ## Runs the linter(s)
 	# --select=E9,F6,F7,F8,F4,W1,W2,W4,W5,W6,E11 --ignore W293
 	${VENVBIN}/flake8 . --count --select=E9,F6,F7,F8,F4,W1,W2,W4,W5,W6,E11 --ignore W293,W503 --show-source --statistics --exclude */tests/pyfrc*,utils/yaml/*,.venv*/,venv*/
 
-test: setup_${VENV} lint  ## Does a lint and then test
+test: setup_${VENV} lint  coverage ## Does a lint and then test
 	${VENVBIN}/${PYTHON} -m robotpy test
 
 coverage: setup_${VENV} test
-	${VENVBIN}/${PYTHON} -m robotpy coverage test
+	${VENVBIN}/${PYTHON} -m robotpy coverage
 
 setup_${VENV}: ${VENV}
 	${VENVBIN}/${PYTHON} -m pip install --upgrade pip setuptools

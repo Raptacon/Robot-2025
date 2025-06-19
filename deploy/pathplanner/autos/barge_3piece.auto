@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "rs_5r"
+            "pathName": "bs_1r"
           }
         },
         {
@@ -19,19 +19,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5r_2f"
+            "pathName": "1r_1f"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral_Intake"
+            "name": "Chute_to_Intake"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "2f_7r"
+            "pathName": "1f_11r"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Raise_Place"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "11r_1f"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Chute_to_Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1f_12r"
           }
         },
         {

@@ -4,24 +4,24 @@
     {
       "anchor": {
         "x": 7.15,
-        "y": 7.5
+        "y": 7.575
       },
       "prevControl": null,
       "nextControl": {
         "x": 6.58125,
-        "y": 7.420326704545454
+        "y": 7.495326704545454
       },
       "isLocked": false,
       "linkedName": "Blue_Start"
     },
     {
       "anchor": {
-        "x": 5.484375,
-        "y": 7.310639204545454
+        "x": 5.7215371621621625,
+        "y": 6.920354729729729
       },
       "prevControl": {
-        "x": 6.282102272727273,
-        "y": 7.470184659090909
+        "x": 6.519264434889435,
+        "y": 7.079900184275184
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,16 +33,16 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 0.65,
-    "maxAcceleration": 3.0,
-    "maxAngularVelocity": 540.0,
-    "maxAngularAcceleration": 720.0,
+    "maxVelocity": 0.75,
+    "maxAcceleration": 1.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 360.0,
     "nominalVoltage": 12.0,
     "unlimited": false
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -115.0
   },
   "reversed": false,
   "folder": "Paths2025_Blue",

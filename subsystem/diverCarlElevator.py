@@ -1,162 +1,250 @@
-import wpilib
-import wpimath
+# Native imports
+import math
+
+# Internal imports
+from constants import DiverCarlElevatorConsts as c
+from constants import MechConsts as mc
+
+# Third-party imports
 import commands2
 import rev
-import wpimath.trajectory
-import wpimath.controller
-import wpimath.units
-from constants import DiverCarlElevatorConsts as c
-# plan to use 25:1 gear ratio
-# drum TBD
-# 2 motors one will run opposite direction
+from wpilib import Timer
+from wpimath.controller import ElevatorFeedforward
+from wpimath.trajectory import TrapezoidProfile
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from subsystem.diverCarlChistera import DiverCarlChistera
 
 
 class DiverCarlElevator(commands2.Subsystem):
+    """
+    """
+    def __init__(self, height_at_zero: float = c.kHeightAtZeroCm, update_period: float = 0.05) -> None:
+        """
+        """
+        super().__init__()
 
-    def __init__(self, elevatorHeightDelta: float = c.kMechDeltaHeightM, dt=0.02) -> None:
-        self._dt = dt
-        self._heightDelta = elevatorHeightDelta
-        self._primaryMotor = rev.SparkMax(c.kMotorPrimaryCanId, rev.SparkLowLevel.MotorType.kBrushless)
-        self._followerMotor = rev.SparkMax(c.kMotorFollowerCanId, rev.SparkLowLevel.MotorType.kBrushless)
-        # setup primary
-        motorConfig = rev.SparkBaseConfig()
-        motorConfig.setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
-        motorConfig.inverted(c.kMotorPrimaryInverted)
-        self._primaryMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
-        # set follower like primary except inverted
-        motorConfig.inverted(not c.kMotorPrimaryInverted)
-        self._followerMotor.configure(motorConfig, rev.SparkBase.ResetMode.kNoResetSafeParameters , rev.SparkBase.PersistMode.kPersistParameters)
+        # Save starting configurations
+        self.height_at_zero = height_at_zero
+        self.update_period = update_period
 
-        self._motors = wpilib.MotorControllerGroup(self._primaryMotor, self._followerMotor)
+        # Set up objects for controlling the motor
+        self.timer = Timer()
+        self.motor = rev.SparkFlex(c.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless)
+        self.encoder = self.motor.getEncoder()
+        self.motor_pid = self.motor.getClosedLoopController()
+        self.profilerUp = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileUp))
+        self.profilerDown = TrapezoidProfile(TrapezoidProfile.Constraints(*c.kTrapezoidProfileDown))
+        self.feedforward = ElevatorFeedforward(*c.kFeedforward, self.update_period)
 
-        self._encoder = wpilib.Encoder(*c.kEncoderPins)
-        # 0.1mm to meters
-        self._encoder.setDistancePerPulse(0.1 / 1000 / 3)
+        # Configure motor
+        self.configureMotor()
+        self.encoder.setPosition(0)
 
-        self._constraints = wpimath.trajectory.TrapezoidProfile.Constraints(c.kMaxVelMPS, c.kMaxAccelMPSS)
-        self._controller = wpimath.controller.ProfiledPIDController(*c.kPid, self._constraints, self._dt)
+        # Instantiate elevator state variables for telemetry
+        self.current_goal_height = self.height_at_zero
+        self.current_goal_height_above_zero = 0
+        self.last_profiler_state = TrapezoidProfile.State(0, 0)
+        self.updateSensorRecordings()
 
-        # TODO adjust tolerance. Currently set to 1cm (0.01 m)
-        self._controller.setTolerance(0.01)
+        self.lockedMaxHeight = None
 
-        self._disabled = False
-        self._curentGoal = 0.0
+    def configureMotor(self) -> None:
+        """
+        """
+        motor_config = rev.SparkBaseConfig()
 
-        # setup telem
-        self._limitAlert = wpilib.Alert("mechanism","Elevator Limit Reached", wpilib.Alert.AlertType.kWarning)
-        self._limitAlert.set(False)
-        self._trackingAlert = wpilib.Alert("mechanism","Elevator moving", wpilib.Alert.AlertType.kInfo)
-        self._trackingAlert.set(False)
+        # Set overall configurations
+        (
+            motor_config
+            .setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
+            .inverted(c.kMotorInverted)
+            .smartCurrentLimit(c.kCurrentLimitAmps)
+        )
+
+        # Configure soft limits (software-enforced elevator range of motion limits)
+        (
+            motor_config.softLimit
+            .forwardSoftLimit(c.kSoftLimits["forwardLimit"])
+            .forwardSoftLimitEnabled(c.kSoftLimits["forward"])
+            .reverseSoftLimit(c.kSoftLimits["reverseLimit"])
+            .reverseSoftLimitEnabled(c.kSoftLimits["reverse"])
+        )
+
+        # Configure hard limits (hardware triggers to stop motor execution)
+        (
+            motor_config.limitSwitch
+            .forwardLimitSwitchEnabled(c.kLimits["forward"])
+            .forwardLimitSwitchType(c.kLimits["forwardType"])
+            .reverseLimitSwitchEnabled(c.kLimits["reverse"])
+            .reverseLimitSwitchType(c.kLimits["reverseType"])
+        )
+
+        # Set conversion factors to turn motor units into centimeters
+        (
+            motor_config.encoder
+            .positionConversionFactor(c.kMaxHeightAboveZeroCm / c.kRotationsToMaxHeight)
+            .velocityConversionFactor((c.kMaxHeightAboveZeroCm / c.kRotationsToMaxHeight) / 60)
+        )
+
+        # Set up the PID controller
+        (
+            motor_config.closedLoop
+            .pid(*c.kPid0)
+            .outputRange(*c.kMaxOutRange0)
+            .setFeedbackSensor(rev.ClosedLoopConfig.FeedbackSensor.kPrimaryEncoder)
+        )
+
+        # Apply the configuration and burn to the SparkFlex's flash memory
+        self.motor.configure(
+            motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters, rev.SparkBase.PersistMode.kPersistParameters
+        )
+
+    def resetProfilerState(self) -> None:
+        """
+        """
+        self.updateSensorRecordings()
+        self.last_profiler_state = TrapezoidProfile.State(self.current_height_above_zero, self.motor_velocity)
+
+    def validateGoalHeight(self) -> None:
+        """
+        """
+        if self.current_goal_height < self.height_at_zero:
+            self.current_goal_height = self.height_at_zero
+        if self.current_goal_height > (c.kMaxHeightAboveZeroCm + self.height_at_zero):
+            self.current_goal_height = c.kMaxHeightAboveZeroCm + self.height_at_zero
+
+        if self.current_goal_height_above_zero < 0:
+            self.current_goal_height_above_zero = 0
+        if self.current_goal_height_above_zero > c.kMaxHeightAboveZeroCm:
+            self.current_goal_height_above_zero = c.kMaxHeightAboveZeroCm
+
+    def setArm(self, arm: "DiverCarlChistera") -> None:
+        """ """
+        self._arm = arm
+
+    def lockMaxHeight(self, maxHeight: float) -> None:
+        self.lockedMaxHeight = maxHeight
+
+
+    def setGoalHeight(self, height_cm: float) -> None:
+        """
+        """
+        self.current_goal_height = height_cm
+        self.current_goal_height_above_zero = self.current_goal_height - self.height_at_zero
+        self.validateGoalHeight()
+        self.resetProfilerState()
+
+        #if arm starts in unsafe postion, protect it until it moves.
+        # after that then the arm is on its own.
+        if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
+            self.lockMaxHeight(mc.kElevatorSafeHeight)
+
+    def getPosition(self) -> float:
+        """Returns position in motor rotations"""
+        return self.encoder.getPosition()
+
+    def incrementGoalHeight(self, height_increment_cm: float) -> None:
+        """
+        """
+        self.resetProfilerState()
+        self.current_goal_height = self.current_goal_height + height_increment_cm
+        self.current_goal_height_above_zero = self.current_goal_height_above_zero + height_increment_cm
+        self.validateGoalHeight()
+
+        #if arm starts in unsafe postion, protect it until it moves.
+        # after that then the arm is on its own.
+        if self.encoder.getPosition() <= mc.kElevatorSafeHeight:
+            self.lockMaxHeight(mc.kElevatorSafeHeight)
+
+    def goToGoalHeight(self) -> None:
+        """
+        Sets the height of the elevator goal in centimeters from the ground.
+        """
+        profiler_use = self.profilerDown
+        if self.current_goal_height_above_zero > self.last_profiler_state.position:
+            profiler_use = self.profilerUp
+
+
+        self.last_profiler_state = profiler_use.calculate(
+            self.update_period, self.last_profiler_state, TrapezoidProfile.State(self.current_goal_height_above_zero, 0)
+        )
+
+        # Protect the arm from moving into unsafe position while arm is not in the correct position
+        currArmArc = 0
+        if self._arm is not None:
+            currArmArc = self._arm.getArc()
+
+        currPos = self.last_profiler_state.position
+
+        #if locked max height is set, keep it below max height
+        # until arm is in safe position.
+        # then unlock. It is expected that the arm won't move
+        # back to an unsafe position without another set being called
+        if self.lockedMaxHeight:
+            print(f"Locked Max Height {currArmArc} {self.lockedMaxHeight}")
+            if currArmArc > mc.kArmSafeAngleStart:
+                print("Unlocking")
+                self.lockedMaxHeight = None
+            elif currPos > self.lockedMaxHeight:
+                print("Latching")
+                currPos = self.lockedMaxHeight
+
+        self.motor_pid.setReference(
+            currPos,
+            rev.SparkLowLevel.ControlType.kPosition,
+            rev.ClosedLoopSlot.kSlot0,
+            self.feedforward.calculate(
+                self.motor_velocity, self.last_profiler_state.velocity
+            ),
+            rev.SparkClosedLoopController.ArbFFUnits.kVoltage,
+        )
+
+    def checkIfAtGoalHeight(self) -> bool:
+        """
+        """
+        return (
+            math.isclose(self.encoder.getVelocity(), 0.0, abs_tol=0.1)
+            and math.isclose(self.encoder.getPosition(), self.current_goal_height_above_zero, abs_tol=1)
+        )
+
+    def manualControl(self, velocity_percentage: float) -> None:
+        """
+        """
+        if velocity_percentage > 0.25:
+            velocity_percentage = 0.25
+        desired_velocity = velocity_percentage * (c.kTrapezoidProfileUp[0] / 4)
+        if desired_velocity < 0:
+            desired_velocity = velocity_percentage * (c.kTrapezoidProfileDown[0] / 3)
+        self.motor.setVoltage(self.feedforward.calculate(desired_velocity))
+
+    def updateSensorRecordings(self) -> None:
+        """
+        """
+        self.current_height_above_zero = self.encoder.getPosition()
+        self.current_height = self.height_at_zero + self.current_height_above_zero
+        self.at_top_limit = self.motor.getForwardLimitSwitch().get()
+        self.at_bottom_limit = self.motor.getReverseLimitSwitch().get()
+        self.motor_current = self.motor.getOutputCurrent()
+        self.motor_output = self.motor.getAppliedOutput()
+        self.motor_velocity = self.encoder.getVelocity()
+        self.at_goal = self.checkIfAtGoalHeight()
+        self.error_from_goal = self.current_height_above_zero - self.current_goal_height_above_zero
 
     def periodic(self) -> None:
-        # update telemtry
-        if self._controller.atGoal():
-            self._trackingAlert.setText(f"Elevator stable at {self._encoder.getDistance():1.1f}m")
-            self._trackingAlert.set(True)
-        else:
-            self._trackingAlert.setText(f"Elevator at {self._encoder.getDistance():1.1f}m goal {self.getSetHeightM():1.1f}m")
-            self._trackingAlert.set(True)
+        """
+        """
+        self.updateSensorRecordings()
 
-        if self.getReverseLimit():
-            self._encoder.reset()
+        if self.at_bottom_limit:
+            self.encoder.setPosition(0)
 
-        # safe the motors if forward limit is hit
-        if self.getForwardLimit() and self._motors.get() > 0:
-            self._motors.set(0)
-            self._limitAlert.setText(f"Elevator TOP HIT at {self._encoder.getDistance()}m")
-            self._limitAlert.set(True)
+        if (self.at_top_limit and self.motor.get() > 0) or (self.at_bottom_limit and self.motor.get() < 0):
+            self.motor.set(0)
             return
-
-        if self.getReverseLimit() and self._motors.get() < 0:
-            self._motors.set(0)
-            self._limitAlert.setText(f"Elevator BOTTOM HIT at {self._encoder.getDistance()}m")
-            self._limitAlert.set(True)
-            return
-
-        # clear the alert as we no longer are at the limit
-        self._limitAlert.set(False)
-
-        if self._disabled:
-            self._motors.set(0)
-            return
-
-        output = self._controller.calculate(self._encoder.getDistance())
-        if output > 0.1:
-            output = 0.1
-        if output < -0.1:
-            output = -0.1
-
-
-        self._motors.set(output)
-
-    def getForwardLimit(self) -> bool:
-        """Returns if either motor controller has hit the forward limit switch
-        Returns:
-            bool: True if either motor controller has hit the forward limit switch
-        """
-        return self._primaryMotor.getForwardLimitSwitch().get() or self._followerMotor.getForwardLimitSwitch().get()
-
-    def getReverseLimit(self) -> bool:
-        return self._primaryMotor.getReverseLimitSwitch().get() or self._followerMotor.getReverseLimitSwitch().get()
-
-
-    def setHeight(self, heightM: float) -> None:
-        """
-        Sets the height of the elevator goal in meters from ground.
-        """
-        # TODO add max and min set constraints to setters
-        if self._disabled:
-            self._disabled = False
-            self._controller.reset(self._encoder.getDistance())
-
-        heightM = heightM - self._heightDelta
-
-        if heightM < 0:
-            heightM = 0
-
-        # cache goal for easy access
-        self._curentGoal = heightM
-        self._controller.setGoal(heightM)
-
-    def getSetHeightM(self) -> float:
-        """
-        Returns the current goal height of the elevator in meters from ground.
-        Returns:
-            float: set heigh in meters
-        """
-        return self._curentGoal+self._heightDelta
-
-    def getHeightM(self) -> float:
-        """Returns the current height of the elevator in meters from ground.
-        """
-        return self._encoder.getDistance()
-
-    def atGoal(self) -> bool:
-        """
-        Returns if the elevator is at the goal height.
-        """
-        return self._controller.atGoal()
-
-    def getError(self) -> float:
-        """
-        Returns the error in meters between the goal height and the current height.
-        """
-        return self._controller.getPositionError()
-
-    def setIncrementalMove(self, deltaM: float) -> None:
-        """
-        Moves the elevator by the delta in meters from the current goal height.
-        """
-        self.setHeight(self.getSetHeightM() + deltaM)
-
-    def stopElevator(self) -> None:
-        """
-        Stops the by setting current height to goal. This will maintain the current height.
-        """
-        self.setHeight(self.getHeightM())
 
     def disable(self) -> None:
         """
-        Disables the elvators motors. The elevator may fall under gravity.
         """
-        self._disabled = True
+        self.motor.disable()
