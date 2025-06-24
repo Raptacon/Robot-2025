@@ -1,6 +1,6 @@
 {
-  "robotWidth": 0.95,
-  "robotLength": 0.95,
+  "robotWidth": 0.774,
+  "robotLength": 0.876,
   "holonomicMode": true,
   "pathFolders": [
     "reef_stem_paths",
@@ -10,13 +10,13 @@
   "autoFolders": [
     "Autos2025_Blue"
   ],
-  "defaultMaxVel": 0.65,
-  "defaultMaxAccel": 3.0,
-  "defaultMaxAngVel": 540.0,
-  "defaultMaxAngAccel": 720.0,
+  "defaultMaxVel": 0.75,
+  "defaultMaxAccel": 1.0,
+  "defaultMaxAngVel": 360.0,
+  "defaultMaxAngAccel": 360.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 74.088,
-  "robotMOI": 6.883,
+  "robotMass": 63.956,
+  "robotMOI": 5.94175290870316,
   "robotTrackwidth": 0.546,
   "driveWheelRadius": 0.050165,
   "driveGearing": 6.75,
@@ -25,7 +25,7 @@
   "driveCurrentLimit": 40.0,
   "wheelCOF": 1.0,
   "flModuleX": 0.31115,
-  "flModuleY": 0.26035,
+  "flModuleY": 0.26,
   "frModuleX": 0.31115,
   "frModuleY": -0.26035,
   "blModuleX": -0.31115,

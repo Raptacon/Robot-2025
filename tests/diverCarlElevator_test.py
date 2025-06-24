@@ -1,142 +1,96 @@
-from subsystem.diverCarlElevator import DiverCarlElevator
-from constants import DiverCarlElevatorConsts
-import wpilib.simulation
+import pytest
 import rev
 from wpimath.system.plant import DCMotor
-import math
+from robot import MyRobot
 
-def test_elevatorSubsystem() -> None:
-    simTime = 0.06
-    elevator = DiverCarlElevator(dt=simTime)
-    simPrimaryMotor = rev.SparkSim(elevator._primaryMotor, DCMotor(12, 10, 10, 10, 5000, 1))
-    #simFollowerMotor = rev.SparkSim(elevator._followerMotor, DCMotor(12, 10, 10, 10, 5000, 1))
+from constants import MechConsts as mc
+from subsystem.diverCarlElevator import DiverCarlElevator
+from subsystem.diverCarlChistera import DiverCarlChistera
+
+def test_elevatorSubsystemSafety(robot : MyRobot) -> None:
+    elevator: DiverCarlElevator
+    arm: DiverCarlChistera
+    if hasattr(robot, "getRobot"):
+        robot = robot.getRobot()
+        elevator = robot.elevator
+        arm = robot.arm
+    else:
+        elevator = DiverCarlElevator()
+        arm = DiverCarlChistera()
+
+    simArmMotor = rev.SparkSim(arm._primaryMotor, DCMotor(12, 10, 10, 10, 5000, 1))
+    simElevMotor = rev.SparkSim(elevator.motor, DCMotor(12, 10, 10, 10, 5000, 1))
+    simArmEncoder = simArmMotor.getRelativeEncoderSim()
+    simElevEncoder = simElevMotor.getRelativeEncoderSim()
+
+    elevator.setArm(None)
+    #verify operation with no arm
+    elevator.setGoalHeight(0.0)
+    simElevEncoder.setPosition(0)
+    elevator.goToGoalHeight()
+    assert simElevMotor.getClosedLoopSlot() == rev.ClosedLoopSlot.kSlot0
+    assert simElevMotor.getSetpoint() == pytest.approx(0.0)
+
+    elevator.setArm(arm)
+
+    #test arm in unsafe positions
+    for pos in [0,  mc.kArmSafeAngleStart*0.999]:
+        simArmEncoder.setPosition(-pos)
+        simElevEncoder.setPosition(0)
+        elevator.setGoalHeight(100)
 
 
-    # test some contsturction time variables
-    assert elevator._dt == simTime
-    assert elevator._controller.getPeriod() == simTime
+        #arb loop count, but make sure value does not converge past safe height
+        for i in range(100):
+            elevator.goToGoalHeight()
+            elevator.periodic()
+            assert simElevMotor.getSetpoint() <= mc.kElevatorSafeHeight
+            #move elevator to last position
+            print(i)
+            simElevEncoder.setPosition(elevator.last_profiler_state.position)
 
-    # test the nominal operations by setting the elevator to 1m and then 0m
-    # call periodic until at goal and increase the encoder reading.
-    # If encoder reading is < 0m or >2m, fail test so we don't get "stuck"
-
-    assert elevator.getHeightM() == 0
-    elevator.setHeight(1)
-    assert elevator.getHeightM() == 0
-    assert elevator.atGoal() == False
-    encSim = wpilib.simulation.EncoderSim(elevator._encoder)
-    simPos = 0
-    while not elevator.atGoal():
+        simArmEncoder.setPosition(-mc.kArmSafeAngleStart*1.05)
+        elevator.goToGoalHeight()
         elevator.periodic()
-        encSim.setDistance(simPos)
-        simPos += 0.0001  #0.1mm at a time
-        #  print(f"SimPos: {simPos}, encoder distance: {elevator.encoder.getDistance()} error: {elevator.getError()}")
-        if(simPos > 2):
-            raise("Elevator did not reach goal")
+        assert simElevMotor.getSetpoint() > mc.kElevatorSafeHeight
 
-        assert elevator._limitAlert.get() == False
-        assert elevator._trackingAlert.get() == True
-        assert "Elevator at" in elevator._trackingAlert.getText()
-
-    #  now that we are at goal run one more cycle to verify behaviors
-    elevator.periodic()
-    assert elevator._limitAlert.get() == False
-    assert elevator._trackingAlert.get() == True
-    assert "Elevator stable" in elevator._trackingAlert.getText()
-
-    assert elevator.atGoal() == True
-    assert elevator.getError() < 0.01
-    elevator.setHeight(0)
-    assert elevator.atGoal() == False
-    while not elevator.atGoal():
+        #slam the arm so we can break it. The elevator should keep moving up
+        simArmEncoder.setPosition(0)
+        elevator.goToGoalHeight()
         elevator.periodic()
-        if simPos > 0.0:
-            encSim.setDistance(simPos)
-        simPos -= 0.0001  #0.1mm at a time
-        if simPos < -2.0:
-            raise(Exception("Elevator did not reach goal"))
+        assert simElevMotor.getSetpoint() > mc.kElevatorSafeHeight
 
 
-    assert elevator.atGoal() == True
-    assert elevator.getError() < 0.01
+    #test arm in safe positions
+    # note float error, adding 0.01 to start
+    for pos in [mc.kArmSafeAngleStart+0.01, mc.kArmSafeAngleEnd, 1.0]:
+        testHeight = 100
+        simArmEncoder.setPosition(-pos)
+        simElevEncoder.setPosition(0)
+        elevator.setGoalHeight(testHeight)
 
-    # now that we are at goal run one more cycle to verify behaviors
-    elevator.periodic()
-    assert elevator._limitAlert.get() == False
-    assert elevator._trackingAlert.get() == True
-    assert "Elevator stable" in elevator._trackingAlert.getText()
+        #arb loop count, but make sure value does not converge past safe height
+        for i in range(1000):
+            elevator.goToGoalHeight()
+            elevator.periodic()
+            #move elevator to last position
+            simElevEncoder.setPosition(elevator.last_profiler_state.position)
 
-    # test limit switches
-    # set elevator at 0m
-    # then set elevator to move to 1m.
-    # simulate forward limit being hit
-    # release forward limit and verify motors restart
+        assert simElevMotor.getSetpoint() == pytest.approx(testHeight-elevator.height_at_zero)
 
-    encSim.setDistance(0)
-    elevator.setHeight(1.0)
-    simPrimaryMotor.getForwardLimitSwitchSim().setPressed(True)
-    elevator._motors.set(1.0)
-    elevator.periodic()
-    assert elevator._motors.get() == 0
-    assert elevator._limitAlert.get() == True
-    simPrimaryMotor.getForwardLimitSwitchSim().setPressed(False)
-    elevator.periodic()
-    assert elevator._motors.get() > 0
-    assert elevator._limitAlert.get() == False
+    for pos in [mc.kArmSafeAngleStart+0.01, mc.kArmSafeAngleEnd, 1.0]:
+        testHeight = 0
+        simArmEncoder.setPosition(-pos)
+        arm.periodic()
+        simElevEncoder.setPosition(150)
+        elevator.periodic()
+        elevator.setGoalHeight(testHeight)
 
-    # test disable while setup for it
-    elevator.disable()
-    elevator.periodic()
-    assert elevator._motors.get() == 0
-    assert elevator._disabled == True
+        #arb loop count, but make sure value does not converge past safe height
+        for i in range(1000):
+            elevator.goToGoalHeight()
+            elevator.periodic()
+            #move elevator to last position
+            simElevEncoder.setPosition(100-i)
 
-    # test reverse limit now
-    # set elevator at 1m
-    # then set elevator to move to 0.
-    # simulate reverse limit being hit
-    # release reverse limit and verify motors restart
-
-    encSim.setDistance(1.0)
-    elevator.setHeight(0.0)
-    assert elevator._disabled == False
-
-    simPrimaryMotor.getReverseLimitSwitchSim().setPressed(True)
-    elevator._motors.set(-1.0)
-    encSim.setDistance(1.0)
-    elevator.periodic()
-    assert elevator._motors.get() == 0
-    assert elevator._limitAlert.get() == True
-    assert elevator._encoder.getDistance() == 0
-    simPrimaryMotor.getReverseLimitSwitchSim().setPressed(False)
-    encSim.setDistance(1.0)
-    elevator.periodic()
-    assert elevator._motors.get() < 0
-    assert elevator._limitAlert.get() == False
-
-    # test incremental move and stop move
-    elevator.setHeight(0.5)
-    assert elevator.getSetHeightM() == 0.5
-    elevator.setIncrementalMove(0.1)
-    assert elevator.getSetHeightM() == 0.6
-    encSim.setDistance(0.55)
-    elevator.stopElevator()
-    assert elevator.getSetHeightM() == 0.55
-
-
-    # test robot mechnical to set adjustment
-    elevator.setHeight(0)
-    assert elevator.getSetHeightM() == DiverCarlElevatorConsts.kMechDeltaHeightM
-    assert elevator._curentGoal == 0
-    elevator.setHeight(DiverCarlElevatorConsts.kMechDeltaHeightM)
-    assert elevator.getSetHeightM() == DiverCarlElevatorConsts.kMechDeltaHeightM
-    assert elevator._curentGoal == 0
-    elevator.setHeight(DiverCarlElevatorConsts.kMechDeltaHeightM + 0.1)
-    assert elevator.getSetHeightM() == DiverCarlElevatorConsts.kMechDeltaHeightM + 0.1
-    assert math.isclose(elevator._curentGoal, 0.1)
-
-
-    print("Elevator test passed")
-
-
-def test_elevatorCommand():
-    pass
+        assert simElevMotor.getSetpoint() == pytest.approx(0)

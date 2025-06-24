@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "rs_5r"
+            "pathName": "bs_barge_stem"
           }
         },
         {
@@ -19,25 +19,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "5r_2f"
+            "pathName": "barge_stem"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Coral_Intake"
+            "name": "Score_Piece"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "2f_8r"
+            "pathName": "barge_backup"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Raise_Place"
+            "name": "Lower_Elevator"
           }
         }
       ]

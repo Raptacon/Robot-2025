@@ -148,7 +148,9 @@ class SwerveDrivetrain(Subsystem):
         velocity_vector_x: float,
         velocity_vector_y: float,
         angular_velocity: float,
-        field_relative: bool = True
+        field_relative: bool = True,
+        turbo_mode: bool = False,
+        slow_mode: bool = False
     ) -> None:
         """
         Operate the swerve drive according to three given component velocities. These velocities
@@ -166,16 +168,35 @@ class SwerveDrivetrain(Subsystem):
         Returns:
             None: individual swerve modules are given new goal states to transition to in-place
         """
+        # Turn down speed for better driver usage
+        dampener_use = OperatorRobotConfig.swerve_velocity_dampener
+        dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (
+            dampener_use, dampener_use, dampener_use
+        )
+        if turbo_mode:
+            dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (1.0, 1.0, 1.0)
+        if slow_mode:
+            dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (
+                dampener_use, dampener_use, 0.55
+            )
+
+        dampened_velocity_vector_x = dampener_use_velocity_x * velocity_vector_x
+        dampened_velocity_vector_y = dampener_use_velocity_y * velocity_vector_y
+        dampened_angular_velocity = dampener_use_angular * angular_velocity
+
         if field_relative:
             field_invert = 1
             if self.flip_to_red_alliance():
                 field_invert = -1
 
             chassis_speeds = ChassisSpeeds.fromFieldRelativeSpeeds(
-                field_invert * velocity_vector_x, field_invert * velocity_vector_y, angular_velocity, self.current_pose().rotation()
+                field_invert * dampened_velocity_vector_x, field_invert * dampened_velocity_vector_y,
+                dampened_angular_velocity, self.current_pose().rotation()
             )
         else:
-            chassis_speeds = ChassisSpeeds(velocity_vector_x, velocity_vector_y, angular_velocity)
+            chassis_speeds = ChassisSpeeds(
+                dampened_velocity_vector_x, dampened_velocity_vector_y, dampened_angular_velocity
+            )
 
         self.set_states_from_speeds(chassis_speeds)
 
@@ -248,6 +269,18 @@ class SwerveDrivetrain(Subsystem):
             None: pose estimator is updated in-place
         """
         self.pose_estimator.update(self.current_yaw(), self.current_module_positions())
+
+    def add_vision_pose_estimate(self, pose: Pose2d, timestamp: float, stdDevs: Tuple[float]) -> None:
+        """
+        Adds a vision-based pose estimate to the pose estimator. This method is expected to be called from the Vision class.
+
+        Args:
+            pose: the vision-based pose estimate
+
+        Returns:
+            None: pose estimator is updated in-place
+        """
+        self.pose_estimator.addVisionMeasurement(pose, timestamp, stdDevs)
 
     def reset_pose_estimator(self, current_pose: Pose2d) -> None:
         """

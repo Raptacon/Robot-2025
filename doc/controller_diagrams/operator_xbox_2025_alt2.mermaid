@@ -1,0 +1,81 @@
+---
+title: Operator (Xbox)
+---
+graph TB
+    LT[/Pivot Out\]:::clsHold
+    NullTrigger:::hidden
+    RT[/Pivot In\]:::clsHold
+
+    LB("Feed
+        Backward"):::clsHold
+    NullBumper:::hidden
+    RB("Feed
+        Forward"):::clsHold
+
+    LJs((("Elevator
+            Height
+            ↕"))):::clsHold
+    subgraph controls[ ]
+        Start("N/A"):::na~~~Select("N/A"):::na
+    end
+    controls:::hidden
+    subgraph buttons
+        x("Stage 
+            Trough L1"):::clsPress
+        y("Stage
+            Reef L4"):::clsPress
+        a("Stage 
+            Reef L2"):::clsPress
+        b("Stage
+            Reef L3"):::clsPress
+
+        x~~~y~~~b
+        x~~~a~~~b
+    end
+    buttons:::nobg
+    
+
+    LNoteLayer[/"Vertical Axis Only
+                 ↕"/]:::hidden
+    MNoteLayer:::hidden
+    RNoteLayer[/"Horizontal Axis Only
+                 ↔"/]:::hidden
+
+    subgraph dpad[ ]
+        dL{{"Not 
+            Assigned"}}:::na
+        dU{{"Remove L3-L4
+            Reef Algae"}}:::clsPress
+        dD{{"Remove L2-L3
+            Reef Algae"}}:::clsPress
+        dR{{"Not 
+            Assigned"}}:::na
+
+        dL~~~dU~~~dR
+        %% dL---dR
+    
+        dL~~~dD~~~dR
+    end
+    dpad:::nobg
+    NullBottom:::hidden
+    RJs((("Not
+            Assigned"))):::na
+
+    LT---LB~~~LJs~~~LNoteLayer~~~dpad
+    NullTrigger~~~NullBumper
+        NullBumper~~~controls~~~MNoteLayer
+        MNoteLayer~~~NullBottom
+    RT---RB~~~buttons~~~RNoteLayer~~~RJs
+
+    subgraph legend
+        press["Press to trigger event"]:::clsPress
+        toggle["Press to toggle state"]:::clsToggle
+        hold["Hold for secondary state"]:::clsHold
+    end
+classDef hidden display: none;
+classDef na color: #a88
+classDef note fill: #0000, stroke-dasharray: 5 5
+classDef clsHold fill: #ea0
+classDef clsToggle fill: #a0e, color: white
+classDef clsPress fill: #0ea
+classDef nobg fill: transparent

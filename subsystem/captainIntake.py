@@ -1,81 +1,87 @@
 import wpilib
 import rev
+import commands2
 
-from robotpy_ext.autonomous import StatefulAutonomous, state
-from constants import CaptainPlanetConsts as consts
+from constants import CaptainPlanetConsts as intakeConsts, DiverCarlChuteConsts as chuteConsts
 
 
-class CaptainIntake(StatefulAutonomous):
-    MODE_NAME = "Intake"
-
-    def __init__(self):
-        self.intakeMotor = rev.SparkMax(consts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless)
-        self.front_breakbeam = wpilib.DigitalInput(consts.kFrontBreakBeam)
-        self.back_breakbeam = wpilib.DigitalInput(consts.kBackBreakBeam)
-        self.smartdashboard = wpilib.SmartDashboard
+class CaptainIntake(commands2.Subsystem):
+    """
+    """
+    def __init__(self) -> None:
         super().__init__()
+        self.intakeMotor = rev.SparkFlex(
+            intakeConsts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
+        )
+        self.chuteMotor = rev.SparkFlex(
+            chuteConsts.kMotorCanId, rev.SparkLowLevel.MotorType.kBrushless
+        )
+        # Front is closest to pivot motor
+        self.frontBreakbeam = wpilib.DigitalInput(intakeConsts.kFrontBreakBeam)
+        self.backBreakbeam = wpilib.DigitalInput(intakeConsts.kBackBreakBeam)
 
-    @state(first=True)
-    def idle(self):
-        self.intakeMotor.set(0)
-        
-        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-        self.smartdashboard.putString("Intake State", "idle")
+        self.configureIntakeMotor()
+        self.configureChuteMotor()
 
-        if self.smartdashboard.getBoolean("A Button Pressed", False):
-            self.next_state("first_intaking")
+        self.updateSensorRecordings()
 
-        if not self.smartdashboard.getBoolean("A Button Pressed", False):
-            self.next_state("idle")
+    def configureIntakeMotor(self) -> None:
+        """
+        """
+        motor_config = rev.SparkBaseConfig()
 
-    @state()
-    def first_intaking(self):
-        self.intakeMotor.set(consts.kDefaultSpeed)
+        (
+            motor_config
+            .setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
+            .inverted(intakeConsts.kMotorInverted)
+            .smartCurrentLimit(intakeConsts.kCurrentLimitAmps)
+        )
 
-        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-        self.smartdashboard.putString("Intake State", "first_intaking")
+        # Apply the configuration and burn to the SparkFlex's flash memory
+        self.intakeMotor.configure(
+            motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters, rev.SparkBase.PersistMode.kPersistParameters
+        )
 
-        
+    def configureChuteMotor(self) -> None:
+        """
+        """
+        motor_config = rev.SparkBaseConfig()
 
-        if not self.front_breakbeam.get():
-            self.next_state("second_intaking")
-        if not self.smartdashboard.getBoolean("A Button Pressed", False):
-            self.next_state("idle")
+        (
+            motor_config
+            .setIdleMode(rev.SparkMaxConfig.IdleMode.kBrake)
+            .inverted(chuteConsts.kMotorInverted)
+            .smartCurrentLimit(chuteConsts.kCurrentLimitAmps)
+        )
 
-    @state()
-    def second_intaking(self):
-        self.intakeMotor.set(consts.kDefaultSpeed)
+        # Apply the configuration and burn to the SparkFlex's flash memory
+        self.chuteMotor.configure(
+            motor_config, rev.SparkBase.ResetMode.kNoResetSafeParameters, rev.SparkBase.PersistMode.kPersistParameters
+        )
 
-        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-        self.smartdashboard.putString("Intake State", "second_intaking")
+    def setMotor(self, speed: float, reverse: bool = False, manualControl: bool = False) -> None:
+        """
+        """
+        speedUseIntake = speed
+        speedUseChute = speed
+        if reverse:
+            speedUseIntake = -1 * speedUseIntake
+            speedUseChute = -1 * speedUseChute
+        if manualControl:
+            speedUseIntake = speedUseIntake * intakeConsts.kOperatorDampener
+            speedUseChute = speedUseChute * chuteConsts.kOperatorDampener
+        self.intakeMotor.set(speedUseIntake)
+        self.chuteMotor.set(speedUseChute)
 
-        
+    def updateSensorRecordings(self) -> None:
+        """
+        """
+        self.frontBeamBroken = not self.frontBreakbeam.get()
+        self.backBeamBroken = not self.backBreakbeam.get()
+        wpilib.SmartDashboard.putBoolean("Front broken", self.frontBeamBroken)
+        wpilib.SmartDashboard.putBoolean("Back broken", self.backBeamBroken)
 
-        if not self.back_breakbeam.get():
-            self.next_state("third_intaking")
-
-    @state()
-    def third_intaking(self):
-        self.intakeMotor.set(consts.kDefaultSpeed)
-
-        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-        self.smartdashboard.putString("Intake State", "third_intaking")
-
-        
-
-        if self.front_breakbeam and not self.back_breakbeam.get():
-            self.next_state("intook")
-
-    @state()
-    def intook(self):
-        self.intakeMotor.set(0)
-
-        self.smartdashboard.putBoolean("Breakbeam 1", self.front_breakbeam.get())
-        self.smartdashboard.putBoolean("Breakbeam 2", self.back_breakbeam.get())
-        self.smartdashboard.putString("Intake State", "intook")
-
-        self.next_state("idle")
+    def periodic(self) -> None:
+        """
+        """
+        self.updateSensorRecordings()
