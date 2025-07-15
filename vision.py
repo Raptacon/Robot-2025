@@ -8,7 +8,7 @@ from robotpy_apriltag import AprilTagField, AprilTagFieldLayout
 
 from config import OperatorRobotConfig
 from lookups.reef_positions import reef_position_lookup
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from raptacon3200.universal_assets import SwerveDrivetrain
 
 
 class Vision:

@@ -1,7 +1,7 @@
 import commands2
 import commands2.cmd
 import wpilib
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from raptacon3200.universal_assets import SwerveDrivetrain
 from wpimath.geometry import Pose2d, Transform2d
 
 class AutoDrive(commands2.CommandBase):

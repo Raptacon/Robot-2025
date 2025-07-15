@@ -3,8 +3,8 @@ import math
 from typing import Callable
 
 # Internal imports
-from constants import SwerveDriveConsts
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from constants import swerve_drive_constants
+from raptacon3200.universal_assets import SwerveDrivetrain
 
 # Third-party imports
 import commands2
@@ -21,8 +21,6 @@ class DefaultDrive(commands2.Command):
         velocity_vector_y: Callable[[], float],
         angular_velocity: Callable[[], float],
         field: Callable[[], bool],
-        turbo_mode: Callable[[], bool],
-        slow_mode: Callable[[], bool]
     ) -> None:
         """
         Store joystick and button inputs within the object, and require the swerve drivetrain
@@ -55,9 +53,8 @@ class DefaultDrive(commands2.Command):
         self.velocity_vector_y = velocity_vector_y
         self.angular_velocity = angular_velocity
         self.field = field
-        self.turbo_mode = turbo_mode
-        self.slow_mode = slow_mode
         self.addRequirements(self.drivetrain)
+        self.swerve_consts = swerve_drive_constants
 
     def execute(self) -> None:
         """
@@ -68,10 +65,8 @@ class DefaultDrive(commands2.Command):
             None: interface eventually passes desired goal states to the swerve modules
         """
         self.drivetrain.drive(
-            self.velocity_vector_x() * SwerveDriveConsts.maxTranslationMPS,
-            self.velocity_vector_y() * SwerveDriveConsts.maxTranslationMPS,
-            self.angular_velocity() * math.radians(SwerveDriveConsts.maxAngularDPS),
+            self.velocity_vector_x() * self.swerve_consts.maxTranslationMPS,
+            self.velocity_vector_y() * self.swerve_consts.maxTranslationMPS,
+            self.angular_velocity() * math.radians(self.swerve_consts.maxAngularDPS),
             self.field(),
-            self.turbo_mode(),
-            self.slow_mode()
         )

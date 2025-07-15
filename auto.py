@@ -1,7 +1,7 @@
 import commands2
 import commands2.cmd
 from commands.autoDrive import AutoDrive
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from raptacon3200.universal_assets import SwerveDrivetrain
 from commands.sparkyAuto import HandOff
 from subsystem.sparkyShooter import Shooter
 from subsystem.sparkyIntake import SparkyIntake

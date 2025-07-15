@@ -6,7 +6,8 @@ from typing import Callable
 
 # Internal imports
 from data.telemetry import Telemetry
-from constants import PoseOptions, MechConsts
+from config import OperatorRobotConfig
+from constants import PoseOptions, MechConsts, swerve_drive_constants, swerve_module_constants
 from vision import Vision
 from commands.auto.pathplan_to_pose import pathplanToPose
 from commands.default_swerve_drive import DefaultDrive
@@ -15,7 +16,6 @@ import commands.operate_intake as IntakeCommands
 from commands.operate_elevator import ElevateManually
 from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.captainIntake import CaptainIntake
 
 # Third-party imports
@@ -26,6 +26,7 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
+from raptacon3200.universal_assets import SwerveDrivetrain
 from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 from subsystem.diverCarlChistera import DiverCarlChistera as Arm
 
@@ -46,7 +47,7 @@ class RobotSwerve:
         wpilib.SmartDashboard.putData("Field", self.field)
 
         # Subsystem instantiation
-        self.drivetrain = SwerveDrivetrain()
+        self.drivetrain = SwerveDrivetrain(swerve_drive_constants, swerve_module_constants, OperatorRobotConfig)
         self.elevator = Elevator()
         self.arm = Arm()
         # cross link arm and elevator
@@ -194,8 +195,6 @@ class RobotSwerve:
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
                 lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
                 lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: self.driver_controller.getLeftBumperButton(),
-                lambda: self.driver_controller.getRightTriggerAxis() > 0.5
             )
         )
 

@@ -1,6 +1,6 @@
 # Internal imports
 from config import OperatorRobotConfig
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from raptacon3200.universal_assets import SwerveDrivetrain
 from subsystem.diverCarlElevator import DiverCarlElevator
 from subsystem.diverCarlChistera import DiverCarlChistera
 from subsystem.captainIntake import CaptainIntake

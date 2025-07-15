@@ -4,7 +4,7 @@ from typing import Callable
 
 # Internal imports
 from config import OperatorRobotConfig
-from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
+from raptacon3200.universal_assets import SwerveDrivetrain
 
 # Third-party imports
 from commands2 import Command
