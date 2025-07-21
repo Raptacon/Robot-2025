@@ -5,8 +5,10 @@ flowchart TD
     Robot-->
         LED
     Robot-->
-        Drivetrain
+        Drivetrain-->
+            SwerveModules
     Robot-->
+    %%Scoring outline may change in the future
         Scorer-->
             Elevator
         Scorer-->
@@ -15,4 +17,9 @@ flowchart TD
             Arm-->
                 Placer
     Robot-->
-        Intake
+        Indexer
+    Robot-->
+        Intake-->
+            IntakePivot
+        Intake-->
+            IntakeMotors
