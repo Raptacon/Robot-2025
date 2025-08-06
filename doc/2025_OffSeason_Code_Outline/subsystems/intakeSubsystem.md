@@ -1,7 +1,7 @@
 import intakeMotors, intakePivot
 
 class intakeSubsystem():
-	init():
+	__init__():
 		vars
 
 		try intakemotors
@@ -9,6 +9,9 @@ class intakeSubsystem():
 		try intakepivot
 			intakepivot()
 		exept Exeption
-			sys.exit(_____)
-	execute():
-		
+			sys.exit("Either intakeMotors and/or intakePivot is not seen by intakeSubsystem")
+	execute
+		turnToGoal():
+
+		runMotors():
+
