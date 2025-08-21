@@ -11,8 +11,8 @@ class intakeSubsystem():
 		def runMotors(self, spitOut: bool):
 			self.intakemotors.runMotor(spitOut)
 
-		def setGoal(self):
-			
+		def setGoal(self, goal: float):
+			self.intakePivot.setGoal(goal)
 		
 		def turnToGoal(self):
 			self.intakepivot.turnToGoal()

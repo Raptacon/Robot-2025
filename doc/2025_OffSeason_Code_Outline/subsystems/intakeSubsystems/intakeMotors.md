@@ -16,3 +16,6 @@ class intakeMotors:
             self.intakeMotor.set(self.kMotorSpeed)
         else:
             self.intakeMotor.set(-self.kMotorSpeed)
+
+    def stopIntakeMotor(self):
+        self.intakeMotor.set(0)

@@ -20,7 +20,7 @@ class intakePivot:
         self.kPivotGravity: float = 2
         self.kPivotVelocity: float = 3
         self.kPivotTolerance: float = 1
-        self.kSoftConstraint: float = 27 
+        self.kPivotSoftConstraint: float = 27 
 
         self.trapezoidConstraints = TrapezoidProfile.Constraints(self.kMaxSpeed, self.kMaxAcceleration)
         self.previousState = TrapezoidProfile.State(0, self.kMinSpeed)
@@ -50,9 +50,9 @@ class intakePivot:
         self.motorSpeed = motorSpeed
 
     def softLimits(self):
-        if (self.intakePivotMotorEncoder.getVelocity() > 0) and (self.getRotaionalPosition() >= (self.kMaxPos - self.kSoftConstraint)):
+        if (self.intakePivotMotorEncoder.getVelocity() > 0) and (self.getRotaionalPosition() >= (self.kMaxPos - self.kPivotSoftConstraint)):
             self.IntakePivotMotor.set(0.1)
-        if (self.intakePivotMotorEncoder.getVelocity() < 0) and (self.getRotaionalPosition() <= (self.kMinPos + self.kSoftConstraint)):
+        if (self.intakePivotMotorEncoder.getVelocity() < 0) and (self.getRotaionalPosition() <= (self.kMinPos + self.kPivotSoftConstraint)):
             self.IntakePivotMotor.set(-0.1)
 
     def hardConstraints(self) -> None:
@@ -79,6 +79,9 @@ class intakePivot:
         self.feedBackVoltage = self.pid.calculate(self.getRotaionalPosition(), self.goal)
         self.IntakePivotMotor.setVoltage(self.feedBackVoltage + self.feedForwardVoltage)
         return self.pid.atSetpoint()
+
+    def stopPivotMotor(self):
+        self.IntakePivotMotor.set(0)
 
     def periodic(self) -> None:
         self.softLimits()
