@@ -59,11 +59,7 @@ class intakeCommands():
 
     #combined intake commmands
     def ingestUntilScorableCommand(self):
-        ingestUntilScoreable = commands2.cmd.runEnd(
-            lambda: intakePivotVar.setGoal(135), commands2.cmd.parallel(
-                intakePivotVar.turnToGoal, lambda: intakeMotorVar.runMotor(False)
-            ), intakePivotVar, intakeMotorVar
-        )
+        ingestUntilScoreable = commands2.cmd.
         return ingestUntilScorable
 
     def upAndOffCommand(self):
@@ -77,6 +73,9 @@ class intakeCommands():
         return downAndOn
 
     def stopAllIntakeCommand(self):
-        stopAllIntake = commands2.cmd.runEnd(intakeMotorVar.stopIntakeMotor, intakePivotVar.stopPivotMotor, intakeMotorVar, intakePivotVar)
+        stopAllIntake = commands2.cmd.parellel(
+            commands2.cmd.run(intakeMotorVar.stopIntakeMotor, intakeMotorVar), 
+            commands2.cmd.run(intakePivotVar.stopPivotMotor, intakePivotVar)
+        )
         return stopAllIntake
     

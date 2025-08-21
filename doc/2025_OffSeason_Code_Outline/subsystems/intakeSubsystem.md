@@ -1,17 +1,18 @@
-import intakeMotors, intakePivot
+from subsystems.intakeSubsystems import intakeMotors, intakePivot
 
 class intakeSubsystem():
-	__init__():
-		vars
-
-		try intakemotors
-			intakemotors()
-		try intakepivot
-			intakepivot()
-		exept Exeption
+	def __init__(self, ):
+		try:
+			self.intakemotors = intakemotors()
+			self.intakepivot = intakepivot()
+		exept Exeption:
 			sys.exit("Either intakeMotors and/or intakePivot is not seen by intakeSubsystem")
 	execute
-		turnToGoal():
+		def runMotors(self, spitOut: bool):
+			self.intakemotors.runMotor(spitOut)
 
-		runMotors():
-
+		def setGoal(self):
+			
+		
+		def turnToGoal(self):
+			self.intakepivot.turnToGoal()
