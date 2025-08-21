@@ -56,7 +56,7 @@ class intakePivot:
             self.IntakePivotMotor.set(-0.1)
 
     def hardConstraints(self) -> None:
-        if self.limitSwitchUpper or self.limitSwitchUpper:
+        if self.limitSwitchUpper or self.limitSwitchLower:
             self.setMotorSpeed(0)
         if self.getRotaionalPosition <= self.kMinPos or self.getRotaionalPosition >= self.kMaxPos:
             self.setMotorSpeed(0)
