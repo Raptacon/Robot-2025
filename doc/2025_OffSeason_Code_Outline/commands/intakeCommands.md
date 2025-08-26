@@ -1,7 +1,7 @@
 from Commands import commands2
-from subsystems import intakePivot, intakeMotors
+from subsystems import intakePivot, intakeMotors, indexer
 
-
+indexerVar = indexer()
 
 #intake commands
 intakeMotorVar = intakeMotor()
@@ -18,7 +18,7 @@ turnToHandOff = commands2.cmd.runEnd(lambda: intakePivotVar.setGoal(135), intake
 stopTurn = commands2.cmd.run(intakePivotVar.stopPivotMotor, intakePivotVar)
 
 #intake combined commands
-ingestUntilScoreable = commands2.cmd.runEnd(
+ingestUntilFull = commands2.cmd.runEnd(
     lambda: intakePivotVar.setGoal(135), commands2.cmd.parallel(
         intakePivotVar.turnToGoal, lambda: intakeMotorVar.runMotor(False)
     ), intakePivotVar, intakeMotorVar
@@ -58,15 +58,19 @@ class intakeCommands():
         return stopTurn
 
     #combined intake commmands
-    def ingestUntilScorableCommand(self):
-        ingestUntilScoreable = commands2.cmd.
-        return ingestUntilScorable
+    def ingestUntilFullCommand(self):
+        ingestUntilFull = commands2.cmd.deadline(
+            self.indexerVar.checkIndexerSensor(), 
+        )
+        return ingestUntilFull
 
     def upAndOffCommand(self):
+        # turn into parrallel
         upAndOff = commands2.cmd.sequence(intakeMotorVar.stopIntakeMotor, lambda: intakePivotVar.setGoal(135), intakePivotVar.turnToGoal)
         return upAndOff
 
     def downAndOnCommand(self):
+        # turn into parrallel
         downAndOn = commands2.cmd.sequence(
             lambda: intakePivotVar.setGoal(0), intakePivotVar.turnToGoal, lambda: intakeMotorVar.runMotor(False)
         )
