@@ -1,0 +1,19 @@
+flowchart TB
+    Design
+    Manufacturing
+    Electronics
+    Programming
+    DriveTeam[Drive Team]
+    
+    Robot((Robot))
+    Game((Game))
+    
+    Design-->Manufacturing
+    Manufacturing-->Electronics-->Programming-->DriveTeam
+    
+    Concept-->Design-->Robot
+    Concept-.-DriveTeam2[Drive Team]-.->Design
+              Manufacturing-->Robot
+              Electronics-->Robot
+              Programming-->DriveTeam3[Drive Team]-->Robot
+    Robot-->DriveTeam-->Game
