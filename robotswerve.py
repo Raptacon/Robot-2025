@@ -17,11 +17,14 @@ from lookups.utils import getCurrentReefZone
 from lookups.reef_positions import reef_position_lookup
 from subsystem.drivetrain.swerve_drivetrain import SwerveDrivetrain
 from subsystem.captainIntake import CaptainIntake
+from subsystem.drivetrain.tankDrive import TankDrive
+from commands.defaultTankDrive import DefaultTankDrive
 
 # Third-party imports
 import commands2
 import ntcore
 import wpilib
+import phoenix5
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
@@ -68,6 +71,20 @@ class RobotSwerve:
         # Initialize timer
         self.timer = wpilib.Timer()
         self.timer.start()
+
+        # initialize tank drive
+        self.tankdrivetrain = DefaultTankDrive()
+        self.isTank = True # only true when on tank drive robot
+        #tank drive things that may change later
+        self.right_front_motor = phoenix5.WPI_TalonFX(31)
+        self.right_back_motor = phoenix5.WPI_TalonFX(30)
+        self.left_front_motor = phoenix5.WPI_TalonFX(21)
+        self.left_back_motor = phoenix5.WPI_TalonFX(20)
+
+        self.left_drive_motors = wpilib.MotorControllerGroup(self.left_front_motor, self.left_back_motor)
+        self.right_drive_motors = wpilib.MotorControllerGroup(self.right_front_motor, self.right_back_motor)
+
+        self.drivetrain = TankDrive(self.left_drive_motors, self.right_drive_motors)
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
@@ -161,8 +178,9 @@ class RobotSwerve:
         pass
 
     def teleopInit(self):
-        self.table.putNumber("pressedKey", -1)
-        self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
+        if not self.isTank:
+            self.table.putNumber("pressedKey", -1)
+            self.keys = {0: commands2.cmd.print_("Key 0 pressed"),
                      1: commands2.cmd.print_("Key 1 pressed"),
                      2: commands2.cmd.print_("Key 2 pressed"),
                      3: commands2.cmd.print_("Key 3 pressed"),
@@ -179,120 +197,131 @@ class RobotSwerve:
                      14: commands2.cmd.print_("Key 14 pressed"),
                      -1: commands2.cmd.print_("No key pressed"),}
 
-        if self.auto_command:
-            self.auto_command.cancel()
+            if self.auto_command:
+                self.auto_command.cancel()
 
-        self.alliance = "blue"
-        if self.drivetrain.flip_to_red_alliance():
-            self.alliance = "red"
-        self.teleop_auto_command = None
+            self.alliance = "blue"
+            if self.drivetrain.flip_to_red_alliance():
+                self.alliance = "red"
+            self.teleop_auto_command = None
 
-        self.drivetrain.setDefaultCommand(
-            DefaultDrive(
-                self.drivetrain,
-                lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftY(), 0.06),
-                lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
-                lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
-                lambda: not self.driver_controller.getRightBumperButton(),
-                lambda: self.driver_controller.getLeftBumperButton(),
-                lambda: self.driver_controller.getRightTriggerAxis() > 0.5
+            self.drivetrain.setDefaultCommand(
+                DefaultDrive(
+                    self.drivetrain,
+                    lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftY(), 0.06),
+                    lambda: wpimath.applyDeadband(-1 * self.driver_controller.getLeftX(), 0.06),
+                    lambda: wpimath.applyDeadband(-1 * self.driver_controller.getRightX(), 0.1),
+                    lambda: not self.driver_controller.getRightBumperButton(),
+                    lambda: self.driver_controller.getLeftBumperButton(),
+                    lambda: self.driver_controller.getRightTriggerAxis() > 0.5
+                )
             )
-        )
 
-        self.teleop_auto_triggers = {
-            "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
-                commands2.cmd.parallel(
-                    commands2.InstantCommand(
-                        lambda: self.setAlignmentTag(
-                            reef_position_lookup
-                            .get(
+            self.teleop_auto_triggers = {
+                "left_reef_align": Trigger(self.driver_controller.getXButtonPressed).onTrue(
+                    commands2.cmd.parallel(
+                        commands2.InstantCommand(
+                            lambda: self.setAlignmentTag(
+                                reef_position_lookup
+                                .get(
+                                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                                    {}
+                                )
+                                .get("tag", None)
+                            )
+                        ),
+                        commands2.DeferredCommand(
+                            lambda: pathplanToPose(lambda: reef_position_lookup.get(
                                 (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
                                 {}
+                            ).get("pose", None)
                             )
-                            .get("tag", None)
                         )
-                    ),
-                    commands2.DeferredCommand(
-                        lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "l"),
+                    ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
+                ),
+                "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
+                    commands2.cmd.parallel(
+                        commands2.InstantCommand(
+                            lambda: self.setAlignmentTag(
+                                reef_position_lookup
+                                .get(
+                                    (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
+                                    {}
+                                )
+                                .get("tag", None)
+                            )
+                        ),
+                        commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
+                            (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
                             {}
-                        ).get("pose", None)
-                        )
-                    )
-                ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
-            ),
-             "right_reef_align": Trigger(self.driver_controller.getBButtonPressed).onTrue(
-                commands2.cmd.parallel(
-                    commands2.InstantCommand(
-                        lambda: self.setAlignmentTag(
-                            reef_position_lookup
-                            .get(
-                                (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                                {}
-                            )
-                            .get("tag", None)
-                        )
-                    ),
-                    commands2.DeferredCommand(lambda: pathplanToPose(lambda: reef_position_lookup.get(
-                        (self.alliance, getCurrentReefZone(self.alliance, self.drivetrain.current_pose), "r"),
-                        {}
-                    ).get("pose", None)))
-                ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
-             ),
-        }
+                        ).get("pose", None)))
+                    ).finallyDo(lambda interrupted: self.setAlignmentTag(None))
+                ),
+            }
 
-        self.elevator.setDefaultCommand(ElevateManually(
-            self.elevator,
-            self.arm,
-            lambda: (
-                wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
-            )
-        ))
-        # Allow manual override of elevator movement by operator, even if a setpoint command is active
-        Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
-            ElevateManually(
+            self.elevator.setDefaultCommand(ElevateManually(
                 self.elevator,
                 self.arm,
                 lambda: (
                     wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
                 )
+            ))
+            # Allow manual override of elevator movement by operator, even if a setpoint command is active
+            Trigger(lambda: abs(wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)) > 0).whileTrue(
+                ElevateManually(
+                    self.elevator,
+                    self.arm,
+                    lambda: (
+                        wpimath.applyDeadband(self.mech_controller.getLeftY(), 0.2)
+                    )
+                )
             )
-        )
 
-        self.intake_subsystem.setDefaultCommand(IntakeCommands.IntakeManually(
-            lambda: int(self.mech_controller.getRightBumperButton()),
-            self.intake_subsystem
-        ))
-        # Allow manual override of intake movement by operator, even if moving based on breakbeams
-        Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
-            IntakeCommands.IntakeManually(
-                lambda: wpimath.applyDeadband(-1 * self.mech_controller.getRightTriggerAxis(), 0.1),
+            self.intake_subsystem.setDefaultCommand(IntakeCommands.IntakeManually(
+                lambda: int(self.mech_controller.getRightBumperButton()),
                 self.intake_subsystem
+            ))
+            # Allow manual override of intake movement by operator, even if moving based on breakbeams
+            Trigger(lambda: self.mech_controller.getRightTriggerAxis() > 0.1).whileTrue(
+                IntakeCommands.IntakeManually(
+                    lambda: wpimath.applyDeadband(-1 * self.mech_controller.getRightTriggerAxis(), 0.1),
+                    self.intake_subsystem
+                )
             )
-        )
-        Trigger(lambda: self.mech_controller.getRightBumperButton()).whileTrue(
-            IntakeCommands.IntakeManually(lambda: 1, self.intake_subsystem)
-        )
+            Trigger(lambda: self.mech_controller.getRightBumperButton()).whileTrue(
+                IntakeCommands.IntakeManually(lambda: 1, self.intake_subsystem)
+            )
 
 
-        Trigger(self.mech_controller.getYButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4)
-        )
-        Trigger(self.mech_controller.getBButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3)
-        )
-        Trigger(self.mech_controller.getAButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2)
-        )
-        Trigger(self.mech_controller.getXButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH)
-        )
-        Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
-            elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
-        )
+            Trigger(self.mech_controller.getYButtonPressed).onTrue(
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4)
+            )
+            Trigger(self.mech_controller.getBButtonPressed).onTrue(
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF3)
+            )
+            Trigger(self.mech_controller.getAButtonPressed).onTrue(
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF2)
+            )
+            Trigger(self.mech_controller.getXButtonPressed).onTrue(
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.TROUGH)
+            )
+            Trigger(self.mech_controller.getLeftBumperButtonPressed).onTrue(
+                elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST)
+            )
 
-        Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
-            elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
+            Trigger(lambda: wpimath.applyDeadband(self.mech_controller.getRightY(), 0.06) > 0).whileTrue(
+                elevCommands.PivotManually(self.arm, lambda: -1 * self.mech_controller.getRightY() * MechConsts.kArmAngleIncrement)
+            )
+        
+        else:
+            self.drivetrain.setDeadband(0.02)
+
+            self.drivetrain.setDefaultCommand(
+            TankDrive(
+                lambda: self.driver_controller.getLeftY(),
+                lambda: self.driver_controller.getRightY(),
+                self.drivetrain
+            )
         )
 
     def teleopPeriodic(self):
