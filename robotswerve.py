@@ -24,7 +24,7 @@ from commands.defaultTankDrive import DefaultTankDrive
 import commands2
 import ntcore
 import wpilib
-import phoenix5
+import rev
 import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
@@ -76,15 +76,11 @@ class RobotSwerve:
         self.tankdrivetrain = DefaultTankDrive()
         self.isTank = True # only true when on tank drive robot
         #tank drive things that may change later
-        self.right_front_motor = phoenix5.WPI_TalonFX(31)
-        self.right_back_motor = phoenix5.WPI_TalonFX(30)
-        self.left_front_motor = phoenix5.WPI_TalonFX(21)
-        self.left_back_motor = phoenix5.WPI_TalonFX(20)
-
-        self.left_drive_motors = wpilib.MotorControllerGroup(self.left_front_motor, self.left_back_motor)
-        self.right_drive_motors = wpilib.MotorControllerGroup(self.right_front_motor, self.right_back_motor)
-
-        self.drivetrain = TankDrive(self.left_drive_motors, self.right_drive_motors)
+        self.right_motor = rev.SparkFlex(6, rev.SparkLowLevel.MotorType.kBrushless) #phoenix5.WPI_TalonFX(31)
+        self.left_motor = rev.SparkFlex(5, rev.SparkLowLevel.MotorType.kBrushless)  #phoenix5.WPI_TalonFX(30)
+        # self.left_drive_motors = wpilib.MotorControllerGroup(self.left_front_motor, self.left_back_motor)
+        # self.right_drive_motors = wpilib.MotorControllerGroup(self.right_front_motor, self.right_back_motor)
+        self.drivetrain = TankDrive(self.left_motor, self.right_motor)
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
