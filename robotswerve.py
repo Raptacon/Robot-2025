@@ -20,7 +20,7 @@ import wpimath
 from commands2.button import Trigger
 from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
-# from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
+from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 
 class RobotSwerve:
     """
@@ -34,14 +34,19 @@ class RobotSwerve:
         # Subsystem instantiation
         self.drivetrain = SwerveDrivetrain()
         self.alliance = "red" if self.drivetrain.flip_to_red_alliance() else "blue"
+        self.elevator = Elevator()
 
         # HID setup
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
 
+        # lambda
+        n = 1
+        Height = lambda : n
+        
         # Register Named Commands
-        NamedCommands.registerCommand('Raise_Place', commands2.cmd.print_("Raise_place"))
+        NamedCommands.registerCommand('Raise_Place', commands2.cmd.runOnce(self.elevator.setHeight(Height())))
         NamedCommands.registerCommand('Coral_Intake', commands2.cmd.print_("Coral_Intake"))
 
         # Autonomous setup

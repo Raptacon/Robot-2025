@@ -2,11 +2,7 @@
   "robotWidth": 0.95,
   "robotLength": 0.95,
   "holonomicMode": true,
-  "pathFolders": [
-    "reef_stem_paths",
-    "Paths2025_Blue",
-    "Paths2025_Red"
-  ],
+  "pathFolders": [],
   "autoFolders": [
     "Autos2025_Blue"
   ],
