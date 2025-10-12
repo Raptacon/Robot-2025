@@ -89,6 +89,7 @@ class PIDToPose(Command):
             rotation_output = -applyDeadband(self.rotation_pid.calculate(rotation_error, 0), 0.04, inf)
 
             drive_speed = ChassisSpeeds.fromFieldRelativeSpeeds(x_output, y_output, rotation_output, current_pose.rotation())
+            # JD: need to pass False for slow mode here
             self.drivetrain.drive(drive_speed.vx, drive_speed.vy, drive_speed.omega, False)
 
     def end(self, interrupted: bool) -> None:

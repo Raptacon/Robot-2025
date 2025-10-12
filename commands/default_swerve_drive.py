@@ -66,6 +66,7 @@ class DefaultDrive(commands2.Command):
         Returns:
             None: interface eventually passes desired goal states to the swerve modules
         """
+        # JD: need to call slow_mode here (you already addressed this)
         self.drivetrain.drive(
             self.velocity_vector_x() * SwerveDriveConsts.maxTranslationMPS,
             self.velocity_vector_y() * SwerveDriveConsts.maxTranslationMPS,

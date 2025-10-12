@@ -174,6 +174,8 @@ class SwerveDrivetrain(Subsystem):
             dampener_use, dampener_use, dampener_use
         )
 
+        # JD: if using slow mode currently, will the speed still change based on the joystick input?
+        # JD: we'll also want to slow translation down. Hard coding is fine for now
         if slow_mode:
             dampener_use_velocity_x, dampener_use_velocity_y, dampener_use_angular = (
                 dampener_use, dampener_use, 0.55
