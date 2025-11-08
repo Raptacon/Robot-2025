@@ -7,9 +7,6 @@
     "Paths2025_Blue",
     "Paths2025_Red"
   ],
-  "autoFolders": [
-    "Autos2025_Blue"
-  ],
   "defaultMaxVel": 0.75,
   "defaultMaxAccel": 1.0,
   "defaultMaxAngVel": 360.0,

@@ -24,7 +24,6 @@ import ntcore
 import wpilib
 import wpimath
 from commands2.button import Trigger
-from pathplannerlib.auto import AutoBuilder, NamedCommands
 from pathplannerlib.path import PathPlannerPath
 from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 from subsystem.diverCarlChistera import DiverCarlChistera as Arm
@@ -73,31 +72,6 @@ class RobotSwerve:
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
-
-        # Register Named Commands
-        NamedCommands.registerCommand("Chute_to_Intake", IntakeCommands.IntakeToFront(self.intake_subsystem, 0.0, reverse=False))
-        NamedCommands.registerCommand(
-            'Raise_Place', elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REEF4).withTimeout(3),
-        )
-        NamedCommands.registerCommand(
-            "Score_Piece", commands2.DeferredCommand(
-                lambda: IntakeCommands.IntakeReleasePiece(self.intake_subsystem, 0.1).withTimeout(1.5),
-                self.intake_subsystem
-            )
-        )
-        NamedCommands.registerCommand(
-            "Lower_Elevator", elevCommands.genPivotElevatorCommand(self.arm, self.elevator, PoseOptions.REST).withTimeout(5)
-        )
-
-        # Autonomous setup
-        self.auto_command = None
-        self.auto_chooser = AutoBuilder.buildAutoChooser()
-        wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
-
-        self.teleop_stem_paths = {
-            start_location: PathPlannerPath.fromPathFile(start_location)
-            for start_location in [f"Stem_Reef_F{n}" for n in range(1, 7)] + [f"Stem_Reef_N{n}" for n in range(1, 7)]
-        }
 
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)
