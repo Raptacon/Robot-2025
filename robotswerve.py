@@ -24,7 +24,7 @@ import ntcore
 import wpilib
 import wpimath
 from commands2.button import Trigger
-from pathplannerlib.path import PathPlannerPath
+from pathplannerlib.auto import AutoBuilder
 from subsystem.diverCarlElevator import DiverCarlElevator as Elevator
 from subsystem.diverCarlChistera import DiverCarlChistera as Arm
 
@@ -72,6 +72,11 @@ class RobotSwerve:
         wpilib.DriverStation.silenceJoystickConnectionWarning(True)
         self.driver_controller = wpilib.XboxController(0)
         self.mech_controller = wpilib.XboxController(1)
+
+        # Auto Setup
+        self.auto_command = None
+        self.auto_chooser = AutoBuilder.buildAutoChooser()
+        wpilib.SmartDashboard.putData("Select auto routine", self.auto_chooser)
 
         # Telemetry setup
         self.enableTelemetry = wpilib.SmartDashboard.getBoolean("enableTelemetry", True)

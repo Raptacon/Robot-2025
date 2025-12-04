@@ -9,6 +9,8 @@ from .swerve_module import SwerveModuleMk4iSparkMaxNeoCanCoder
 # Third-party imports
 import navx
 from commands2 import Subsystem
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import ModuleConfig, RobotConfig, PIDConstants
 from wpilib import DriverStation
 from wpimath.estimator import SwerveDrive4PoseEstimator
@@ -83,6 +85,10 @@ class SwerveDrivetrain(Subsystem):
         )
 
         self.reset_heading()
+
+        # Path Planner setup
+        self.path_planner_config = RobotConfig.fromGUISettings()
+        self.configure_path_planner(self.path_planner_config)
 
     def raw_current_heading(self) -> Rotation3d:
         """
@@ -392,6 +398,51 @@ class SwerveDrivetrain(Subsystem):
         )
 
         return path_planner_config
+
+    def configure_path_planner(self, config: RobotConfig) -> None:
+        """
+        Set up PathPlanner to execute autonomous routines using this drivetrain.
+
+        PathPlanner expects the following:
+
+        - A method to retrieve the robot's current field-relative position and rotation.
+            PathPlanner uses this to evaluate the difference between the expected progression
+            along the path to the robot's actual position. The optimizer minimizes this error.
+        - A method to reset the robot's current field-relative position and rotation.
+            PathPlanner uses this to align the robot's virtual pose to the starting pose
+            of the autonomous routine.
+        - A method to retrieve the robot's current robot-relative velocities, translational and rotational.
+            PathPlanner uses this to evaluate the difference between the expected velocities
+            as the robot traverses the path and the robot's actual velocities. The optimizer minimizes this error.
+        - A method to update each swerve module's goal state based on desired velocities for the overall drivetrain.
+            PathPlanner uses this to command the robot to drive in accordance with its path.
+        - A controller object that defines how actual robot velocities will be optimized against PathPlanner's
+            desired velocities for the path. The object is configured with separate PID constants for
+            translation and rotation.
+        - A PathPlanner configuration object defining properties of the drivetrain and individual modules.
+        - A method to determine whether autonomous routines should be flipped for the red alliance.
+        - A subsystem to require for PathPlanner's commands.
+
+        Args:
+            config: PathPlanner configuration object defining properties of the drivetrain and individual modules
+
+        Returns:
+            None: PathPlanner's AutoBuilder is configured in-place
+        """
+
+        AutoBuilder.configure(
+            self.current_pose,
+            self.reset_pose_estimator,
+            self.current_robot_relative_speed,
+            lambda speeds, feedforwards: self.set_states_from_speeds(speeds, apply_cosine_scaling=False),
+            PPHolonomicDriveController(
+                PIDConstants(*OperatorRobotConfig.pathplanner_translation_pid),
+                PIDConstants(*OperatorRobotConfig.pathplanner_rotation_pid)
+            ),
+            config,
+            self.flip_to_red_alliance,
+            self
+        )
 
     def periodic(self) -> None:
         """
